@@ -112,8 +112,9 @@ task_events / task_comments / task_links / task_attachments / kanban_notify_subs
 ## 5. `hermesui.db` — наша БД
 
 DDL: [`db/schema.sql`](../db/schema.sql) · **создана 2026-11-07** (`scripts/db_init.py`):
-11 таблиц, 3 представления, 2 триггера, `journal_mode=wal`, `integrity_check = ok`,
+12 таблиц, 6 представлений, 2 триггера, `journal_mode=wal`, `integrity_check = ok`,
 `foreign_key_check` чист, `audit_log` append-only проверен попыткой UPDATE.
+Версия схемы — **5** (миграции `0002`…`0005`).
 
 ### 5.1 ER-диаграмма
 
@@ -161,6 +162,30 @@ DDL: [`db/schema.sql`](../db/schema.sql) · **создана 2026-11-07** (`scri
 | `audit_log` | append-only аудит | `actor`, `action`, `result` |
 | `settings` | ожидания платформы, пути | `platform.version`, `platform.state_db_schema` |
 | `doctor_runs` | история здоровья | `summary ∈ ok/warn/fail` |
+| `session_registry` | тип сессии (project/temp), её происхождение и след | `kind`, `boot`, `purged_at`, `purge_evidence`, `exported_path` |
+
+### 5.2.1 `session_registry` — типы сессий (этап 3)
+
+У ядра нет понятия «одноразовая сессия», а `ephemeral.json` в `project-map-ui` — оперативный
+кэш фронтенда: по нему нельзя ни посчитать историю, ни доказать, что после закрытия приложения
+от сессии не осталось следа. Поэтому тип живёт здесь, а `ephemeral.json` остаётся тем, чем был.
+
+| Поле | Смысл |
+|---|---|
+| `kind` | `project` (живёт, экспортируется в vault) или `temp` (исчезает вместе с приложением) |
+| `boot` | id инстанса приложения, создавшего временную сессию; смена `boot` = повод для sweep |
+| `purged_at` / `purge_evidence` | когда удалили и **доказательство**: строка `state.db`, сообщения, файл экспорта, заметки vault |
+| `exported_path` / `exported_at` | куда лёг markdown (только для project) |
+
+| Представление | Что показывает |
+|---|---|
+| `v_temp_sessions` | живые временные (`kind='temp' AND purged_at IS NULL`) |
+| `v_temp_trace_gaps` | **долг**: удаление объявлено, доказательства нет (в 0004 вьюха ошибочно включала и живые — исправлено в 0005) |
+| `v_session_exports` | экспортированные сессии по проектам |
+
+Заполняется плагином (`POST /ephemeral` → `temp.register`, `POST /ephemeral/drop` →
+`temp.purge` с проверкой следа) и CLI `tools/sessions.py`. Sweep (`--purge`) удаляет только
+сессии чужого инстанса — живые не трогает.
 
 ### 5.3 Почему именно так
 

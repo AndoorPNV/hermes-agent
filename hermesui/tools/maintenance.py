@@ -39,6 +39,7 @@ sys.path.insert(0, str(HERE))
 import catalog as catalog_mod  # noqa: E402
 import db as db_mod  # noqa: E402
 import doctor as doctor_mod  # noqa: E402
+import sessions as sessions_mod  # noqa: E402
 
 REPO = HERE.parent
 BACKUP_ROOT = ".hermesui-backup"
@@ -205,6 +206,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             payload["backups"] = rotate_backups(conn, home, keep)
         if daily:
             payload["version"] = check_version(conn, home)
+            vault = Path(db_mod.setting(conn, "vault.path") or "")
+            payload["sessions"] = sessions_mod.check(conn, home, vault)
 
         monday = date.today().weekday() == 0
         if args.report or args.force_report or (daily and monday):
@@ -234,6 +237,16 @@ def main(argv: Optional[list[str]] = None) -> int:
                         print(f"    kanban: {'+' if ver['kanban']['ok'] else '!'} {ver['kanban']['detail']}")
                 else:
                     print(f"  версия: {ver['actual']} (совпадает с settings)")
+            if "sessions" in payload:
+                info = payload["sessions"]
+                print(f"  сессии: project {info['project']} (экспорт {info['exported']}),"
+                      f" temp живых {info['temp_live']}, удалено {info['temp_purged']}")
+                if info["pending_sweep"]:
+                    print(f"    ждут sweep: {len(info['pending_sweep'])}")
+                if info["trace_gaps"]:
+                    print(f"    ! без доказательства удаления: {len(info['trace_gaps'])}")
+                if info["stale_project_rows"]:
+                    print(f"    ! project без строки в state.db: {len(info['stale_project_rows'])}")
             if "doctor" in payload:
                 doc = payload["doctor"]
                 bad = [check for check in doc["checks"] if check["status"] != "ok"]

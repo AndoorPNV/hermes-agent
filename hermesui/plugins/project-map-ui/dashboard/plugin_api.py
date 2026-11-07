@@ -44,6 +44,45 @@ def _policy():
     return module
 
 
+def _registry():
+    """Наш реестр типов сессий (`hermesui/tools/sessions.py`).
+
+    Отсутствие модуля — не ошибка: плагин обязан работать и без репозитория (тогда тип сессии
+    живёт только в `ephemeral.json`). Поэтому импорт ленивый и через путь, а не через пакет.
+    """
+    from pathlib import Path as _Path
+
+    repo = _Path(__file__).resolve().parents[3]
+    tools_dir = repo / "tools"
+    if not (tools_dir / "sessions.py").is_file():
+        return None
+    import sys as _sys
+
+    if str(tools_dir) not in _sys.path:
+        _sys.path.insert(0, str(tools_dir))
+    try:
+        import sessions as sessions_mod
+
+        return sessions_mod
+    except Exception:  # noqa: BLE001
+        log.debug("session registry unavailable", exc_info=True)
+        return None
+
+
+def _remember(kind: str, session_id: str, **fields: Any) -> bool:
+    mod = _registry()
+    if mod is None:
+        return False
+    allowed = {key: value for key, value in fields.items()
+               if key in ("project_id", "cwd", "parent", "boot", "title")}
+    return bool(mod.remember(session_id, kind, **allowed))
+
+
+def _mark_purged(session_id: str) -> bool:
+    mod = _registry()
+    return bool(mod and mod.mark_purged(session_id))
+
+
 policy = _policy()
 
 _EPHEMERAL = None
@@ -352,9 +391,14 @@ def state() -> dict[str, Any]:
 def ephemeral_add(body: EphemeralBody) -> dict[str, Any]:
     """Mark a session temporary (it dies with the app instead of staying in the history)."""
     try:
-        return {"ok": True, **ephemeral.register(body.session_id, body.parent, body.cwd, body.project_id, body.boot)}
+        result = ephemeral.register(body.session_id, body.parent, body.cwd, body.project_id, body.boot)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Учёт в hermesui.db: ephemeral.json — оперативный кэш фронтенда, история типов живёт в нашей
+    # БД (иначе не ответить «сколько было» и не доказать, что следа не осталось). Fail-open.
+    _remember("temp", body.session_id, project_id=body.project_id, cwd=body.cwd,
+              parent=body.parent, boot=body.boot)
+    return {"ok": True, **result}
 
 
 @router.post("/ephemeral/boot")
@@ -369,9 +413,14 @@ def ephemeral_boot(body: BootBody) -> dict[str, Any]:
 @router.post("/ephemeral/drop")
 def ephemeral_drop(body: DropBody) -> dict[str, Any]:
     try:
-        return {"ok": True, **ephemeral.drop(body.session_id)}
+        result = ephemeral.drop(body.session_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Фронтенд зовёт drop уже после `session.delete` — здесь фиксируем доказательство,
+    # что следа не осталось (строка в state.db, сообщения, экспорт, заметки vault).
+    if result.get("removed"):
+        _mark_purged(body.session_id)
+    return {"ok": True, **result}
 
 
 @router.post("/link")
