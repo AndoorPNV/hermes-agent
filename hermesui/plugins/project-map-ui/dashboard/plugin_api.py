@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -234,17 +235,114 @@ def _mcp_servers() -> list[str]:
         return []
 
 
+def _skills_meta(skills: list[str]) -> dict[str, dict[str, Any]]:
+    """Происхождение каждого установленного скилла: `external` (наш репозиторий), `local`
+    (`$HERMES_HOME/skills`) или `builtin`. Нужно, чтобы в списке было видно, что своё, а что
+    пришло с платформой — без этого «20 скиллов» выглядят одинаково.
+    """
+    try:
+        from hermes_cli.config import load_config_readonly
+        from hermes_constants import get_hermes_home
+    except Exception:
+        return {}
+
+    home = Path(get_hermes_home())
+
+    roots: list[tuple[str, str]] = []
+    try:
+        config = load_config_readonly()
+        external = ((config.get("skills") or {}).get("external_dirs") or [])
+        for path in external:
+            roots.append((str(path), "external"))
+    except Exception:
+        log.debug("external_dirs read failed", exc_info=True)
+    roots.append((str(home / "skills"), "local"))
+
+    found: dict[str, dict[str, Any]] = {}
+    for name in skills:
+        source = "builtin"
+        for root, label in roots:
+            if not root:
+                continue
+            base = Path(root)
+            if not base.is_dir():
+                continue
+            # скиллы лежат плоско (`skills/<name>`) или по категориям (`skills/<cat>/<name>`)
+            candidates = [base / name]
+            try:
+                candidates.extend(child / name for child in base.iterdir()
+                                   if child.is_dir() and child.name != name)
+            except OSError:
+                pass
+            if any(path.is_dir() for path in candidates):
+                source = label
+                break
+        found[name] = {"source": source}
+    return found
+
+
+def _audit(policy_data: dict[str, Any], projects: list[dict[str, Any]], skills: list[str],
+           toolsets: list[str], mcp: list[str], groups: list[dict[str, Any]]) -> dict[str, Any]:
+    """Что выбрано в политике, но больше не установлено. Реестр обязан показывать только живое;
+    «мёртвые» ссылки нельзя молча прятать — иначе ограничение висит на скилле, которого нет,
+    и человек думает, что доступ закрыт.
+    """
+    installed = {
+        "skills": set(skills),
+        "toolsets": set(toolsets),
+        "mcp": set(mcp),
+        "groups": {str(group.get("id")) for group in groups},
+    }
+    project_ids = {str(project["id"]) for project in projects}
+
+    per_project: dict[str, dict[str, list[str]]] = {}
+    for pid, entry in (policy_data.get("projects") or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        missing: dict[str, list[str]] = {}
+        for key in ("skills", "toolsets", "mcp", "groups"):
+            values = entry.get(key)
+            if isinstance(values, list):
+                lost = [str(value) for value in values if str(value) not in installed[key]]
+                if lost:
+                    missing[key] = lost
+        if missing:
+            per_project[str(pid)] = missing
+
+    group_missing = {}
+    for group in groups:
+        lost = [item for item in (group.get("items") or []) if item not in installed["skills"]]
+        if lost:
+            group_missing[str(group.get("id"))] = lost
+
+    orphans = sorted(set(map(str, (policy_data.get("projects") or {}))) - project_ids)
+    return {
+        "projects": per_project,
+        "groups": group_missing,
+        "orphan_projects": orphans,
+        "counts": {key: len(value) for key, value in installed.items()},
+    }
+
+
 @router.get("/state")
 def state() -> dict[str, Any]:
     """Everything the map's policy editor needs, in one round trip."""
+    stored = policy.load()
+    projects = _projects()
+    skills = _skills()
+    groups = policy.skill_groups()
+    toolsets = _toolsets()
+    mcp = _mcp_servers()
     return {
-        "policy": policy.load(),
-        "projects": _projects(),
+        "policy": stored,
+        "projects": projects,
         "sessions": _sessions(),
-        "skills": _skills(),
-        "groups": policy.skill_groups(),
-        "toolsets": _toolsets(),
-        "mcp": _mcp_servers(),
+        "skills": skills,
+        "skills_meta": _skills_meta(skills),
+        "groups": groups,
+        "toolsets": toolsets,
+        "mcp": mcp,
+        "audit": _audit(stored, projects, skills, [item["name"] for item in toolsets], mcp, groups),
         "ephemeral": ephemeral.items(),
         "db": str(policy.state_db()),
     }

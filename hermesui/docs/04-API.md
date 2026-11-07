@@ -215,6 +215,45 @@ curl -s -o /dev/null -w '%{http_code}\n' \
      http://127.0.0.1:8799/api/plugins/guards/state
 ```
 
+## 5.2 `project-map` — реестр для политики проекта
+
+Карта проектов берёт всё для редактора политики одним запросом; список навыков — **живой**
+(`skills_list()` ядра), а не таблица в коде.
+
+| Метод | Путь (после `/api/plugins/project-map`) | Назначение |
+|---|---|---|
+| GET | `/state` | политика + проекты + сессии + реестр + аудит |
+| POST | `/policy` | `{scope, id, policy}`; `policy: null` **удаляет** запись |
+| GET | `/resolve?session_id=…&cwd=…` | как политика применяется к сессии |
+| POST | `/ephemeral`, `/ephemeral/boot`, `/ephemeral/drop` | временные сессии |
+| POST | `/link`, `/unlink` | вложенность сессий |
+
+Ответ `/state`:
+
+```json
+{
+  "skills": ["airtable", "…"],
+  "skills_meta": {"project-start": {"source": "external"}},
+  "groups": [{"id": "hermesui-dev", "name": "…", "items": ["…"]}],
+  "toolsets": [{"name": "hermes-cli", "tools": ["…"]}],
+  "mcp": [],
+  "audit": {
+    "projects": {"p_7b77ca1d": {"skills": ["ghost-skill"]}},
+    "groups": {"hermesui-dev": ["удалённый-скилл"]},
+    "orphan_projects": ["p_289b70be"],
+    "counts": {"skills": 62, "toolsets": 60, "mcp": 0, "groups": 9}
+  }
+}
+```
+
+- `skills_meta.source` — `external` (наш `hermesui/skills`), `local` (`$HERMES_HOME/skills`)
+  или `builtin`; в списке такие скиллы помечены меткой «наш».
+- `audit` — что выбрано в политике, но больше не установлено. Такие значения раньше исчезали
+  из списка (в политике оставались, в UI нет); теперь они показываются красной строкой с кнопкой
+  «убрать», а на карточке проекта виден счётчик «нет в наборе».
+- `audit.orphan_projects` — записи политики для проектов, которых нет в `projects.db`; чип в
+  шапке карты удаляет их одним кликом (`POST /policy` с `policy: null`).
+
 ## 6. Совместимость
 
 | Изменение | Политика |

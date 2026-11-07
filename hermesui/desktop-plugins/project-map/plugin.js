@@ -1895,7 +1895,7 @@ function policyEntry(backend, scope, id) {
   return bucket?.[id] || null
 }
 
-function LimitList({ items, values, onChange, emptyLabel, covered, flat }) {
+function LimitList({ items, values, onChange, emptyLabel, covered, flat, missing, meta }) {
   const [needle, setNeedle] = useState('')
   // "no limit" is a real state (values === null) — but hiding the list behind an
   // "ограничить" button made the dialog look empty and unsearchable, so it renders
@@ -1906,6 +1906,10 @@ function LimitList({ items, values, onChange, emptyLabel, covered, flat }) {
   const shown = query ? items.filter(item => item.toLowerCase().includes(query)) : items
   const toggle = (item, on) => onChange(on ? [...picked, item] : picked.filter(value => value !== item))
   const addShown = () => onChange([...picked, ...shown.filter(item => !picked.includes(item))])
+  // Выбрано раньше, но с тех пор снято/удалено: такие значения раньше просто исчезали из списка,
+  // оставаясь в политике — ограничение висело на скилле, которого нет.
+  const lost = unlimited ? [] : (missing || []).filter(name => picked.includes(name))
+  const dropLost = () => onChange(picked.filter(value => !lost.includes(value)))
 
   return jsxs('div', {
     className: 'flex min-h-0 flex-col gap-2',
@@ -1941,10 +1945,29 @@ function LimitList({ items, values, onChange, emptyLabel, covered, flat }) {
           jsx('div', { style: { flex: 1 } }),
           jsx('span', {
             style: { fontSize: 10, color: T.faint },
-            children: unlimited ? `${items.length} — без ограничений` : `${values.length} / ${items.length}`
+            children: unlimited
+              ? `${items.length} — без ограничений`
+              : lost.length
+                ? `${picked.length - lost.length} / ${items.length} · ${lost.length} нет в наборе`
+                : `${values.length} / ${items.length}`
           })
         ]
       }),
+      lost.length
+        ? jsxs('div', {
+            className: 'flex items-center gap-2 rounded-md px-2 py-1',
+            style: { fontSize: 10.5, color: '#b42318', background: 'rgba(180,35,24,0.08)' },
+            children: [
+              `не установлено: ${lost.join(', ')}`,
+              jsx('button', {
+                type: 'button',
+                onClick: dropLost,
+                style: { color: T.text, textDecoration: 'underline', whiteSpace: 'nowrap' },
+                children: 'убрать'
+              })
+            ]
+          })
+        : null,
       jsxs('div', {
         className: 'flex items-center gap-2 rounded-full px-2.5 py-1',
         style: { background: T.bg, border: `1px solid ${T.lineSoft}` },
@@ -2007,6 +2030,13 @@ function LimitList({ items, values, onChange, emptyLabel, covered, flat }) {
                           style: { fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.faint, whiteSpace: 'nowrap' },
                           title: 'входит в выбранную группу',
                           children: 'гр.'
+                        })
+                      : null,
+                    meta?.[item]?.source === 'external'
+                      ? jsx('span', {
+                          style: { fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.accent, whiteSpace: 'nowrap' },
+                          title: 'скилл из нашего репозитория (hermesui/skills), а не с платформы',
+                          children: 'наш'
                         })
                       : null
                   ]
@@ -2104,6 +2134,13 @@ function PolicyDialog({ target, backend, onClose, onSaved }) {
     skills: backend?.skills || [],
     toolsets: (backend?.toolsets || []).map(item => item.name).filter(name => name !== 'core' && name !== 'memory'),
     mcp: backend?.mcp || []
+  }
+  // Список берётся только из установленного (бэкенд отдаёт живой `skills_list`), поэтому
+  // сохранённое значение, которого там нет, — это «мертвая» ссылка, и её надо показать.
+  const missingItems = {
+    skills: Array.isArray(draft.skills) ? draft.skills.filter(name => !items.skills.includes(name)) : [],
+    toolsets: Array.isArray(draft.toolsets) ? draft.toolsets.filter(name => !items.toolsets.includes(name)) : [],
+    mcp: Array.isArray(draft.mcp) ? draft.mcp.filter(name => !items.mcp.includes(name)) : []
   }
   // Skills a picked group brings in — shown with a «гр.» mark in the flat list and counted
   // once in the summary, so «20 скиллов» never hides that they came from two groups.
@@ -2259,7 +2296,9 @@ function PolicyDialog({ target, backend, onClose, onSaved }) {
                   values: draft[tab],
                   onChange: next => setDraft(current => ({ ...current, [tab]: next })),
                   emptyLabel: items[tab].length ? 'Ограничений нет — доступно всё.' : 'Список пуст.',
-                  covered: tab === 'skills' ? covered : null
+                  covered: tab === 'skills' ? covered : null,
+                  missing: missingItems[tab],
+                  meta: tab === 'skills' ? backend?.skills_meta : null
                 })
               ]
             })
@@ -2456,11 +2495,15 @@ function projectSessions(rows, project) {
   return rows.filter(row => inProject(project, row.cwd))
 }
 
-function ProjectStats({ rows, project, policy }) {
+function ProjectStats({ rows, project, policy, audit }) {
   const sessions = projectSessions(rows, project)
   const saved = sessions.filter(row => row.saved).length
   const skills = policy?.projects?.[project.id]?.skills
   const skillCount = Array.isArray(skills) ? skills.length : null
+  // Сколько выбранного в политике больше не установлено: без этого «4 скилла» выглядели
+  // рабочим ограничением, хотя часть имён уже не существует.
+  const gap = audit?.projects?.[project.id] || null
+  const gapCount = gap ? Object.values(gap).reduce((total, list) => total + (list?.length || 0), 0) : 0
 
   const item = (label, value, tone) =>
     jsxs('div', {
@@ -2476,12 +2519,13 @@ function ProjectStats({ rows, project, policy }) {
     children: [
       item('сессий', sessions.length),
       item('скиллов', skillCount === null ? '∞' : skillCount),
+      gapCount ? item('нет в наборе', gapCount, '#b42318') : null,
       item('открыто', Math.max(0, sessions.length - saved), sessions.length - saved > 0 ? '#b42318' : T.muted)
     ]
   })
 }
 
-function ProjectRail({ projects, rows, policy, activeId, onPick, onNew, query, onQuery }) {
+function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, query, onQuery }) {
   const needle = query.trim().toLowerCase()
   const shown = needle
     ? projects.filter(project => `${project.name} ${project.description || ''}`.toLowerCase().includes(needle))
@@ -2546,7 +2590,7 @@ function ProjectRail({ projects, rows, policy, activeId, onPick, onNew, query, o
                       },
                       children: project.description || 'без описания'
                     }),
-                    jsx(ProjectStats, { rows, project, policy })
+                    jsx(ProjectStats, { rows, project, policy, audit })
                   ]
                 },
                 project.id
@@ -3368,6 +3412,7 @@ function ProjectMap({ variant }) {
         projects,
         rows: backend.data?.sessions || [],
         policy: backend.data?.policy,
+        audit: backend.data?.audit,
         activeId,
         onPick: id => {
           setPicked(id)
@@ -3394,6 +3439,26 @@ function ProjectMap({ variant }) {
                 })
               ] }),
               jsx('div', { style: { flex: 1 } }),
+              backend.data?.audit?.orphan_projects?.length
+                ? jsx('button', {
+                    type: 'button',
+                    className: 'rounded-full px-2.5 py-1 transition-colors',
+                    style: { fontSize: 10, color: '#b42318', border: '1px solid rgba(180,35,24,0.35)', background: 'transparent' },
+                    title: `политика сохранена для удалённых проектов: ${backend.data.audit.orphan_projects.join(', ')} — клик удаляет эти записи`,
+                    onClick: async () => {
+                      const orphans = backend.data?.audit?.orphan_projects || []
+                      for (const pid of orphans) {
+                        try {
+                          await apiPost('/policy', { scope: 'project', id: pid, policy: null })
+                        } catch {
+                          // один несохранённый не должен останавливать остальные
+                        }
+                      }
+                      void backend.refetch()
+                    },
+                    children: `политик без проекта: ${backend.data.audit.orphan_projects.length} · убрать`
+                  })
+                : null,
               jsxs('div', {
                 className: 'flex items-center gap-1 rounded-full px-3 py-1',
                 style: { background: T.panel, border: `1px solid ${T.line}` },
@@ -3501,7 +3566,7 @@ function ProjectMap({ variant }) {
                             })
                           : null
                       ] }),
-                      jsx(ProjectStats, { rows: backend.data?.sessions || [], project, policy: backend.data?.policy })
+                      jsx(ProjectStats, { rows: backend.data?.sessions || [], project, policy: backend.data?.policy, audit: backend.data?.audit })
                     ]
                   }),
                   jsx('div', {
