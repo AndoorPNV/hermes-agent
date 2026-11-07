@@ -44,3 +44,6 @@
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)
 - Python-плагины: `project-map-ui`, `ui-dispatcher` (`plugins.enabled`)
+- **Capability `tools.override` у `project-map-ui` не выдан** (проверено 2026-11-07:
+  `hermes plugins capabilities` → `not granted`, в `backups/config/*` записи тоже нет) —
+  значит политика проектов сейчас не применяется, `policy.json` хранит выбор без enforcement'а

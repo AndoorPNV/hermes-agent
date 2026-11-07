@@ -80,4 +80,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Python-плагины (2) | ✅ junction, `hermes plugins list` = enabled, REST `/api/plugins/ui-dispatcher/groups` = 200 |
 | Desktop-плагины (2) | ✅ junction, `node --check` проходит |
 | `hermesui.db` + CLI `hermesui` | ⬜ не реализовано (M0.3 в `docs/07-ROADMAP.md`); `db/schema.sql` — проект, не факт |
+| Политика проекта (enforcement в `project-map-ui`) | ⬜ **выключена**: capability `tools.override` не выдан ни разу; карточки хранят выбор в `policy.json`, но `pre_tool_call` не блокирует. Доделать: `hermes plugins enable project-map-ui` (интерактивно, решение пользователя) + тест обхода через `tool_call` |
 | Темы/скины, i18n | ⬜ не начато |
