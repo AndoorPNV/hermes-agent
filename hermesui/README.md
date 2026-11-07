@@ -109,4 +109,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |
 | Страница `/hermesui` | 🟡 `ui-workspace`: бэкенд + страница установлены; REST — после рестарта гейтвея, страница — после ⌘K → Reload desktop plugins |
+| Сверка vault ↔ docs | ✅ `vault-sync`: индекс в `vault_notes`, cron `0 9 * * *`, задачи в kanban по дрейфу |
 | i18n | ⬜ не начато |

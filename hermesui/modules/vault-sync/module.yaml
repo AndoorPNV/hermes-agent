@@ -1,0 +1,28 @@
+id: vault-sync
+type: plugin
+version: 0.1.0
+description: "Сверка docs/ ↔ Obsidian vault: индекс заметок в hermesui.db, поиск дрейфа (документ новее ссылающихся заметок), задачи в kanban с идемпотентным ключом. Логика — tools/vault_sync.py, в scripts/ только лончер для cron"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  # cron принимает только скрипты из $HERMES_HOME/scripts/, поэтому там — лончер,
+  # а вся логика остаётся в tools/ (единственный источник).
+  - kind: python
+    src: launcher.py
+    dst: scripts/hermesui_vault_sync.py
+
+config: {}
+
+hooks: []
+
+settings:
+  cron: "0 9 * * *"
+  cron_command: "hermes cron create \"0 9 * * *\" --no-agent --script hermesui_vault_sync.py --name hermesui-vault-sync --deliver local"
+  manual: "python tools/vault_sync.py [--index] [--kanban] [--days 14] [--json]"

@@ -61,13 +61,13 @@
 
 ## M4 · Память проекта (2 дн) — критерий: vault не расходится с docs
 
-| # | Задача | Приёмка |
-|---|---|---|
-| 4.1 | Vault: MOC + 5 заметок с frontmatter | из MOC 1 переход до каждой |
-| 4.2 | `vault-sync`: sha256 docs → `vault_notes.doc_hash` | повторный запуск = 0 изменений |
-| 4.3 | Cron `0 9 * * *` | первый прогон пишет `synced_at` |
-| 4.4 | Расхождение → задача в kanban | тест: правка docs → задача появилась |
-| 4.5 | `OBSIDIAN_VAULT_PATH` в `.env` | скилл `obsidian` находит vault без подсказки |
+| # | Задача | Приёмка | Статус |
+|---|---|---|---|
+| 4.1 | Vault: MOC + 5 заметок с frontmatter | из MOC 1 переход до каждой | ✅ 9 заметок, `vault_check` = OK |
+| 4.2 | `vault-sync`: sha256 docs → `vault_notes.doc_hash` | повторный запуск = 0 изменений | ✅ `tools/vault_sync.py --index`: 9 заметок, повтор = те же 9 строк |
+| 4.3 | Cron `0 9 * * *` | первый прогон пишет `synced_at` | ✅ job `2437e8160557` `hermesui-vault-sync`, no-agent, доставка local |
+| 4.4 | Расхождение → задача в kanban | тест: правка docs → задача появилась | ✅ реальный дрейф: 2 задачи (`t_0e12ad03`, `t_1da5f1b5`); повтор не создал дублей (тот же id) |
+| 4.5 | `OBSIDIAN_VAULT_PATH` в `.env` | скилл `obsidian` находит vault без подсказки | ✅ ключ есть, путь `F:\06_AI\HermesUI\Obsidian\HermesUI` |
 
 ## M5 · Эксплуатация (ongoing)
 

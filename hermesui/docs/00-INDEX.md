@@ -52,6 +52,8 @@
   инструментов, включая вызов отложенного тула через `tool_call` (обхода нет)
 - **Скин `hermesui` установлен и активен** (`$HERMES_HOME/skins/hermesui.yaml`, `display.skin=hermesui`):
   палитра поверх `default`, светлая пара в `light_colors`, `tool_prefix ⟡`; branding наследуется
+- **`vault-sync` работает**: индекс заметок в `hermesui.db:vault_notes`, cron
+  `0 9 * * *` (`hermesui-vault-sync`, no-agent) + задачи в kanban с идемпотентным ключом
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)
