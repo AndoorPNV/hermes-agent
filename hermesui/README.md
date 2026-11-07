@@ -110,4 +110,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |
 | Страница `/hermesui` | 🟡 `ui-workspace`: бэкенд + страница установлены; REST — после рестарта гейтвея, страница — после ⌘K → Reload desktop plugins |
 | Сверка vault ↔ docs | ✅ `vault-sync`: индекс в `vault_notes`, cron `0 9 * * *`, задачи в kanban по дрейфу |
+| Защита `config.yaml`/`.env` | 🟡 `guards` установлен, capability выдана, логика проверена; живой блок — после рестарта |
 | i18n | ⬜ не начато |

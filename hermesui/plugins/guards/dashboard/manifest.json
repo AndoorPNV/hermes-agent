@@ -1,0 +1,9 @@
+{
+  "name": "guards",
+  "label": "Guards",
+  "description": "Blocks agent writes to config.yaml and .env; keeps settings in `hermes config set` and secrets with the human.",
+  "version": "0.1.0",
+  "icon": "Shield",
+  "api": "plugin_api.py",
+  "tab": { "hidden": true }
+}

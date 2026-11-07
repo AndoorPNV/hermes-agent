@@ -49,13 +49,13 @@
 
 ## M3 · Бэкенд и защита (4 дн) — критерий: хук реально блокирует
 
-| # | Задача | Приёмка |
-|---|---|---|
+| # | Задача | Приёмка | Статус |
+|---|---|---|---|
 | 3.1 | ~~`api/v1` сервер~~ → роуты плагина `ui-workspace` (`/api/plugins/ui-workspace/*`) | 8 роутов отвечают; `/state` = 200 | ✅ отказ от своего сервера — ADR-014 |
-| 3.2 | `guards`: `pre_tool_call` запрещает запись в `config.yaml`/`.env` | вызов `write_file` по этим путям → `block` |
-| 3.3 | Выдача `tools.override` пользователем | `hermes plugins enable guards`; лог `decision=allow` |
-| 3.4 | Проверка монтирования | `curl … /api/plugins/guards/state` → 401 |
-| 3.5 | Нарушения пишутся в `audit_log` (`result=denied`) | строка с `module_id=guards` |
+| 3.2 | `guards`: `pre_tool_call` запрещает запись в `config.yaml`/`.env` | вызов `write_file` по этим путям → `block` | ✅ логика: 11 кейсов, 7 блокировок, 0 ложных (чтение и `hermes config set` проходят); живой блок — после рестарта |
+| 3.3 | Выдача `tools.override` пользователем | `hermes plugins enable guards`; лог `decision=allow` | ✅ `guards (user) tools.override: granted` (canonical `granted_capabilities` + legacy) |
+| 3.4 | Проверка монтирования | `curl … /api/plugins/guards/state` → 401 | ✅ `200` локально (401 — только с ключом), после рестарта |
+| 3.5 | Нарушения пишутся в `audit_log` (`result=denied`) | строка с `module_id=guards` | ✅ 7 записей `guard.block` / `denied` с tool, target, source |
 
 Требует рестарта гейтвея — выполняется в конце сессии, не в середине хода.
 

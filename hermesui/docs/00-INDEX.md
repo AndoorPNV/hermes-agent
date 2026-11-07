@@ -54,6 +54,8 @@
   палитра поверх `default`, светлая пара в `light_colors`, `tool_prefix ⟡`; branding наследуется
 - **`vault-sync` работает**: индекс заметок в `hermesui.db:vault_notes`, cron
   `0 9 * * *` (`hermesui-vault-sync`, no-agent) + задачи в kanban с идемпотентным ключом
+- **`guards` установлен, `tools.override` выдан**: логика проверена 11 кейсами (7 блокировок,
+  чтение и `hermes config set` проходят), 7 записей `denied` в аудите; живой хук — после рестарта
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)

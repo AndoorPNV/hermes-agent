@@ -1,0 +1,9 @@
+name: guards
+version: 0.1.0
+description: "Защита config.yaml и .env: pre_tool_call блокирует запись этих файлов инструментами агента (write_file/patch по пути, shell-редиректы по тексту команды). Настройки — только hermes config set, секреты — только человек. Отказы пишутся в hermesui.db:audit_log с result=denied"
+author: "mrkee, СЭМ (SAM)"
+api: plugin_api.py
+capabilities:
+  - tools.override
+provides_hooks:
+  - pre_tool_call

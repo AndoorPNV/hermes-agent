@@ -1,0 +1,30 @@
+id: guards
+type: plugin
+version: 0.1.0
+description: "Защита config.yaml и .env от записи инструментами агента: pre_tool_call блокирует write_file/patch по пути и shell-редиректы, отказы идут в audit_log с result=denied. Нужна capability tools.override — выдаёт пользователь"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+# Объявляем, но НЕ выдаём: согласие подтверждает пользователь
+# (`hermes plugins enable guards --allow-tool-override`).
+capabilities:
+  - tools.override
+
+artifacts:
+  - kind: python
+    src: "@repo/plugins/guards"
+    dst: plugins/guards/
+
+config:
+  plugins.enabled: ["guards"]
+
+hooks:
+  - pre_tool_call
+
+settings:
+  guarded: "config.yaml, .env"
+  not_sandbox: "эвристика по тексту команды; полноценной изоляции в модели плагинов нет"
