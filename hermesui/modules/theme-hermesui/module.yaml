@@ -1,0 +1,28 @@
+id: theme-hermesui
+type: theme
+version: 0.1.0
+description: "Скин HermesUI: тёмный тил с мятным акцентом плюс светлая пара для белого фона. Палитра поверх default, layout не трогает"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: skin
+    src: theme.yaml
+    dst: skins/hermesui.yaml
+
+# Модуль объявляет «наш скин активен». Если переключить скин руками, `plan` снова предложит
+# hermesui — это честный дрейф, а не баг. Не нужно — убери ключ из манифеста.
+config:
+  display.skin: hermesui
+
+hooks: []
+
+settings:
+  palette: "dark: teal/mint (#0C1A17 base, #4FD1A5 accent); light: ink on paper"
+  overrides: "colors + light_colors + spinner + tool_prefix; branding не трогаем (наследуется от default)"

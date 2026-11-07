@@ -49,6 +49,8 @@
 - **Capability `tools.override` у `project-map-ui` выдана 2026-11-07** (`granted_capabilities`
   + legacy `allow_tool_override`), enforcement проверен боем: блокируются скиллы и наборы
   инструментов, включая вызов отложенного тула через `tool_call` (обхода нет)
+- **Скин `hermesui` установлен и активен** (`$HERMES_HOME/skins/hermesui.yaml`, `display.skin=hermesui`):
+  палитра поверх `default`, светлая пара в `light_colors`, `tool_prefix ⟡`; branding наследуется
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)

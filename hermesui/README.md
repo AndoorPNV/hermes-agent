@@ -107,4 +107,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Установщик `hermesui` (plan/apply/rollback/doctor/list/log) | ✅ работает; 3 модуля установлены, `doctor` = `OK`, `plan` пуст |
 | Патч-модуль ядра | ✅ `patch-desktop-create-options` учтён, применяется вручную |
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
-| Темы/скины, i18n | ⬜ не начато |
+| Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |
+| i18n | ⬜ не начато |

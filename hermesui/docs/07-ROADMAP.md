@@ -38,7 +38,7 @@
 
 | # | Задача | Приёмка |
 |---|---|---|
-| 2.1 | `theme-hermesui`: скин на базе `default` (без форка палитры) | `display.skin` переключается, все поверхности меняются ~1 с |
+| 2.1 | `theme-hermesui`: скин на базе `default` (без форка палитры) | `display.skin` переключается, все поверхности меняются ~1 с | ✅ 2026-11-07 (`hermesui` в `hermes skin list`, `* hermesui user`; откат проверен) |
 | 2.2 | `ui-workspace`: `ROUTES_AREA` `/hermesui` + `SIDEBAR_NAV_AREA` | после hot-reload видна строка навигации и страница |
 | 2.3 | Страница читает `/api/v1/plan`, `/changes`, `/doctor` через `ctx.rest` | данные рендерятся; ошибка → чип `backend unavailable [err]` |
 | 2.4 | `PALETTE_AREA`: «HermesUI: Apply», «HermesUI: Doctor» | команды в ⌘K вызывают API |
