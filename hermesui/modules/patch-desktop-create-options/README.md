@@ -1,10 +1,12 @@
 ---
 tags: [hermesui/hermesui]
-updated: 2026-11-03
-status: active
+updated: 2026-11-07
+status: deprecated
 ---
 
 # patch-desktop-create-options
+
+**С 2026-11-07 не требуется: зависимость снята, патч в установку не входит.**
 
 Патч в `hermes-agent` (единственный разрешённый вид правки ядра — см. `HERMES.md` п. 1 и
 ADR-011). Причина: canonical-клиент десктопа (`apps/desktop/src/api/canonical-protocol.ts`)
@@ -15,14 +17,25 @@ ADR-011). Причина: canonical-клиент десктопа (`apps/desktop
 «Не удалось создать сессию: Canonical gateway does not support explicit session options:
 parent_session_id».
 
-## Что делает патч
+## Почему больше не нужен
+
+Плагин перешёл на схему «создать пустую сессию + связать после»: `plugin.js` вызывает
+`session.create` **без** опций, а родителя пишет `POST /api/plugins/project-map/link`
+(он же ставит маркер `_branched_from`, без которого ядро не листит дочернюю строку).
+Проверено: единственное место, где вообще встречается `parent_session_id`, — автономный
+`link-sessions.py`, и он пишет прямо в `state.db`, а не через RPC.
+
+Следствие: после `hermes update` пересобирать десктоп не надо, а приёмка этапа 2
+(«проект создан из UI») от патча не зависит.
+
+## Что делает патч (архив)
 
 - `canonical-protocol.ts`: три ключа добавлены и в `allowed`, и в фильтр результата
   `prepareCreate` (иначе они отбрасывались бы после проверки).
 - `canonical-protocol.test.ts`: тест «session.create passes a fork’s parent, seed and retry
   key through».
 
-## Применение
+## Применение (только если понадобится снова)
 
 ```bash
 cd <HERMES_HOME>/hermes-agent

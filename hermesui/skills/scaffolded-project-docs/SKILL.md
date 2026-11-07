@@ -35,6 +35,28 @@ resolve and vault notes have frontmatter.
 6. **Report the remainder honestly.** If the user asked only for a skeleton, say "каркас, N
 markers" rather than claiming finished documentation.
 
+## Готовый каркас без заглушек (когда принимают не черновик, а результат)
+
+Иногда приёмка звучит как «открывается и не содержит TODO». Генератор для этого не предназначен —
+он делает черновик по замыслу. Не переписывай шаблоны: вызови генератор и **вычисти
+незаполненное** после него, оставив только то, что выведено из ответов пользователя.
+
+1. Сгенерировать (`scaffold.py --root … --name … --desc …`, профиль = набор флагов:
+   минимальный `--no-db --no-api`, стандартный без флагов, полный `--modules`).
+2. Вычистить: блоки `<!-- TODO(…) -->`; строки таблиц и списков с маркером; заголовки с маркером
+   вместе с телом; ```-блоки с маркером; **пустые таблицы** (шапка + разделитель без строк);
+   **пустые разделы** (заголовок → заголовок); строки-анонсы вида «Не-цели (…):» без пунктов.
+3. Перенумеровать разделы (`## 3` и `## 6` подряд читаются как потеря содержания) и поставить
+   `status: draft` в frontmatter.
+4. Документ, где после чистки не осталось содержания, **не создавать вовсе**, а записать причину в
+   манифест сборки. Пустая схема слоёв хуже отсутствующего файла: она выглядит как обещание.
+5. Проверить: маркеры, плейсхолдеры, битые ссылки — и прогнать чистку ссылок **второй раз**,
+   потому что удалённый документ оставляет битые ссылки на себя.
+
+Правила проверки, без которых она врёт: плейсхолдеры ищутся только в прозе — внутри `code` и
+```-блоков `<name>` законен (`000N_<name>.sql` — соглашение об имени, а не незаполненное поле);
+маркером считается `TODO(…)` или отдельный токен `TODO`, но не «TODO-маркеры» в тексте правила.
+
 ## Pitfalls
 
 - **`write_file` refuses scaffold-created files until a full `read_file` registers.** Reads done
@@ -51,6 +73,10 @@ markers" rather than claiming finished documentation.
 - **Do not create a Git repository silently.** `project-start` deliberately skips `git init`;
   only create one when the user asks. If the user forbids git, record that as a constraint in
   `docs/01` (history then lives only in frontmatter dates and session notes).
+- **A cleaned stub is not "almost done": empty tables and empty sections ARE the stub.** A table
+  with a header row and no data rows, or `## 2. Цели` followed straight by `## 3.`, reads to the
+  reader exactly like `TODO(...)` — remove them in the same pass, and re-check links after any
+  document is dropped.
 - **Do not duplicate contracts in vault.** DDL, API shapes and field lists belong in `docs/` and
   `db/`; a vault copy diverges within a week.
 

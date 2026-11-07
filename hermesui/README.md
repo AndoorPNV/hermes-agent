@@ -105,7 +105,7 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Desktop-плагины (3) | ✅ junction, `node --check` проходит |
 | `hermesui.db` (журнал учёта) | ✅ создана 2026-11-07: 11 таблиц, 3 представления, 2 триггера, `integrity_check=ok`, аудит append-only (`python scripts/db_init.py --status`) |
 | Установщик `hermesui` (plan/apply/rollback/doctor/list/log) | ✅ работает; 8 модулей установлены, `doctor` = `OK`, `plan` пуст |
-| Патч-модуль ядра | ✅ `patch-desktop-create-options` учтён, применяется вручную |
+| Патч-модуль ядра | ⛔ **не требуется** с 2026-11-07: сессия создаётся пустой, родитель пишется `POST /link` (`_branched_from`); патч оставлен как архив ADR-011 |
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Реестр скиллов в UI (этап 4) | ✅ `/state` отдаёт живой реестр + `skills_meta` (метка «наш») и `audit` («не установлено» по проектам, группам, осиротевшим политикам); проверено статическим рендером карты и диалога |
 | Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |

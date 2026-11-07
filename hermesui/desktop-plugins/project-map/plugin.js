@@ -2489,6 +2489,56 @@ function Tooltip({ node, anchor, state }) {
   })
 }
 
+function EmptyProjects({ onNew }) {
+  const step = (number, title, text) =>
+    jsxs('div', {
+      className: 'flex items-start gap-2',
+      children: [
+        jsx('div', {
+          className: 'flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
+          style: { background: T.bg, border: `1px solid ${T.line}`, fontSize: 10, color: T.muted },
+          children: String(number)
+        }),
+        jsxs('div', {
+          className: 'flex flex-col',
+          children: [
+            jsx('div', { style: { fontSize: 11.5, color: T.text }, children: title }),
+            jsx('div', { style: { fontSize: 10.5, color: T.faint }, children: text })
+          ]
+        })
+      ]
+    }, String(number))
+
+  return jsx('div', {
+    className: 'flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6',
+    children: jsxs('div', {
+      className: 'flex w-[460px] flex-col gap-3 rounded-2xl p-4',
+      style: { background: T.panel, border: `1px solid ${T.lineSoft}` },
+      children: [
+        jsx('div', { style: { fontSize: 14, fontWeight: 600, color: T.text }, children: 'Проектов пока нет' }),
+        jsx('div', {
+          style: { fontSize: 11, color: T.muted },
+          children: 'Карта пуста: на ней живут проекты, а сессии раскладываются по папкам проектов. Пока проекта нет — все сессии попадают в «Без проекта».'
+        }),
+        step(1, 'Создайте проект', 'имя, одно предложение о продукте и папка на диске'),
+        step(2, 'Карточка появится на карте', 'клик — детали и список сессий, пкм — новая сессия'),
+        step(3, 'Подготовьте структуру', 'кнопка «структура проекта»: docs, правила, схема — без заглушек'),
+        jsx('button', {
+          type: 'button',
+          onClick: onNew,
+          className: 'mt-1 self-start rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.14em]',
+          style: { background: T.accent, color: '#fff' },
+          children: 'новый проект'
+        }),
+        jsx('div', {
+          style: { fontSize: 10, color: T.faint },
+          children: 'Туда же можно попасть из ⌘K: «Карта проектов: новый проект».'
+        })
+      ]
+    })
+  })
+}
+
 // ── подготовка структуры проекта (этап 5) ───────────────────────────────────
 
 const SCAFFOLD_PROFILES = [
@@ -2877,18 +2927,33 @@ function ProjectWizard({ backend, onClose, onDone }) {
       })
       const sessionId = session?.stored_session_id || session?.session_id || session?.session?.id || ''
 
-      if (vault && sessionId) {
-        setBusy('запускаю project-start…')
-        await host.request('prompt.submit', {
-          session_id: sessionId,
-          text:
-            'Старт проекта по скиллу project-start.\n' +
-            `Имя: ${name.trim()}\nОписание: ${description.trim() || 'нет'}\n` +
-            `Корень: ${folder.trim() || '(текущая папка)'}\n` +
-            'Сделай каркас: docs/ 00–07, HERMES.md, project.yaml (тип generic, стек из описания), ' +
-            `vault через --vault в ${folder.trim() || '.'}\\Obsidian\\${name.trim()}, затем заполни docs по рубрике скилла. ` +
-            'Git-репозиторий не создавай. В конце назови остаток TODO-маркеров.'
+      // Каркас строит наш инструмент (этап 5), а не модель: детерминированно, без TODO-заглушек
+      // и без ожидания, пока агент отработает промпт. Модель остаётся для того, что она умеет
+      // лучше: подобрать скиллы по описанию (шаг выше).
+      setBusy('создаю структуру проекта…')
+      let scaffoldReport = null
+      let scaffoldError = ''
+      try {
+        scaffoldReport = await apiPost('/scaffold', {
+          project_id: id,
+          profile: 'standard',
+          storage: 'sqlite',
+          confirm: true
         })
+      } catch (error) {
+        scaffoldError = String(error?.message || error)
+      }
+      if (scaffoldReport) {
+        const created = (scaffoldReport.created || []).length
+        const removed = (scaffoldReport.removed || []).length
+        host.notify?.({
+          kind: scaffoldReport.check?.ok ? 'info' : 'warning',
+          message: scaffoldError
+            ? `структура не создана: ${scaffoldError}`
+            : `структура: файлов ${created}, без заглушек ${scaffoldReport.check?.ok ? 'да' : 'нет'}${removed ? `, пустых удалено ${removed}` : ''}`
+        })
+      } else if (scaffoldError) {
+        host.notify?.({ kind: 'error', message: `структура не создана: ${scaffoldError}` })
       }
 
       setBusy('готово')
@@ -3109,10 +3174,10 @@ function ProjectWizard({ backend, onClose, onDone }) {
     body = jsxs('div', {
       className: 'flex min-h-0 flex-1 flex-col justify-center gap-3',
       children: [
-        jsx('div', { style: { fontSize: 13, color: T.text }, children: 'Создать начальную структуру скиллом project-start?' }),
+        jsx('div', { style: { fontSize: 13, color: T.text }, children: 'Создать начальную структуру проекта?' }),
         jsx('div', {
           style: { fontSize: 11.5, color: T.muted, lineHeight: 1.5 },
-          children: `В папке ${folder.trim() || 'проекта'} появятся docs/ 00–07, HERMES.md, project.yaml и vault с MOC «${name.trim()}». Каркас собирает project-start, ритуал сессий добавляет knowledge-vault. Делает новая сессия первым сообщением — ответ придёт в чат.`
+          children: `В папке ${folder.trim() || 'проекта'} появятся docs/ по разделам, HERMES.md, project.yaml и db/schema.sql. Каркас строит наш инструмент (скрипт скилла project-start), а не модель: он же вычищает незаполненное, поэтому заглушек TODO в файлах не будет — чего не хватает, того файла не будет вовсе. Сессия откроется пустой, структуру можно пересоздать кнопкой «структура проекта» на карточке.`
         }),
         jsxs('div', {
           className: 'flex flex-wrap gap-2 pt-1',
@@ -3150,7 +3215,7 @@ function ProjectWizard({ backend, onClose, onDone }) {
           style: { width: 54, height: 54, borderRadius: 999, border: `2px solid ${T.accent}`, opacity: 0.5 }
         }),
         jsx('div', { style: { fontSize: 13, color: T.text }, children: busy || 'создаю…' }),
-        jsx('div', { style: { fontSize: 11, color: T.faint }, children: withVault ? 'проект · политика скиллов · первая сессия · структура vault' : 'проект · политика скиллов · первая сессия' })
+        jsx('div', { style: { fontSize: 11, color: T.faint }, children: withVault ? 'проект · политика скиллов · первая сессия · каркас без заглушек' : 'проект · политика скиллов · первая сессия' })
       ]
     })
   }
@@ -3696,6 +3761,9 @@ function ProjectMap({ variant }) {
               )
             )
           }),
+          apiProjects.length === 0 && backend.data
+            ? jsx(EmptyProjects, { onNew: () => setWizard(true) })
+            : null,
           selected && project
             ? jsxs('div', {
                 className: 'm-3 flex min-h-0 flex-col overflow-hidden rounded-2xl',
