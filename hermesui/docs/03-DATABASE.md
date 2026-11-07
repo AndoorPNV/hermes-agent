@@ -112,9 +112,9 @@ task_events / task_comments / task_links / task_attachments / kanban_notify_subs
 ## 5. `hermesui.db` — наша БД
 
 DDL: [`db/schema.sql`](../db/schema.sql) · **создана 2026-11-07** (`scripts/db_init.py`):
-12 таблиц, 6 представлений, 2 триггера, `journal_mode=wal`, `integrity_check = ok`,
+13 таблиц, 8 представлений, 2 триггера, `journal_mode=wal`, `integrity_check = ok`,
 `foreign_key_check` чист, `audit_log` append-only проверен попыткой UPDATE.
-Версия схемы — **5** (миграции `0002`…`0005`).
+Версия схемы — **6** (миграции `0002`…`0006`).
 
 ### 5.1 ER-диаграмма
 
@@ -186,6 +186,24 @@ DDL: [`db/schema.sql`](../db/schema.sql) · **создана 2026-11-07** (`scri
 Заполняется плагином (`POST /ephemeral` → `temp.register`, `POST /ephemeral/drop` →
 `temp.purge` с проверкой следа) и CLI `tools/sessions.py`. Sweep (`--purge`) удаляет только
 сессии чужого инстанса — живые не трогает.
+
+### 5.2.2 `save_runs` — журнал сохранений контекста (этап 7)
+
+`save-loop` пишет заметку в vault, но без журнала нельзя ни доказать, что сохранение было,
+ни поймать повтор, ни отличить «прервалось» от «не начиналось».
+
+| Поле | Смысл |
+|---|---|
+| `session_id` | чья сессия сохранена |
+| `note_path` | куда легла заметка (`sessions/YYYY-MM-DD-save-<тема>.md`) |
+| `content_hash` | sha256 тела заметки (без frontmatter) — основа `--verify` |
+| `status` | `running` → `ok` / `failed` / `verify_failed` |
+| `sections` | сколько разделов записали (защита от «сохранилось пустое») |
+
+| Представление | Что показывает |
+|---|---|
+| `v_save_interrupted` | `status='running'` без `finished_at` — процесс умер посреди записи |
+| `v_last_save` | последнее успешное сохранение по каждой сессии — то, что увидит новая сессия |
 
 ### 5.3 Почему именно так
 

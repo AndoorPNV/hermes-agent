@@ -114,4 +114,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Защита `config.yaml`/`.env` | ✅ `guards`: живой блок после рестарта — `patch` по обоим файлам отбит, файлы целы, 10 записей `denied` в аудите |
 | Эксплуатация (M5) | ✅ `maintenance`: ротация бэкапов (10), сверка версии платформы, doctor по понедельникам — cron `30 3 * * *` |
 | Типы сессий (этап 3) | ✅ `session_registry` (схема 5): project/temp, `boot`, доказательство удаления; `tools/sessions.py` — `--check/--purge/--export`; проверено живьём: temp удалена без следа, project экспортирован в vault и прочитан Obsidian |
+| Save-loop (этап 7) | ✅ `save-loop`: ⌘⇧S + пункты ⌘K + подсказка на пустом чате; заметка идемпотентна и атомарна, `--verify` сходится, журнал `save_runs` (схема 6) |
 | i18n | ⬜ не начато |

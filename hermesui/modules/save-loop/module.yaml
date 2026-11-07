@@ -1,0 +1,29 @@
+id: save-loop
+type: ui
+version: 0.1.0
+description: "Сохранение контекста сессии в vault из чата: ⌘⇧S и пункты ⌘K, подсказка на пустом транскрипте. Бэкенд — plugins/save-loop (тот же код, что tools/save_loop.py)"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: python
+    src: "@repo/plugins/save-loop"
+    dst: plugins/save-loop/
+  - kind: desktop
+    src: "@repo/desktop-plugins/save-loop"
+    dst: desktop-plugins/save-loop/
+
+config:
+  plugins.enabled: ["save-loop"]
+
+hooks: []
+
+settings:
+  keybind: "mod+shift+s (переназначается в панели горячих клавиш)"
+  api: "POST /api/plugins/save-loop/save с confirm:true; GET /verify, /last, /state"

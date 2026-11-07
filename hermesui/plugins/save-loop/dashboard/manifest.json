@@ -1,0 +1,9 @@
+{
+  "name": "save-loop",
+  "label": "Save loop",
+  "description": "Saves session context to the vault (structured note + index) and verifies the next session reads the same thing.",
+  "version": "0.1.0",
+  "icon": "Save",
+  "api": "plugin_api.py",
+  "tab": { "hidden": true }
+}
