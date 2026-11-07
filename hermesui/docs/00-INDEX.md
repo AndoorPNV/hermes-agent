@@ -31,6 +31,7 @@
 | Desktop-плагины (2) | `hermesui/desktop-plugins/` | junction `$HERMES_HOME/desktop-plugins/<id>` |
 | Документация, модули, DDL | `hermesui/docs`, `hermesui/modules`, `hermesui/db` | только чтение |
 | Установщик | `hermesui/tools/hermesui.py` (plan/apply/rollback/doctor/list/log) | пишет файлы в `$HERMES_HOME` + журнал в `hermesui.db` |
+| Страница `/hermesui` | `hermesui/desktop-plugins/ui-workspace/plugin.js` + `hermesui/plugins/ui-workspace/` | plugin REST `/api/plugins/ui-workspace/*` |
 
 ## Зафиксированные факты (проверено 2026-11-07)
 

@@ -1,0 +1,32 @@
+id: ui-workspace
+type: ui
+version: 0.1.0
+description: "Бэкенд страницы HermesUI: отдаёт план установщика, журнал изменений и doctor, запускает apply/rollback тем же кодом, что CLI (hermesui/tools)"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires:
+  - id: skill-hermes-adapt
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  # Единственный источник — боевые каталоги репозитория (на них смотрят junction'ы).
+  - kind: python
+    src: "@repo/plugins/ui-workspace"
+    dst: plugins/ui-workspace/
+  - kind: desktop
+    src: "@repo/desktop-plugins/ui-workspace/plugin.js"
+    dst: desktop-plugins/ui-workspace/plugin.js
+
+config:
+  plugins.enabled: ["ui-workspace"]
+
+hooks: []
+
+settings:
+  page: "/hermesui"
+  routes: "/api/plugins/ui-workspace/{state,plan,changes,doctor,doctor/run,apply,rollback}"
+  writes: "apply/rollback требуют confirm: true — плагин меняет файлы в $HERMES_HOME"

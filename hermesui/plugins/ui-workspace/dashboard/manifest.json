@@ -1,0 +1,9 @@
+{
+  "name": "ui-workspace",
+  "label": "HermesUI",
+  "description": "Installer workspace: plan, journal, doctor and guarded apply/rollback for HermesUI modules.",
+  "version": "0.1.0",
+  "icon": "Wrench",
+  "api": "plugin_api.py",
+  "tab": { "hidden": true }
+}

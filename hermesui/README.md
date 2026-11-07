@@ -108,4 +108,5 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Патч-модуль ядра | ✅ `patch-desktop-create-options` учтён, применяется вручную |
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |
+| Страница `/hermesui` | 🟡 `ui-workspace`: бэкенд + страница установлены; REST — после рестарта гейтвея, страница — после ⌘K → Reload desktop plugins |
 | i18n | ⬜ не начато |

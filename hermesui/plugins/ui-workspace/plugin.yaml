@@ -1,0 +1,7 @@
+name: ui-workspace
+version: 0.1.0
+description: "REST для страницы HermesUI: план установщика, журнал изменений, doctor и запуск apply/rollback тем же кодом, что и CLI (tools/). Страница получает данные без отдельного сервера и портов."
+author: "mrkee, СЭМ (SAM)"
+api: plugin_api.py
+capabilities: []
+provides_hooks: []

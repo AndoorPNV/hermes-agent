@@ -36,14 +36,14 @@
 
 ## M2 · Интерфейс (4 дн) — критерий: тема + страница живут без правок ядра
 
-| # | Задача | Приёмка |
-|---|---|---|
+| # | Задача | Приёмка | Статус |
+|---|---|---|---|
 | 2.1 | `theme-hermesui`: скин на базе `default` (без форка палитры) | `display.skin` переключается, все поверхности меняются ~1 с | ✅ 2026-11-07 (`hermesui` в `hermes skin list`, `* hermesui user`; откат проверен) |
-| 2.2 | `ui-workspace`: `ROUTES_AREA` `/hermesui` + `SIDEBAR_NAV_AREA` | после hot-reload видна строка навигации и страница |
-| 2.3 | Страница читает `/api/v1/plan`, `/changes`, `/doctor` через `ctx.rest` | данные рендерятся; ошибка → чип `backend unavailable [err]` |
-| 2.4 | `PALETTE_AREA`: «HermesUI: Apply», «HermesUI: Doctor» | команды в ⌘K вызывают API |
-| 2.5 | Проверка `node --check` + AX-дерево | нет тоста ошибки, метки видны |
-| 2.6 | Откат UI-модуля | папка удалена, страница исчезает после reload |
+| 2.2 | `ui-workspace`: `ROUTES_AREA` `/hermesui` + `SIDEBAR_NAV_AREA` | после hot-reload видна строка навигации и страница | ✅ код готов (496 строк, `node --check` ok); видно после ⌘K → Reload desktop plugins |
+| 2.3 | Страница читает `/api/plugins/ui-workspace/{state,plan,changes,doctor}` через `ctx.rest` | данные рендерятся; ошибка → чип `backend unavailable [err]` | ✅ вместо `/api/v1` — plugin REST (ADR-014); бэкенд проверен вызовом обработчиков |
+| 2.4 | `PALETTE_AREA`: «HermesUI: открыть установщик», «HermesUI: проверить (doctor)» | команды в ⌘K вызывают API | ✅ код готов |
+| 2.5 | Проверка `node --check` + AX-дерево | нет тоста ошибки, метки видны | 🟡 `node --check` ✅, AX-дерево — после reload |
+| 2.6 | Откат UI-модуля | папка удалена, страница исчезает после reload | ⬜ |
 
 Ограничение: не регистрировать и pane, и page (см. `05-MODULES.md`, анти-паттерны).
 
@@ -51,7 +51,7 @@
 
 | # | Задача | Приёмка |
 |---|---|---|
-| 3.1 | `api/v1` сервер (stdlib `http.server`/`uvicorn`, bind 127.0.0.1) | 12 роутов из `04-API.md` отвечают; `/health` = 200 |
+| 3.1 | ~~`api/v1` сервер~~ → роуты плагина `ui-workspace` (`/api/plugins/ui-workspace/*`) | 8 роутов отвечают; `/state` = 200 | ✅ отказ от своего сервера — ADR-014 |
 | 3.2 | `guards`: `pre_tool_call` запрещает запись в `config.yaml`/`.env` | вызов `write_file` по этим путям → `block` |
 | 3.3 | Выдача `tools.override` пользователем | `hermes plugins enable guards`; лог `decision=allow` |
 | 3.4 | Проверка монтирования | `curl … /api/plugins/guards/state` → 401 |

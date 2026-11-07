@@ -106,7 +106,7 @@ plugins/<id>/
 
 - Базовый путь: `/api/plugins/<id>`; `ctx.rest('/state')` → `GET /api/plugins/<id>/state`.
 - Проверка монтирования: `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` →
-  **401** = смонтирован, **404** = нет.
+  **200** локально = смонтирован (401 — только если у бэкенда включён ключ), **404** = нет.
 - `api: dashboard/plugin_api.py` — **ошибка**: путь относителен `dashboard/`, роуты не встанут.
 - Требуется `plugins.enabled: ["<id>"]`; для блокирующих хуков — согласие на `tools.override`.
 
@@ -121,7 +121,7 @@ plugins/<id>/
 
 ### 4.2 `ui-dispatcher` — фактические роуты
 
-Смонтированы 2026-10-31, `GET /state` → 401 без тикета.
+Смонтированы 2026-10-31, `GET /state` → 200 локально (401 — если включён ключ у бэкенда).
 
 | Метод | Путь | Тело | Ответ |
 |---|---|---|---|
@@ -136,7 +136,36 @@ plugins/<id>/
 таблица существует, иначе — `plugins/ui-dispatcher/audit.jsonl` (append-only).
 
 
-## 5. HermesUI API (наш дизайн, `/api/v1`)
+## 5. HermesUI API — реализовано как plugin REST
+
+Своего сервера нет: страница и внешние вызывающие ходят в `/api/plugins/ui-workspace/…`
+(см. ADR-014). Порт, bind и токен не заводятся — монтирует ядро, доступ только с localhost.
+
+| Метод | Путь (после `/api/plugins/ui-workspace`) | Назначение | Ответ |
+|---|---|---|---|
+| GET | `/state` | сводка для страницы | `{home, repo, plan:{summary,changes}, changes[], modules[], artifact_count, doctor:{summary,checks}}` |
+| GET | `/plan` | diff без записи | `{summary, warnings[], changes[]}` |
+| GET | `/changes?limit=20` | журнал + аудит | `{changes[], audit[]}` |
+| GET | `/doctor` | последний прогон | `{summary, checks[]}` |
+| POST | `/doctor/run` | прогнать doctor и записать | `{summary, checks[]}` |
+| POST | `/apply` | `{module?, confirm:true}` | `{applied:[{module, action, ok, change_id, copied[], config[], error}]}` |
+| POST | `/rollback` | `{last:1, confirm:true}` | `{rolled_back:[{change_id, module_id, action, restored[], removed[]}]}` |
+
+Правила, которые реально соблюдаются:
+
+- **`confirm: true` обязателен** для `apply`/`rollback`; без него — `400` с объяснением.
+- Ошибка — `400 {detail}`; страница печатает `detail` как есть (чип `backend unavailable [err]`
+  только когда бэкенд не смонтирован).
+- **Идемпотентность по факту:** повторный `apply` на пустом плане возвращает `applied: []`
+  и не трогает файлы.
+- Логика одна: плагин вызывает `hermesui/tools/*`, поэтому CLI и страница не могут разойтись.
+
+## 5.1 Отменённый проект `/api/v1` (история, ADR-014)
+
+Ниже — исходный дизайн собственного локального REST (порт `8799`, токен `hermesui.token`,
+12 роутов, `Idempotency-Key`, `423 locked`). **Не реализован и не будет в таком виде:**
+его заменяет plugin REST выше. Таблица оставлена как история требований — если когда-нибудь
+понадобится внешний доступ не из десктопа (cron, сторонние клиенты), её можно поднять заново.
 
 Локальный REST для UI-модуля и cron. Порт по умолчанию `8799`, bind `127.0.0.1`,
 авторизация — файловый токен (`$HERMES_HOME/hermesui.token`), без сети.
