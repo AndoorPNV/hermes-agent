@@ -13,6 +13,29 @@
 | `db/` | `schema.sql` (DDL `hermesui.db` — создана 2026-11-07) | только чтение |
 | `scripts/link.py` | мост репозиторий ↔ `$HERMES_HOME` | — |
 | `scripts/db_init.py` | создание/проверка журнала `$HERMES_HOME/hermesui.db` | `hermesui.db` |
+| `tools/` | установщик: `hermesui.py` (CLI), `catalog.py`, `yamlmini.py`, `db.py`, `planner.py`, `applier.py`, `doctor.py` | файлы в `$HERMES_HOME` + `hermesui.db` |
+
+## Установщик
+
+```bash
+python tools/hermesui.py plan              # что изменится (ничего не пишет)
+python tools/hermesui.py apply --yes       # применить: бэкап → копия → journal → audit
+python tools/hermesui.py doctor            # здоровье: база, каталог, связи, дрейф файлов
+python tools/hermesui.py rollback --last 1 --yes
+python tools/hermesui.py list              # модули и их состояние
+python tools/hermesui.py log --limit 20    # applied_changes + audit_log
+```
+
+Инварианты (проверены в песочнице и на живой установке):
+
+- `plan` не пишет ничего; после успешного `apply` он обязан быть пустым;
+- перед перезаписью файла — копия в `$HERMES_HOME/.hermesui-backup/<change_id>/`;
+- неудачный `apply` откатывает уже скопированное и пишет `result='failed'`;
+- `config.yaml` — только через `hermes config set`; для списков объединение, а не замена
+  (иначе установка одного модуля выключила бы остальные);
+- junction не копируется: если `$HERMES_HOME/...` уже ссылка на репозиторий, файлы те же;
+- патч ядра (`kind: patch`) в `apply` не копируется — он применяется вручную по README модуля;
+- журнал неизменяем: `rollback` не стирает имя модуля из `applied_changes` (миграция 0003).
 
 Vault и журнал остались в `F:\06_AI\HermesUI` (Obsidian-хранилище открывается оттуда).
 
@@ -81,6 +104,7 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Python-плагины (2) | ✅ junction, `hermes plugins list` = enabled, REST `/api/plugins/ui-dispatcher/groups` = 200 |
 | Desktop-плагины (2) | ✅ junction, `node --check` проходит |
 | `hermesui.db` (журнал учёта) | ✅ создана 2026-11-07: 11 таблиц, 3 представления, 2 триггера, `integrity_check=ok`, аудит append-only (`python scripts/db_init.py --status`) |
-| CLI `hermesui` (plan/apply/rollback) | ⬜ M0.1–M0.2, M0.4 — не начато |
+| Установщик `hermesui` (plan/apply/rollback/doctor/list/log) | ✅ работает; 3 модуля установлены, `doctor` = `OK`, `plan` пуст |
+| Патч-модуль ядра | ✅ `patch-desktop-create-options` учтён, применяется вручную |
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Темы/скины, i18n | ⬜ не начато |

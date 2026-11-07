@@ -12,14 +12,16 @@ conflicts: []
 capabilities: []
 
 artifacts:
+  # Источник один — боевые каталоги репозитория: `@repo/...` считается от корня hermesui/.
+  # Дубля кода в modules/ больше нет (был: modules/ui-dispatcher/plugin/, удалён 2026-11-07).
   - kind: desktop
-    src: plugin.js
+    src: "@repo/desktop-plugins/ui-dispatcher/plugin.js"
     dst: desktop-plugins/ui-dispatcher/plugin.js
   - kind: python
-    src: plugin/
+    src: "@repo/plugins/ui-dispatcher"
     dst: plugins/ui-dispatcher/
   - kind: state
-    src: groups.json
+    src: "@repo/plugins/ui-dispatcher/groups.json"
     dst: plugins/ui-dispatcher/groups.json
 
 config:

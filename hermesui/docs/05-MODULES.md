@@ -27,7 +27,8 @@ conflicts:
 capabilities: []                 # объявляем, НЕ выдаём; выдаёт пользователь
 
 artifacts:
-  - kind: desktop                # desktop | python | skill | skin | locale | mcp_json | patch
+  - kind: desktop                # desktop | python | skill | skin | locale | mcp_json | patch | state
+                                 # state — файлы состояния модуля (groups.json, policy.json)
     src: plugin.js
     dst: desktop-plugins/ui-workspace/plugin.js
   - kind: skill
@@ -116,7 +117,7 @@ apply → файлы в plugins/<id>/ → plugins.enabled=[…] → ПЕРЕЗА
 | Проверка | Команда | Ожидание |
 |---|---|---|
 | импорт | `python -m py_compile plugins/<id>/*.py dashboard/*.py` | 0 |
-| монтирование | `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` | `401` |
+| монтирование | `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` | `200` локально (401 — только когда у бэкенда включён ключ); `404` = не смонтирован |
 | лог | `grep "Mounted plugin API routes" $HERMES_HOME/logs/agent.log` | строка с `<id>` |
 | capability | `grep capability_check $HERMES_HOME/logs/agent.log` | `decision=allow` |
 

@@ -5,7 +5,9 @@
 --         integrity_check=ok, foreign_key_check чист, audit_log append-only.
 -- Расположение: $HERMES_HOME/hermesui.db   ($HERMES_HOME = C:\Users\<user>\AppData\Local\hermes)
 -- Репозиторий: F:\06_AI\hermes-agent\hermesui\db\schema.sql
--- Версия схемы: 1
+-- Версия схемы: 1 (baseline). Полное состояние = этот файл + `db/migrations/*.sql`,
+--   накатывается автоматически: `python hermesui/tools/hermesui.py doctor --init-db`
+--   Текущая версия: см. MAX(version) в schema_migrations.
 -- Назначение: каталог модулей, учёт установленных артефактов, журнал изменений,
 --             аудит, индекс заметок vault. НЕ дублирует данные Hermes (state.db и др.).
 -- Применение: sqlite3 hermesui.db < db/schema.sql   (или hermesui db upgrade)

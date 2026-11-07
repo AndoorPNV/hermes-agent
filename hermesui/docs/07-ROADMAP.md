@@ -11,25 +11,28 @@
 
 | # | Задача | Артефакт | Приёмка |
 |---|---|---|---|
-| 0.1 | Скелет `hermesui` CLI (`plan/apply/rollback/doctor/list/log`) | `tools/hermesui.py` | `--help` + 6 подкоманд |
-| 0.2 | Загрузчик каталога + валидатор `module.yaml` | `hermesui/catalog.py` | битый манифест → `invalid_manifest` с номером строки |
-| 0.3 | Создание `hermesui.db` из `db/schema.sql` | `scripts/db_init.py` — ✅ 2026-11-07 | файл создан, `integrity_check=ok`, сиды на месте |
-| 0.4 | `hermesui list` | — | таблица: id, type, version, enabled |
+| 0.1 | Скелет `hermesui` CLI (`plan/apply/rollback/doctor/list/log`) | `tools/hermesui.py` — ✅ 2026-11-07 | `--help` + 6 подкоманд |
+| 0.2 | Загрузчик каталога + валидатор `module.yaml` | `tools/catalog.py` + `tools/yamlmini.py` — ✅ | битый манифест → `invalid_manifest` с номером строки |
+| 0.3 | Создание `hermesui.db` из `db/schema.sql` | `scripts/db_init.py`, `tools/db.py` — ✅ 2026-11-07 | файл создан, `integrity_check=ok`, сиды на месте |
+| 0.4 | `hermesui list` | ✅ (`hermesui.py list`) | таблица: id, type, version, enabled |
 | 0.5 | Фиксация ожиданий платформы в `settings` | — ✅ (`db_init.py` пишет сам) | `platform.version=0.22.6`, `state_db_schema=32` |
 
-Риск: YAML-парсер. Митигация: stdin-режим + `--json`, если PyYAML недоступен.
+Риск «YAML-парсер» снят: PyYAML в venv нет, поэтому написан `tools/yamlmini.py` на stdlib,
+который **отвергает** неподдерживаемые конструкции (`|`, `>`, незакрытые кавычки, табы)
+с номером строки, а не парсит их наугад.
 
 ## M1 · Первый модуль сквозь весь конвейер (3 дн) — критерий: откат без остатка
 
 | # | Задача | Приёмка |
 |---|---|---|
-| 1.1 | `modules/skill-hermes-adapt` (SKILL.md + references) | `skill_view` открывает; триггер в первых 57 символах |
-| 1.2 | `apply` для `type: skill` (копирование + `artifacts`) | файлы в `$HERMES_HOME/skills/hermesui/…`, sha256 в БД |
-| 1.3 | `rollback --last 1` для skill | папка удалена, `applied_changes.result='rolled_back'` |
-| 1.4 | `plan` после `apply` пуст | 0 изменений |
-| 1.5 | `audit_log` заполнен | `actor=installer`, запись на каждое действие |
+| 1.1 | `modules/skill-hermes-adapt` (SKILL.md + references) | ✅ `skill_view` открывает; скилл виден в `hermes skills list` как `local` |
+| 1.2 | `apply` для `type: skill` (копирование + `artifacts`) | ✅ файлы в `$HERMES_HOME/skills/hermesui/…`, sha256 в БД |
+| 1.3 | `rollback --last 1` для skill | ✅ папка удалена, `applied_changes.result='rolled_back'` |
+| 1.4 | `plan` после `apply` пуст | ✅ 0 изменений (проверено дважды подряд) |
+| 1.5 | `audit_log` заполнен | ✅ `actor=installer`, по записи на каждое действие |
 
-Критерий этапа: **цикл apply → doctor → rollback → plan** проходит дважды подряд.
+Критерий этапа: **цикл apply → doctor → rollback → plan** проходит дважды подряд. ✅ 2026-11-07
+на живой установке (журнал: ревизии 5–7 `ui-dispatcher`, `doctor` = `OK`).
 
 ## M2 · Интерфейс (4 дн) — критерий: тема + страница живут без правок ядра
 
@@ -92,7 +95,6 @@ M4 не зависит от M3: vault можно вести сразу посл�
 
 | Идея | Ценность | Цена |
 |---|---|---|
-| **Назначение групп диспетчера проектам и сессиям** | высокая — группы уже засеяны, потребитель готов (`policy.json`) | 1–2 дн: маппинг `group → policy.skills[]` + UI в карте проекта |
 | `ui-db`: просмотр `hermesui.db` и `state.db` (read-only) в десктопе | высокая | 2 дн, нужен SQL-рендер таблиц |
 | `int-gsheets`: экспорт `doctor` в Google Sheets | средняя | 1 дн (токен уже есть) |
 | `ui-diff`: визуальный diff конфига до/после apply | средняя | 1 дн, данные уже в `applied_changes` |
@@ -101,11 +103,12 @@ M4 не зависит от M3: vault можно вести сразу посл�
 
 ## Критерии выхода из baseline
 
-1. `hermesui plan` / `apply` / `rollback` / `doctor` работают на живой установке v0.22.5.
-2. Не менее 4 модулей (skill, theme, ui, plugin) проходят полный цикл.
-3. Ни одна операция не требует ручной правки `config.yaml`.
-4. Vault содержит 6 заметок, MOC связывает все.
-5. `docs/` и `db/schema.sql` соответствуют фактическому состоянию (проверка `doctor --docs`).
+1. `hermesui plan` / `apply` / `rollback` / `doctor` работают на живой установке v0.22.6. ✅
+2. Не менее 4 модулей (skill, theme, ui, plugin) проходят полный цикл. ⬜ есть 2 типа (skill, ui)
+3. Ни одна операция не требует ручной правки `config.yaml`. ✅ (только `hermes config set`)
+4. Vault содержит все заметки, MOC связывает каждую. ✅ (9 заметок, `vault_check` = OK)
+5. `docs/` и `db/schema.sql` соответствуют фактическому состоянию (проверка `doctor --docs`). 🟡
+   `doctor` пока не сверяет docs — проверка ручная
 
 ## Что делать при апгрейде Hermes
 

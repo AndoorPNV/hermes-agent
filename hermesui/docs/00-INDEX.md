@@ -30,6 +30,7 @@
 | Python-плагины (2) | `hermesui/plugins/` | junction `$HERMES_HOME/plugins/<id>` |
 | Desktop-плагины (2) | `hermesui/desktop-plugins/` | junction `$HERMES_HOME/desktop-plugins/<id>` |
 | Документация, модули, DDL | `hermesui/docs`, `hermesui/modules`, `hermesui/db` | только чтение |
+| Установщик | `hermesui/tools/hermesui.py` (plan/apply/rollback/doctor/list/log) | пишет файлы в `$HERMES_HOME` + журнал в `hermesui.db` |
 
 ## Зафиксированные факты (проверено 2026-11-07)
 
@@ -41,6 +42,10 @@
 - Есть ещё `projects.db` (4 таблицы), `kanban.db` (8), `shared-state.db` (16)
 - **`hermesui.db` создана 2026-11-07** (`scripts/db_init.py`): 11 таблиц, 3 представления,
   2 триггера, `integrity_check = ok`, `journal_mode=wal`, аудит append-only
+- **Схема на v3** (миграции `db/migrations/0002_artifacts_kind_state.sql`,
+  `0003_journal_module_id_no_fk.sql`); полное состояние = `schema.sql` + все миграции
+- **Установщик работает**: 3 модуля установлены (`plan` пуст, `doctor` = `OK`),
+  `applied_changes` ведётся, цикл apply → doctor → rollback → plan пройден дважды
 - **Capability `tools.override` у `project-map-ui` выдана 2026-11-07** (`granted_capabilities`
   + legacy `allow_tool_override`), enforcement проверен боем: блокируются скиллы и наборы
   инструментов, включая вызов отложенного тула через `tool_call` (обхода нет)

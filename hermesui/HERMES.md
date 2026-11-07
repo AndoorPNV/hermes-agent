@@ -35,13 +35,16 @@
 
 ## Definition of Done для модуля
 
-- [ ] `module.yaml` валиден, id совпадает с именем папки.
+- [ ] `module.yaml` валиден, id совпадает с именем папки (`python hermesui/tools/hermesui.py list`).
+- [ ] `python hermesui/tools/hermesui.py plan` показывает ожидаемые действия, после `apply` — пуст.
+- [ ] `python hermesui/tools/hermesui.py doctor` — без `fail`.
 - [ ] `node --check` на копии `plugin.js` с расширением `.mjs` проходит
       (путь копии — нативный `C:/...`, не `/tmp`).
 - [ ] Python: `python -m py_compile` на всех `.py`.
 - [ ] `python scripts/link.py status` — все связи ✓ (после `apply`).
 - [ ] `hermes skills list` / `hermes plugins list` показывают модуль в нужном статусе.
-- [ ] Заметка в vault обновлена (`Модули.md`), `docs/` обновлён в том же изменении.
+- [ ] `applied_changes` содержит запись `result='ok'`, `audit_log` — событие `module.install`.
+- [ ] Заметка в vault обновлена (`Модули.md`), `hermesui/docs/` обновлён в том же изменении.
 
 ## Коммиты и пуши
 
@@ -90,6 +93,9 @@ git rebase main hermesui                                   # перевесит�
 
 python hermesui/scripts/link.py status                     # связи с рантаймом
 python hermesui/scripts/db_init.py --status                # журнал учёта: есть ли, цел ли
+python hermesui/tools/hermesui.py plan                     # что изменится (ничего не пишет)
+python hermesui/tools/hermesui.py apply --yes              # применить план
+python hermesui/tools/hermesui.py doctor                   # здоровье установки
 hermes skills list && hermes plugins list                   # что видит Hermes
 hermes config get skills.external_dirs
 ```

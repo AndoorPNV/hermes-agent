@@ -5,10 +5,27 @@
 ```
 modules/<id>/
 ├── module.yaml          # манифест (обязателен, схема в docs/05-MODULES.md)
-└── <артефакты>          # skill/ | plugin/ | plugin.js | theme.yaml | locales/
+└── <артефакты>          # только то, что принадлежит модулю: skill/, файл, theme.yaml, …
 ```
 
-Пусто до M1 (`docs/07-ROADMAP.md`). Первый модуль — `skill-hermes-adapt`.
+## Откуда берутся артефакты (`src`)
+
+- `src: skill/` — относительно папки модуля (обычный случай);
+- `src: "@repo/plugins/ui-dispatcher"` — ссылка на общий источник в корне `hermesui/`.
+  Так оформлены модули-обёртки (`ui-dispatcher`): **второй копии кода быть не должно**, иначе
+  `plan` вечно показывает расхождение, а правка попадает только в одну из копий.
+
+Правило: если код уже живёт в `hermesui/plugins/<id>` или `hermesui/desktop-plugins/<id>`
+(именно на них смотрят junction'ы в `$HERMES_HOME`), манифест ссылается на них через `@repo/`,
+а не копирует внутрь `modules/`.
+
+## Состав (2026-11-07)
+
+| id | type | что это |
+|---|---|---|
+| `skill-hermes-adapt` | skill | процедура добавления модуля; первый модуль сквозь конвейер |
+| `ui-dispatcher` | ui | обёртка над боевым плагином (`@repo/…`), обе половины одного id |
+| `patch-desktop-create-options` | ui | патч ядра десктопа; артефакт `kind: patch` — применяется вручную |
 
 Не класть сюда: секреты, бэкапы, сгенерированные файлы, состояние (`hermesui.db` живёт
-в `$HERMES_HOME`).
+в `$HERMES_HOME`), runtime-мусор (`__pycache__`, `audit.jsonl`, `policy.json`).

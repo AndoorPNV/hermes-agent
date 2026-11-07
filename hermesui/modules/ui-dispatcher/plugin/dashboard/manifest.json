@@ -1,9 +1,0 @@
-{
-  "name": "ui-dispatcher",
-  "label": "Dispatcher",
-  "description": "Whole-install switchboard for skills, agent plugins, desktop plugins, toolsets and MCP servers, with named groups reusable per project or session.",
-  "version": "0.1.0",
-  "icon": "SettingsGear",
-  "api": "plugin_api.py",
-  "tab": { "hidden": true }
-}

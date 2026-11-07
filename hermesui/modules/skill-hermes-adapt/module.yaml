@@ -1,0 +1,24 @@
+id: skill-hermes-adapt
+type: skill
+version: 0.1.0
+description: "Процедура добавления модуля HermesUI: манифест, plan, apply, doctor, rollback, запись в docs и vault — без правки ядра и без ручного config.yaml"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: skill
+    src: skill/
+    dst: skills/hermesui/skill-hermes-adapt/
+
+config: {}
+
+hooks: []
+
+settings:
+  notes: "Первый модуль сквозь конвейер (M1.1): проверяет apply/rollback на типе skill"
