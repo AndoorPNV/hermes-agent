@@ -1,0 +1,27 @@
+id: maintenance
+type: plugin
+version: 0.1.0
+description: "Эксплуатация: ротация бэкапов $HERMES_HOME/.hermesui-backup (держит installer.backup_retention), сверка версии платформы с settings + задача в kanban при обновлении, doctor по понедельникам. Логика — tools/maintenance.py, в scripts/ только лончер для cron"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: python
+    src: launcher.py
+    dst: scripts/hermesui_maintenance.py
+
+config: {}
+
+hooks: []
+
+settings:
+  cron: "30 3 * * *"
+  cron_command: "hermes cron create \"30 3 * * *\" --no-agent --script hermesui_maintenance.py --name hermesui-maintenance --deliver local"
+  weekly: "doctor запускается по понедельникам (weekday == 0) или с --force-report"
+  manual: "python tools/maintenance.py [--daily|--backups|--report] [--keep N] [--json]"

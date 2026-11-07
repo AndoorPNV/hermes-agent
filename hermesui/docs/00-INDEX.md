@@ -56,6 +56,8 @@
   `0 9 * * *` (`hermesui-vault-sync`, no-agent) + задачи в kanban с идемпотентным ключом
 - **`guards` установлен, `tools.override` выдан**: логика проверена 11 кейсами (7 блокировок,
   чтение и `hermes config set` проходят), 7 записей `denied` в аудите; живой хук — после рестарта
+- **`maintenance` работает**: cron `30 3 * * *` — ротация бэкапов (держит 10), сверка версии
+  платформы с `settings` (+ kanban при обновлении), doctor по понедельникам
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)
