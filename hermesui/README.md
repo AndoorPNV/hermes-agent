@@ -101,15 +101,15 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Что | Статус |
 |---|---|
 | Скиллы (11) | ✅ подключены как `external`, проверено `hermes skills list` |
-| Python-плагины (2) | ✅ junction, `hermes plugins list` = enabled, REST `/api/plugins/ui-dispatcher/groups` = 200 |
-| Desktop-плагины (2) | ✅ junction, `node --check` проходит |
+| Python-плагины (4) | ✅ junction, `hermes plugins list` = enabled; REST смонтирован (401 без тикета + строка `Mounted plugin API routes` в `logs/agent.log`) |
+| Desktop-плагины (3) | ✅ junction, `node --check` проходит |
 | `hermesui.db` (журнал учёта) | ✅ создана 2026-11-07: 11 таблиц, 3 представления, 2 триггера, `integrity_check=ok`, аудит append-only (`python scripts/db_init.py --status`) |
-| Установщик `hermesui` (plan/apply/rollback/doctor/list/log) | ✅ работает; 3 модуля установлены, `doctor` = `OK`, `plan` пуст |
+| Установщик `hermesui` (plan/apply/rollback/doctor/list/log) | ✅ работает; 8 модулей установлены, `doctor` = `OK`, `plan` пуст |
 | Патч-модуль ядра | ✅ `patch-desktop-create-options` учтён, применяется вручную |
 | Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Темы/скины | ✅ `theme-hermesui` установлен и активен (`hermes skin list` → `* hermesui user`), откат проверен |
-| Страница `/hermesui` | 🟡 `ui-workspace`: бэкенд + страница установлены; REST — после рестарта гейтвея, страница — после ⌘K → Reload desktop plugins |
+| Страница `/hermesui` | ✅ `ui-workspace`: страница рендерится на живых данных (4 регистрации, 8 меток, деградированная ветка цела); откат снимает junction, `apply` возвращает |
 | Сверка vault ↔ docs | ✅ `vault-sync`: индекс в `vault_notes`, cron `0 9 * * *`, задачи в kanban по дрейфу |
-| Защита `config.yaml`/`.env` | 🟡 `guards` установлен, capability выдана, логика проверена; живой блок — после рестарта |
+| Защита `config.yaml`/`.env` | ✅ `guards`: живой блок после рестарта — `patch` по обоим файлам отбит, файлы целы, 10 записей `denied` в аудите |
 | Эксплуатация (M5) | ✅ `maintenance`: ротация бэкапов (10), сверка версии платформы, doctor по понедельникам — cron `30 3 * * *` |
 | i18n | ⬜ не начато |

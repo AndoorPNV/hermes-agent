@@ -10,7 +10,9 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -112,6 +114,32 @@ def apply_plan(plan: planner_mod.Plan, conn, home: Path, config, *,
     return results
 
 
+def _repo_root(module) -> Optional[Path]:
+    """Корень hermesui/ для модуля (modules/<id> → modules → hermesui)."""
+    try:
+        return module.path.parents[1] if module.path else None
+    except IndexError:
+        return None
+
+
+def _in_repo(path: Path, repo: Optional[Path]) -> bool:
+    if repo is None:
+        return False
+    try:
+        path.resolve().relative_to(repo.resolve())
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def _make_junction(link: Path, target: Path) -> bool:
+    """Создаёт junction (каталог) — так `@repo/`-артефакт остаётся живым кодом репозитория."""
+    link.parent.mkdir(parents=True, exist_ok=True)
+    proc = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)],
+                          capture_output=True, text=True, encoding="cp866", errors="replace")
+    return proc.returncode == 0
+
+
 def _install_module(conn, item: planner_mod.ModulePlan, home: Path, config, change_id: str,
                     backup_root: Path, before: dict, after: dict,
                     copied: list[str], written: list[str]) -> list[tuple[str, Any, Any]]:
@@ -132,16 +160,29 @@ def _install_module(conn, item: planner_mod.ModulePlan, home: Path, config, chan
                  "existed": artifact.dst.exists(),
                  "sha256_before": artifact.current_sha,
                  "backup": None}
-        if planner_mod.is_junction(artifact.dst) or same_file:
-            # junction (или тот же самый файл через junction): копировать нечего
+        if planner_mod.is_junction(artifact.dst):
+            # сам путь — ссылка на репозиторий: файлов не создаём и не бэкапим
             entry["linked"] = True
+        elif same_file:
+            # файл физически тот же (внутри junction-каталога): ни копии, ни бэкапа
+            entry["same_file"] = True
         elif artifact.dst.exists():
             backup_path = backup_dir / artifact.dst_rel
             _backup_copy(artifact.dst, backup_path)
             entry["backup"] = str(backup_path)
-        if (artifact.needed or not artifact.in_db) and not entry.get("linked"):
-            _copy_artifact(artifact.src, artifact.dst)
-            copied.append(artifact.dst_rel)
+        if (artifact.needed or not artifact.in_db) and not entry.get("linked") and not entry.get("same_file"):
+            repo = _repo_root(module)
+            if _in_repo(artifact.src, repo) and artifact.src.is_dir() and not artifact.dst.exists():
+                # источник — живой каталог репозитория: ставим ссылкой, как это делает link.py
+                if _make_junction(artifact.dst, artifact.src):
+                    entry["linked"] = True
+                    copied.append(artifact.dst_rel + " (junction)")
+                else:
+                    _copy_artifact(artifact.src, artifact.dst)
+                    copied.append(artifact.dst_rel)
+            else:
+                _copy_artifact(artifact.src, artifact.dst)
+                copied.append(artifact.dst_rel)
         new_sha = planner_mod.sha256_any(artifact.dst)
         db_mod.replace_artifact(conn, module.id, kind=artifact.kind, rel_path=artifact.dst_rel,
                                sha256=new_sha, size_bytes=_size(artifact.dst),
@@ -215,9 +256,33 @@ def _revert_artifacts(before: dict, home: Path) -> list[str]:
     return touched
 
 
-def rollback(conn, home: Path, *, last: int = 1, actor: str = "installer") -> list[dict[str, Any]]:
-    """Откат последних N успешных изменений в обратном порядке."""
-    changes = db_mod.last_changes(conn, last)
+def _remove_link(path: Path) -> bool:
+    """Снимает ссылку (junction/symlink). Обычный файл не трогает никогда."""
+    from planner import is_junction
+
+    try:
+        if is_junction(path) and path.is_dir() and not path.is_symlink():
+            os.rmdir(path)          # на Windows RemoveDirectory на junction удаляет только ссылку
+            return True
+        if path.is_symlink():
+            path.unlink()
+            return True
+    except OSError:
+        return False
+    return False
+
+
+def rollback(conn, home: Path, *, last: int = 1, module: Optional[str] = None,
+             actor: str = "installer") -> list[dict[str, Any]]:
+    """Откат последних N успешных изменений в обратном порядке.
+
+    `module` ограничивает откат одним модулем (для проверки отдельного модуля на живой системе).
+    Артефакт, установленный junction'ом (`linked`), откатывается снятием ссылки: файлы в
+    репозитории остаются, рантайм-путь исчезает — иначе «откат UI-модуля» ничего не убирает.
+    """
+    changes = db_mod.last_changes(conn, max(last, 1) * 5 if module else last)
+    if module:
+        changes = [row for row in changes if row["module_id"] == module][:max(last, 1)]
     undone: list[dict[str, Any]] = []
     for row in changes:
         change_id = row["change_id"]
@@ -227,7 +292,13 @@ def rollback(conn, home: Path, *, last: int = 1, actor: str = "installer") -> li
         try:
             for entry in before.get("artifacts", []):
                 dst = home / entry["rel_path"]
-                if entry.get("existed"):
+                if entry.get("linked"):
+                    if _remove_link(dst):
+                        removed.append(entry["rel_path"])
+                elif entry.get("same_file"):
+                    # файл живёт в репозитории и виден через junction-каталог: удалять нечего
+                    pass
+                elif entry.get("existed"):
                     backup = entry.get("backup")
                     if backup and Path(backup).exists():
                         _backup_copy(Path(backup), dst)

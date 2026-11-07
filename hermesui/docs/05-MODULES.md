@@ -117,7 +117,7 @@ apply → файлы в plugins/<id>/ → plugins.enabled=[…] → ПЕРЕЗА
 | Проверка | Команда | Ожидание |
 |---|---|---|
 | импорт | `python -m py_compile plugins/<id>/*.py dashboard/*.py` | 0 |
-| монтирование | `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` | `200` локально (401 — только когда у бэкенда включён ключ); `404` = не смонтирован |
+| монтирование | `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` | `401` = маршрут есть (гейтвей требует тикет), `404` = не смонтирован. `200` **ничего не доказывает**: локальный порт десктопа отвечает `{"result":123,"msg":"Unsupported protocols"}` на любой путь. Второе доказательство — строка `Mounted plugin API routes: /api/plugins/<id>/` в `logs/agent.log` |
 | лог | `grep "Mounted plugin API routes" $HERMES_HOME/logs/agent.log` | строка с `<id>` |
 | capability | `grep capability_check $HERMES_HOME/logs/agent.log` | `decision=allow` |
 

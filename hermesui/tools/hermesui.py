@@ -234,7 +234,7 @@ def cmd_rollback(ctx: Ctx) -> int:
             if input("продолжить? [y/N] ").strip().lower() not in ("y", "yes", "д"):
                 print("отменено")
                 return 2
-        undone = applier.rollback(conn, ctx.home, last=ctx.args.last)
+        undone = applier.rollback(conn, ctx.home, last=ctx.args.last, module=ctx.args.module)
     finally:
         conn.close()
     for item in undone:
@@ -364,6 +364,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     rollback = sub.add_parser("rollback", help="откатить последние изменения")
     rollback.add_argument("--last", type=int, default=1, help="сколько изменений откатить")
+    rollback.add_argument("--module", help="только этот модуль")
     rollback.add_argument("--yes", action="store_true", help="без вопроса")
     rollback.set_defaults(func=cmd_rollback)
 

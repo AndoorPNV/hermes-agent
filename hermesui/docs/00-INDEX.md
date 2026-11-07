@@ -54,8 +54,10 @@
   палитра поверх `default`, светлая пара в `light_colors`, `tool_prefix ⟡`; branding наследуется
 - **`vault-sync` работает**: индекс заметок в `hermesui.db:vault_notes`, cron
   `0 9 * * *` (`hermesui-vault-sync`, no-agent) + задачи в kanban с идемпотентным ключом
-- **`guards` установлен, `tools.override` выдан**: логика проверена 11 кейсами (7 блокировок,
-  чтение и `hermes config set` проходят), 7 записей `denied` в аудите; живой хук — после рестарта
+- **`guards` защищает конфиг живьём**: после рестарта `patch` по `config.yaml` и `.env` отбит,
+  файлы целы (29 170 и 139 051 байт), в `audit_log` 10 записей `denied` с actor `agent`
+- **Страница `/hermesui` проверена рендером**: 4 регистрации (`routes`, `sidebar-nav`, 2×`palette`),
+  8 меток из живого `plugin_api.state()` (8 модулей, 10 артефактов, doctor `ok`, план пуст)
 - **`maintenance` работает**: cron `30 3 * * *` — ротация бэкапов (держит 10), сверка версии
   платформы с `settings` (+ kanban при обновлении), doctor по понедельникам
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория

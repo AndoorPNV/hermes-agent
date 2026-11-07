@@ -42,8 +42,8 @@
 | 2.2 | `ui-workspace`: `ROUTES_AREA` `/hermesui` + `SIDEBAR_NAV_AREA` | после hot-reload видна строка навигации и страница | ✅ код готов (496 строк, `node --check` ok); видно после ⌘K → Reload desktop plugins |
 | 2.3 | Страница читает `/api/plugins/ui-workspace/{state,plan,changes,doctor}` через `ctx.rest` | данные рендерятся; ошибка → чип `backend unavailable [err]` | ✅ вместо `/api/v1` — plugin REST (ADR-014); бэкенд проверен вызовом обработчиков |
 | 2.4 | `PALETTE_AREA`: «HermesUI: открыть установщик», «HermesUI: проверить (doctor)» | команды в ⌘K вызывают API | ✅ код готов |
-| 2.5 | Проверка `node --check` + AX-дерево | нет тоста ошибки, метки видны | 🟡 `node --check` ✅, AX-дерево — после reload |
-| 2.6 | Откат UI-модуля | папка удалена, страница исчезает после reload | ⬜ |
+| 2.5 | Проверка `node --check` + рендер страницы на реальных данных | нет тоста ошибки, метки видны | ✅ `node --check` ✅; статический рендер (CDP в packaged-сборке нет): 4 регистрации (`routes`/`sidebar-nav`/2×`palette`), 8 меток из живого `plugin_api.state()` совпали, деградированная ветка без данных не падает |
+| 2.6 | Откат UI-модуля | папка удалена, страница исчезает после reload | ✅ `rollback --module ui-workspace` снимает junction (репозиторий цел), `apply` возвращает ссылку; цикл проверен дважды |
 
 Ограничение: не регистрировать и pane, и page (см. `05-MODULES.md`, анти-паттерны).
 
@@ -51,11 +51,11 @@
 
 | # | Задача | Приёмка | Статус |
 |---|---|---|---|
-| 3.1 | ~~`api/v1` сервер~~ → роуты плагина `ui-workspace` (`/api/plugins/ui-workspace/*`) | 8 роутов отвечают; `/state` = 200 | ✅ отказ от своего сервера — ADR-014 |
-| 3.2 | `guards`: `pre_tool_call` запрещает запись в `config.yaml`/`.env` | вызов `write_file` по этим путям → `block` | ✅ логика: 11 кейсов, 7 блокировок, 0 ложных (чтение и `hermes config set` проходят); живой блок — после рестарта |
+| 3.1 | ~~`api/v1` сервер~~ → роуты плагина `ui-workspace` (`/api/plugins/ui-workspace/*`) | 8 роутов отвечают | ✅ отказ от своего сервера — ADR-014; монтирование подтверждено логом и `401` (см. 3.4) |
+| 3.2 | `guards`: `pre_tool_call` запрещает запись в `config.yaml`/`.env` | вызов `write_file`/`patch` по этим путям → `block` | ✅ логика 11 кейсов (7 блокировок, 0 ложных) + **живой блок** после рестарта: `patch(config.yaml)` и `patch(.env)` отбиты, файлы целы (29 170 и 139 051 байт) |
 | 3.3 | Выдача `tools.override` пользователем | `hermes plugins enable guards`; лог `decision=allow` | ✅ `guards (user) tools.override: granted` (canonical `granted_capabilities` + legacy) |
-| 3.4 | Проверка монтирования | `curl … /api/plugins/guards/state` → 401 | ✅ `200` локально (401 — только с ключом), после рестарта |
-| 3.5 | Нарушения пишутся в `audit_log` (`result=denied`) | строка с `module_id=guards` | ✅ 7 записей `guard.block` / `denied` с tool, target, source |
+| 3.4 | Проверка монтирования | `curl … /api/plugins/<id>/state` → `401` (маршрут есть), `404` = нет | ✅ 401 от гейтвея (`:60946`, нужен тикет) для `guards` и `ui-workspace`; строка `Mounted plugin API routes: /api/plugins/<id>/` в `logs/agent.log` |
+| 3.5 | Нарушения пишутся в `audit_log` (`result=denied`) | строка с `module_id=guards` | ✅ 10 записей `guard.block` / `denied`; две последние — живые (`patch` → `config.yaml`, `patch` → `.env`, actor `agent`) |
 
 Требует рестарта гейтвея — выполняется в конце сессии, не в середине хода.
 
