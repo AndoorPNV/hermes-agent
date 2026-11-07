@@ -143,6 +143,36 @@ class PolicyBody(BaseModel):
     policy: Optional[dict[str, Any]] = None
 
 
+class ScaffoldBody(BaseModel):
+    project_id: str = Field(description="id проекта из projects.db")
+    profile: str = Field(default="standard", description="minimal | standard | full")
+    storage: str = Field(default="sqlite", description="sqlite | hermesui | files | none")
+    stack: str = ""
+    confirm: bool = Field(default=False, description="запись в файловую систему требует явного да")
+    reason: str = Field(default="", description="для отказа: почему структуру не создаём")
+
+
+def _scaffold():
+    """`hermesui/tools/project_scaffold.py` — тот же код, что у CLI и у скилла."""
+    import sys
+    from pathlib import Path as _Path
+
+    repo = _Path(__file__).resolve().parents[3]
+    tools_dir = repo / "tools"
+    if str(tools_dir) not in sys.path:
+        sys.path.insert(0, str(tools_dir))
+    import project_scaffold
+
+    return project_scaffold
+
+
+def _project_path(project_id: str) -> str:
+    for project in _projects():
+        if str(project["id"]) == str(project_id):
+            return str(project.get("path") or "")
+    raise HTTPException(status_code=404, detail=f"проект {project_id} не найден в projects.db")
+
+
 def _projects() -> list[dict[str, Any]]:
     path = policy.projects_db()
     if not path.exists():
@@ -451,6 +481,49 @@ def set_policy(body: PolicyBody) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="scope must be project or session")
     entry = policy.set_policy(body.scope, body.id, body.policy)
     return {"ok": True, "scope": body.scope, "id": body.id, "policy": entry}
+
+
+@router.get("/scaffold/preview")
+def scaffold_preview(project_id: str, profile: str = "standard", storage: str = "sqlite") -> dict[str, Any]:
+    """Что будет создано — без записи. Кнопка в карточке сначала показывает план."""
+    path = _project_path(project_id)
+    module = _scaffold()
+    try:
+        return {"ok": True, "project": path, **module.prepare(
+            Path(path), path.split("\\")[-1] or path, "",
+            profile=profile, storage=storage, dry_run=True)}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)[:300]) from exc
+
+
+@router.post("/scaffold")
+def scaffold_apply(body: ScaffoldBody) -> dict[str, Any]:
+    if not body.confirm:
+        raise HTTPException(status_code=400, detail="нужен confirm: true — подготовка пишет файлы проекта")
+    path = _project_path(body.project_id)
+    module = _scaffold()
+    try:
+        result = module.prepare(Path(path), path.rstrip("\\/").split("\\")[-1] or path,
+                                "", profile=body.profile, storage=body.storage, stack=body.stack)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)[:300]) from exc
+    return {"ok": True, "project_id": body.project_id, **result}
+
+
+@router.post("/scaffold/decline")
+def scaffold_decline(body: ScaffoldBody) -> dict[str, Any]:
+    """Явный отказ: проект остаётся пустым, факт отказа уходит в журнал."""
+    path = _project_path(body.project_id)
+    module = _scaffold()
+    return {"ok": True, **module.decline(Path(path),
+                                         body.reason or "решение пользователя")}
+
+
+@router.get("/scaffold/check")
+def scaffold_check(project_id: str) -> dict[str, Any]:
+    path = _project_path(project_id)
+    module = _scaffold()
+    return module.check(Path(path))
 
 
 @router.get("/resolve")

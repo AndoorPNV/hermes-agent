@@ -2489,6 +2489,168 @@ function Tooltip({ node, anchor, state }) {
   })
 }
 
+// ── подготовка структуры проекта (этап 5) ───────────────────────────────────
+
+const SCAFFOLD_PROFILES = [
+  ['minimal', 'минимальная', 'README, правила, карточка проекта — без docs/ и БД'],
+  ['standard', 'стандартная', 'docs/ по разделам + db/schema.sql, без modules/'],
+  ['full', 'полная', 'то же + docs/05-MODULES.md и modules/']
+]
+
+const SCAFFOLD_STORAGES = [
+  ['sqlite', 'локальная SQLite', 'db/schema.sql рядом с проектом'],
+  ['hermesui', 'общий hermesui.db', 'состояние в журнале HermesUI'],
+  ['files', 'файлы', 'JSON/Markdown в репозитории проекта'],
+  ['none', 'не выбрано', 'раздела данных в каркасе не будет']
+]
+
+function ScaffoldDialog({ project, onClose, onDone }) {
+  const [profile, setProfile] = useState('standard')
+  const [storage, setStorage] = useState('sqlite')
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState('')
+  const [plan, setPlan] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+    apiGet(`/scaffold/preview?project_id=${encodeURIComponent(project.id)}&profile=${profile}&storage=${storage}`)
+      .then(result => {
+        if (!alive) return
+        setPlan(result || null)
+        if (!result) setError(lastError || 'бэкенд не отвечает')
+      })
+    return () => {
+      alive = false
+    }
+  }, [project.id, profile, storage])
+
+  const create = async () => {
+    setBusy('create')
+    setError('')
+    try {
+      const result = await apiPost('/scaffold', { project_id: project.id, profile, storage, confirm: true })
+      const removed = (result.removed || []).length
+      host.notify?.({
+        kind: result.check?.ok ? 'info' : 'warning',
+        message: `структура: файлов ${(result.created || []).length}, без заглушек ${result.check?.ok ? 'да' : 'нет'}${removed ? `, пустых удалено ${removed}` : ''}`
+      })
+      onDone?.()
+      onClose()
+    } catch (err) {
+      setError(String(err?.message || err))
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const decline = async () => {
+    setBusy('decline')
+    setError('')
+    try {
+      await apiPost('/scaffold/decline', { project_id: project.id, reason: 'отказ из карточки' })
+      host.notify?.({ kind: 'info', message: 'структура не создана — проект остаётся пустым' })
+      onClose()
+    } catch (err) {
+      setError(String(err?.message || err))
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const picker = (rows, value, onPick, title) =>
+    jsxs('div', {
+      className: 'flex flex-col gap-1',
+      children: [
+        jsx('div', { style: { fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.faint }, children: title }),
+        ...rows.map(([id, label, hint]) =>
+          jsxs('label', {
+            className: 'flex cursor-pointer items-start gap-2 rounded-md px-2 py-1',
+            style: { background: value === id ? T.bg : 'transparent', color: value === id ? T.text : T.muted },
+            children: [
+              jsx('input', {
+                type: 'radio',
+                name: title,
+                checked: value === id,
+                onChange: () => onPick(id),
+                style: { marginTop: 2 }
+              }),
+              jsxs('span', {
+                className: 'flex flex-col',
+                children: [
+                  jsx('span', { style: { fontSize: 11.5 }, children: label }),
+                  jsx('span', { style: { fontSize: 9.5, color: T.faint }, children: hint })
+                ]
+              })
+            ]
+          }, id)
+        )
+      ]
+    })
+
+  return jsx('div', {
+    className: 'fixed inset-0 z-50 flex items-center justify-center',
+    style: { background: 'rgba(0,0,0,0.45)' },
+    children: jsxs('div', {
+      className: 'flex w-[560px] flex-col gap-3 rounded-2xl p-4',
+      style: { background: T.panel, border: `1px solid ${T.line}`, color: T.text },
+      children: [
+        jsxs('div', {
+          children: [
+            jsx('div', { style: { fontSize: 9.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.faint }, children: 'подготовка проекта' }),
+            jsx('div', { style: { fontSize: 14, fontWeight: 600 }, children: project.name })
+          ]
+        }),
+        jsx('div', {
+          style: { fontSize: 11, color: T.muted },
+          children: 'Каркас создаётся один раз: документы, правила, схема. Заглушек вида TODO не будет — чего не хватает, того файла не будет вовсе.'
+        }),
+        picker(SCAFFOLD_PROFILES, profile, setProfile, 'профиль'),
+        picker(SCAFFOLD_STORAGES, storage, setStorage, 'хранение'),
+        plan?.already_not_empty
+          ? jsx('div', {
+              style: { fontSize: 10.5, color: '#b45309' },
+              children: 'в каталоге уже что-то есть — существующие файлы не перезаписываются'
+            })
+          : null,
+        error ? jsx('div', { style: { fontSize: 11, color: '#b42318' }, children: error }) : null,
+        jsxs('div', {
+          className: 'flex items-center justify-between gap-2',
+          children: [
+            jsx('button', {
+              type: 'button',
+              onClick: () => void decline(),
+              disabled: Boolean(busy),
+              className: 'rounded-full px-3 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+              style: { border: `1px solid ${T.line}`, color: T.muted },
+              children: busy === 'decline' ? '…' : 'не надо'
+            }),
+            jsxs('div', {
+              className: 'flex gap-2',
+              children: [
+                jsx('button', {
+                  type: 'button',
+                  onClick: onClose,
+                  className: 'rounded-full px-3 py-1.5 text-[10.5px] uppercase tracking-[0.12em]',
+                  style: { border: `1px solid ${T.line}`, color: T.muted },
+                  children: 'отмена'
+                }),
+                jsx('button', {
+                  type: 'button',
+                  onClick: () => void create(),
+                  disabled: Boolean(busy),
+                  className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+                  style: { background: T.accent, color: '#fff' },
+                  children: busy === 'create' ? '…' : 'создать'
+                })
+              ]
+            })
+          ]
+        })
+      ]
+    })
+  })
+}
+
 // ── main ────────────────────────────────────────────────────────────────────
 
 function projectSessions(rows, project) {
@@ -3127,6 +3289,7 @@ function ProjectMap({ variant }) {
   const [hover, setHover] = useState(null)
   const [menu, setMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
+  const [scaffold, setScaffold] = useState(null)
   const [selected, setSelected] = useState(null)
   const [dragId, setDragId] = useState(null)
   const [dropId, setDropId] = useState(null)
@@ -3566,7 +3729,15 @@ function ProjectMap({ variant }) {
                             })
                           : null
                       ] }),
-                      jsx(ProjectStats, { rows: backend.data?.sessions || [], project, policy: backend.data?.policy, audit: backend.data?.audit })
+                      jsx(ProjectStats, { rows: backend.data?.sessions || [], project, policy: backend.data?.policy, audit: backend.data?.audit }),
+                      jsx('button', {
+                        type: 'button',
+                        onClick: () => setScaffold(project),
+                        className: 'mt-1 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em]',
+                        style: { border: `1px solid ${T.line}`, color: T.muted },
+                        title: 'создать каркас: документы, правила, схема — без заглушек',
+                        children: 'структура проекта'
+                      })
                     ]
                   }),
                   jsx('div', {
@@ -3827,6 +3998,16 @@ function ProjectMap({ variant }) {
         : null,
       dialog && backend.data
         ? jsx(PolicyDialog, { target: dialog, backend: backend.data, onClose: () => setDialog(null), onSaved: () => void backend.refetch() })
+        : null,
+      scaffold
+        ? jsx(ScaffoldDialog, {
+            project: scaffold,
+            onClose: () => setScaffold(null),
+            onDone: () => {
+              void backend.refetch()
+              void tree.refetch()
+            }
+          })
         : null,
       wizard && backend.data
         ? jsx(ProjectWizard, {

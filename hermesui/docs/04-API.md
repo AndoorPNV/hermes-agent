@@ -227,6 +227,10 @@ curl -s -o /dev/null -w '%{http_code}\n' \
 | GET | `/resolve?session_id=…&cwd=…` | как политика применяется к сессии |
 | POST | `/ephemeral`, `/ephemeral/boot`, `/ephemeral/drop` | временные сессии |
 | POST | `/link`, `/unlink` | вложенность сессий |
+| GET | `/scaffold/preview?project_id=&profile=&storage=` | что будет создано (без записи) |
+| POST | `/scaffold` | `{project_id, profile, storage, confirm:true}` → каркас без заглушек |
+| POST | `/scaffold/decline` | `{project_id, reason}` → явный отказ, проект остаётся пустым |
+| GET | `/scaffold/check?project_id=` | маркеры/плейсхолдеры/битые ссылки |
 
 Ответ `/state`:
 
