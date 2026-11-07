@@ -1,0 +1,9 @@
+{
+  "name": "project-map-ui",
+  "label": "Project Map",
+  "description": "Policy backend for the Project Map desktop plugin (skills / toolsets / MCP per project and session) plus session linking.",
+  "version": "1.0.1",
+  "icon": "Puzzle",
+  "api": "plugin_api.py",
+  "tab": { "hidden": true }
+}

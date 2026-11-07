@@ -1,0 +1,26 @@
+id: patch-desktop-create-options
+type: ui
+version: 0.1.0
+description: "Патч ядра десктопа: canonical-клиент пропускает parent_session_id / messages / idempotency_key в session.create — без него ветвление несохранённой сессии падало с 'does not support explicit session options'"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: patch
+    src: fix-canonical-create-options.patch
+    dst: hermes-agent
+    apply: git apply --3way
+
+config: {}
+
+hooks: []
+
+# updater перезапишет hermes-agent → после `hermes update` патч нужно применить заново
+# и пересобрать десктоп (`npm run build` в apps/desktop + копия dist в win-unpacked).
+settings: {}

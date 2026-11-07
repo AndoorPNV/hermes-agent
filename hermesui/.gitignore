@@ -1,0 +1,9 @@
+# Runtime-мусор: пишется в $HERMES_HOME и не должен попадать в git.
+__pycache__/
+*.pyc
+audit.jsonl
+ephemeral.json
+policy.json
+policy.json.bak*
+*.log
+.DS_Store

@@ -1,0 +1,7 @@
+name: ui-dispatcher
+version: 0.1.0
+description: "Whole-install switchboard for skills, agent plugins, desktop plugins, toolsets and MCP servers, plus named groups of skills/plugins that projects and sessions can be handed."
+author: "Hermes Agent (local)"
+api: plugin_api.py
+capabilities: []
+provides_hooks: []

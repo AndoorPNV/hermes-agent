@@ -1,0 +1,52 @@
+diff --git a/apps/desktop/src/api/canonical-protocol.test.ts b/apps/desktop/src/api/canonical-protocol.test.ts
+index 9be58a6f09..9f7af3f0cf 100644
+--- a/apps/desktop/src/api/canonical-protocol.test.ts
++++ b/apps/desktop/src/api/canonical-protocol.test.ts
+@@ -85,6 +85,21 @@ test('metadata writes retain the original CAS revision and request identity unti
+   expect(protocol.prepare('session.archive', { session_id: 's', archived: true })).toMatchObject({ expected_revision: 8, operation: 'archive', payload: { archived: true } })
+ })
+ 
++test('session.create passes a fork’s parent, seed and retry key through', () => {
++  const protocol = new CanonicalDesktopProtocol()
++  const prepared = protocol.prepare('session.create', {
++    source: 'desktop',
++    parent_session_id: 'parent-1',
++    messages: [{ role: 'user', content: 'hi' }],
++    idempotency_key: 'branch-1'
++  })
++  expect(prepared).toMatchObject({
++    parent_session_id: 'parent-1',
++    messages: [{ role: 'user', content: 'hi' }],
++    idempotency_key: 'branch-1'
++  })
++})
++
+ test('canonical create retries retain identity', () => {
+   const protocol = new CanonicalDesktopProtocol()
+   const params = { source: 'desktop', profile: 'default', cols: 96, fast: false, cwd: '/tmp' }
+diff --git a/apps/desktop/src/api/canonical-protocol.ts b/apps/desktop/src/api/canonical-protocol.ts
+index 3f596f6ea0..6d08182f27 100644
+--- a/apps/desktop/src/api/canonical-protocol.ts
++++ b/apps/desktop/src/api/canonical-protocol.ts
+@@ -512,7 +512,11 @@ export class CanonicalDesktopProtocol {
+ 
+     if (typeof params.cwd_explicit !== 'boolean') { delete params.cwd_explicit }
+ 
+-    const allowed = new Set(['request_id', 'source', 'cwd', 'model', 'provider', 'toolsets', 'reasoning', 'profile', 'cols', 'title', 'hidden', 'follow_profile_config', 'service_tier', 'cwd_explicit'])
++    // `parent_session_id`, `messages` and `idempotency_key` are real `session.create`
++    // parameters in tui_gateway/contracts/sessions.py (branch nesting, a seeded fork and
++    // the caller's stable retry key). Refusing them here broke every fork of a session
++    // that has no stored row yet — the one path that legitimately falls back to create.
++    const allowed = new Set(['request_id', 'source', 'cwd', 'model', 'provider', 'toolsets', 'reasoning', 'profile', 'cols', 'title', 'hidden', 'follow_profile_config', 'service_tier', 'cwd_explicit', 'parent_session_id', 'messages', 'idempotency_key'])
+     const unsupported = Object.keys(params).filter(key => !allowed.has(key))
+ 
+     if (unsupported.length) { throw new Error(`Canonical gateway does not support explicit session options: ${unsupported.join(', ')}`) }
+@@ -520,7 +524,7 @@ export class CanonicalDesktopProtocol {
+     // RT-26: the picked profile always rides, `default` included: a socket launched as a named
+     // profile (active-profile.json) reads an omitted profile as its own launch profile.
+     const result = Object.fromEntries(Object.entries(params).filter(([key, value]) =>
+-      ['request_id', 'cwd', 'model', 'provider', 'toolsets', 'reasoning', 'title', 'hidden', 'follow_profile_config', 'service_tier', 'cwd_explicit'].includes(key) || (key === 'profile' && typeof value === 'string' && value !== '')))
++      ['request_id', 'cwd', 'model', 'provider', 'toolsets', 'reasoning', 'title', 'hidden', 'follow_profile_config', 'service_tier', 'cwd_explicit', 'parent_session_id', 'messages', 'idempotency_key'].includes(key) || (key === 'profile' && typeof value === 'string' && value !== '')))
+ 
+     const key = JSON.stringify(result)
+     const requestId = params.request_id ?? this.creates.get(key) ?? crypto.randomUUID()

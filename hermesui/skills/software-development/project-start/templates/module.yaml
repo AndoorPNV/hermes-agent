@@ -1,0 +1,20 @@
+# Шаблон единицы поставки. Скопировать в modules/<id>/module.yaml.
+# Правила: id == имя папки; никаких абсолютных путей; capabilities только если реально нужны.
+id: "<kebab-case-id>"
+type: "package"        # skill | plugin | ui | theme | i18n | service | package
+version: "0.1.0"
+description: "<одно предложение: что даёт и кому>"
+author: "<имя>"
+license: "MIT"
+platforms: [windows, linux, macos]
+
+requires: []           # [{id: "<другой-id>", min_version: "0.1.0"}]
+conflicts: []          # взаимно с обеих сторон
+
+capabilities: []       # объявляем, НЕ выдаём
+
+artifacts: []          # [{kind: "src", src: "plugin.js", dst: "..."}]
+
+config: {}             # ключи, которые модуль требует; меняются только через приложение
+hooks: []              # для плагинов: pre_*, post_*, on_*
+settings: {}

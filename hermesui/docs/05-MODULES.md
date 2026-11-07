@@ -1,0 +1,297 @@
+# 05 · Модули и точки расширения
+
+Версия: 1.0 · 2026-10-30
+
+---
+
+## 1. Формат модуля
+
+Каждый модуль — папка `modules/<id>/` с манифестом `module.yaml` и артефактами.
+Манифест — единственный источник истины о составе; установщик не угадывает.
+
+```yaml
+id: ui-workspace                 # kebab-case, == имя папки, == id плагина
+type: ui                         # skill | plugin | ui | theme | i18n | mcp
+version: 0.1.0
+description: Панель состояния HermesUI (plan/changes/doctor) в десктопе
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires:
+  - id: theme-hermesui
+    min_version: 0.1.0
+conflicts:
+  - ui-project-map               # оба регистрируют навигацию → конфликт UX, не техники
+
+capabilities: []                 # объявляем, НЕ выдаём; выдаёт пользователь
+
+artifacts:
+  - kind: desktop                # desktop | python | skill | skin | locale | mcp_json | patch
+    src: plugin.js
+    dst: desktop-plugins/ui-workspace/plugin.js
+  - kind: skill
+    src: skill/
+    dst: skills/hermesui/ui-workspace/
+
+config:                          # записывается только через hermes config set
+  plugins.enabled: ["ui-workspace"]
+
+hooks: []                        # только для type: plugin
+settings: {}                     # произвольные значения → settings в hermesui.db
+```
+
+### 1.1 Правила манифеста
+
+| Правило | Почему |
+|---|---|
+| `id` == имя папки == `const ID` в `plugin.js` == элемент `plugins.enabled` | коллизия id убивает весь плагин без ошибки |
+| `requires` только на существующий `id` | висячая зависимость = невозможный `plan` |
+| `conflicts` — взаимные (оба модуля объявляют друг друга) | односторонний конфликт обнаруживается позже |
+| `capabilities` пустой, если можно | каждая capability — согласие пользователя и лишний шаг |
+| `artifacts[].dst` — относительно `$HERMES_HOME` | переносимость профилей |
+| никаких абсолютных путей в манифесте | `F:\…` не существует на другой машине |
+
+## 2. Типы модулей
+
+### 2.1 `skill`
+
+```
+modules/skill-hermes-adapt/
+├── module.yaml
+└── skill/
+    ├── SKILL.md
+    ├── references/*.md
+    ├── templates/*
+    └── scripts/*
+```
+
+`SKILL.md` frontmatter (проверено на живых скиллах):
+
+```yaml
+---
+name: hermes-adapt
+description: "Use when adding or updating a HermesUI module. Install, validate, rollback."
+version: 0.1.0
+author: mrkee
+license: MIT
+platforms: [windows, linux]
+metadata:
+  hermes:
+    tags: [hermes, plugins, ui, install]
+---
+```
+
+Требования:
+- Первые 57 символов `description` — самодостаточный триггер «Use when …».
+- Тело — процедура, а не пересказ `docs/` (иначе две правды).
+- Тяжёлое — в `references/`, шаблоны — в `templates/`, исполняемое — в `scripts/`.
+- Скилл ссылается на этот проект по абсолютному пути (`F:\06_AI\HermesUI`) только в
+  разделе «где что лежит», а не в каждом шаге.
+
+### 2.2 `plugin` (Python, хуки + REST)
+
+```
+modules/guards/
+├── module.yaml                 # type: plugin, hooks: [pre_tool_call], capabilities: [tools.override]
+└── plugin/
+    ├── plugin.yaml             # api: plugin_api.py  (относительно dashboard/)
+    ├── __init__.py             # def register(ctx): ctx.register_hook(...)
+    ├── dashboard/
+    │   ├── manifest.json       # без него REST не монтируется
+    │   └── plugin_api.py       # router = APIRouter()
+    └── desktop/plugin.js       # опционально
+```
+
+Жизненный цикл:
+
+```
+apply → файлы в plugins/<id>/ → plugins.enabled=[…] → ПЕРЕЗАПУСК ГЕЙТВЕЯ
+      → boot: discover → import → register(ctx) → mount /api/plugins/<id>
+      → хуки активны ТОЛЬКО после выдачи capability
+```
+
+Обязательные проверки после установки:
+
+| Проверка | Команда | Ожидание |
+|---|---|---|
+| импорт | `python -m py_compile plugins/<id>/*.py dashboard/*.py` | 0 |
+| монтирование | `curl -o /dev/null -w '%{http_code}' …/api/plugins/<id>/state` | `401` |
+| лог | `grep "Mounted plugin API routes" $HERMES_HOME/logs/agent.log` | строка с `<id>` |
+| capability | `grep capability_check $HERMES_HOME/logs/agent.log` | `decision=allow` |
+
+### 2.3 `ui` (desktop-плагин)
+
+Один файл `plugin.js` — plain ESM, `export default { id, name, register(ctx) }`.
+Загружается hot-reload из `$HERMES_HOME/desktop-plugins/<id>/plugin.js`.
+
+Доступные `area`:
+
+| Area | Что даёт | Обязательные поля `data` |
+|---|---|---|
+| `ROUTES_AREA` | страница в рабочей области | `path` |
+| `SIDEBAR_NAV_AREA` | строка навигации | `path`, `label`, `codicon?` |
+| `PALETTE_AREA` | команда ⌘K | `label`, `run`, `keywords?` |
+| `KEYBINDS_AREA` | переназначаемое действие | `id`, `label`, `default?` |
+| `'statusBar.left'` / `'statusBar.right'` | чип в статус-баре | `render` |
+| `'panes'` | панель | `placement`, `dock?`, `width?`, `height?`, `title` |
+| `THEMES_AREA` | тема в списке | полный `DesktopTheme` |
+| `TRANSCRIPT_DIRECTIVE_AREA` | `::name{…}` в сообщении | `name`, `render` |
+| `TITLEBAR_AREAS.center` | контрол в заголовке (mount-scoped) | `Contribute` |
+
+Правила (цена ошибки — «интерфейс исчез»):
+
+1. **Не регистрировать одновременно page и pane** для одной сущности.
+2. **JSX запрещён** — только `jsx()`/`jsxs()` из `react/jsx-runtime`.
+3. Импорты — только `@hermes/plugin-sdk`, `react`, `react/jsx-runtime`.
+4. Цвета — только `var(--ui-*)`, `var(--theme-*)`, `var(--shadow-nous)`; hex запрещён.
+5. Canvas — обязательный `ResizeObserver` + изменение `width`/`height` атрибутов.
+6. Данные — `useQuery`/`useMutation` из SDK, не самодельный polling.
+7. Ошибка бэкенда — видимый чип `backend unavailable [<err>]`, не молчание.
+8. Кнопки-иконки — `aria-label` + `title`, иначе они «пустые» в дереве доступности.
+
+Проверка: `node --check` на копии `.mjs`; затем ⌘K → **Reload desktop plugins**;
+затем наличие своих меток в AX-дереве окна.
+
+### 2.4 `theme` / `i18n`
+
+Скин — YAML в `$HERMES_HOME/skins/<name>.yaml`, активируется `display.skin`
+(применяется на CLI/TUI/desktop в пределах ~1 с). Точечная правка активного скина —
+`hermes skin set <key> <hex>`; форкать `default` нельзя (теряется палитра и фон).
+
+Языковой пакет — либо `locales/*.desktop.yaml` (+ регистрация в `i18n`), либо в UI-модуле:
+
+```js
+ctx.i18n.registerAppLocale('ru', { endonym: 'Русский', translations: { 'nav.chat': 'Чат' } })
+```
+
+Ключи берутся из `locales/_keys.desktop.json` (`npm run i18n:keys`); отсутствующие
+падают в английский каталог, затем в сам ключ.
+
+### 2.5 `mcp`
+
+MCP-сервер — не файл, а запись в `config.yaml: mcp_servers`. Модуль типа `mcp`
+поставляет JSON-фрагмент + инструкцию; применяется через API каталога
+(`POST /api/mcp/catalog/install`) или `hermes mcp add`. Профиль-глобально, не по сессии.
+
+## 3. Планируемый состав (baseline)
+
+| id | type | Что делает | Статус |
+|---|---|---|---|
+| `ui-workspace` | ui | страница `/hermesui`: план, журнал изменений, doctor, кнопки apply/rollback через `ctx.rest` | planned |
+| `theme-hermesui` | theme | собственный скин проекта (палитра поверх `default`, без форка) | planned |
+| `skill-hermes-adapt` | skill | процедура «как добавить модуль»: манифест → валидация → применение → откат | planned |
+| `guards` | plugin | `pre_tool_call`: запрет правки `config.yaml`/`.env` инструментами, лог нарушений в `audit_log` | planned |
+| `vault-sync` | plugin + cron | `docs/` → `Obsidian/HermesUI`, сверка `doc_hash`, отчёт в kanban | planned |
+| `i18n-ru` | i18n | русские строки для наших панелей (не подменяет ядро) | planned |
+| `ui-dispatcher` | ui + plugin | «Общий диспетчер»: глобальные переключатели скиллов, плагинов, наборов инструментов и MCP + группы скиллов/плагинов | **installed** (`desktop-plugins/ui-dispatcher`, `plugins/ui-dispatcher`) |
+| `patch-desktop-create-options` | ui (patch) | патч ядра: canonical-клиент пропускает `parent_session_id` / `messages` / `idempotency_key` в `session.create` | **applied** (`hermes-agent/apps/desktop`, ADR-011) |
+| `int-obsidian` | skill | инструкция и проверки vault (частично уже в `HERMES.md`) | in-progress |
+
+Статусы ведутся в `modules` (`enabled`) и в `[[Модули]]` vault. Один источник — БД.
+
+### 3.1 `ui-dispatcher` — что именно он переключает
+
+| Вкладка | Источник чтения | Ключ записи | Ограничение |
+|---|---|---|---|
+| Скиллы | `tools.skills_tool.find_all_skills(skip_disabled=True)` + `get_plugin_manager().list_plugin_skill_metadata()` | `skills.disabled` (`skills_config.save_disabled_skills`) | `hermes-agent` — `ESSENTIAL_SKILLS`, не отключается |
+| Плагины (агент) | `plugins_cmd._discover_all_plugins` + `_plugin_status` | `plugins.enabled` / `plugins.disabled` (`dashboard_set_agent_plugin_enabled`) | ключ — `key` из discovery (`web/ddgs`, `platforms/telegram`), не имя манифеста |
+| Плагины (десктоп) | `$HERMES_HOME/desktop-plugins/*/plugin.js` (regex по `export default`) | `localStorage['hermes.desktop.pluginDecisions.v2']` — пишет **страница**, приложение применяет по «Reload desktop plugins» | бэкенд не может: решение живёт в renderer |
+| Инструменты | `tools_config._get_effective_configurable_toolsets` + `_get_platform_tools` | `platform_toolsets.<platform>` (`_save_platform_tools`); `stt` — `stt.enabled` | первый же toggle раскрывает композит `hermes-cli` в явный список — это поведение ядра |
+| MCP | `mcp_servers` + `server_configs_with_sources` | `mcp_servers.<name>.enabled` | сервер, поставленный плагином, переключается только вместе с плагином (409-семантика) |
+
+Группы (`groups.json` рядом с бэкендом, `$HERMES_HOME/plugins/ui-dispatcher/groups.json`):
+`{id, kind: skill|plugin, name, note, order, items[]}`. Группа — это **выборка**, не политика:
+одна позиция может лежать в нескольких группах, применение группы = «включить все члены» или
+«выключить все члены». Назначение группы проекту/сессии — реализовано в политике
+`project-map-ui`: `policy.json` получил поле `groups[]` (id групп, не развёрнутые имена),
+бэкенд политики читает `groups.json` диспетчера на каждом вызове через `stat`-кэш и
+объединяет членов выбранных групп с полем `skills`. Правка группы в диспетчере поэтому
+сразу меняет все карточки, которые её выбрали; политикой управляют только группы
+`kind: skill` (у политики нет оси «плагины»). Удалённая группа, на которую ссылается
+политика, не разворачивается: карточка остаётся с явным списком `skills`, а диалог
+показывает предупреждение «группа не найдена».
+
+## 3.2 `project-map-ui` — статусы карточек, новая сессия, временные сессии
+
+Живой статус берётся только из RPC `session.active_list` (`LiveSessionStatus`:
+`idle | starting | waiting | working | streaming | resuming`), поллинг 6 с; всё остальное
+достраивается по строке `sessions` в `state.db` (`saved` — маркер «сохранить сессию» в
+последнем ответе ассистента, `message_count`, `ended_at`).
+
+| Состояние | Условие (`sessionState()` в `plugin.js`) | Вид карточки |
+|---|---|---|
+| `working` | живой статус из `LIVE_BUSY` (ход в полёте) | зелёный, пульсирующая точка |
+| `open` | живой `idle` | синий |
+| `done` | `saved` или `ended_at` | тёмно-серый |
+| `idle` | есть сообщения, не живая, маркера нет | янтарный |
+| `empty` | `message_count = 0` | пунктир, полая точка |
+| `temp` | id есть в `ephemeral.json` | фиолетовый, пунктирная рамка, иконка `beaker` |
+
+`id` живой строки — runtime-id, `session_key` — stored-id; карта ключуется stored-id, поэтому
+`liveMap` пишет оба. ПКМ по узлу (проект или сессия) → «Новая сессия»/«Временная»:
+`session.create` (+`parent_session_id` для дочерней), затем `POST /link` — он же ставит маркер
+`_branched_from`, без которого ядро не листит дочернюю строку. Если у только что созданной
+сессии ещё нет строки в БД, док не открывается — она уходит в основной чат
+(`host.openSession`), иначе `selected` висел бы на узле, которого нет на графе.
+
+Временная сессия (`ephemeral.py`, store `plugins/project-map-ui/ephemeral.json`):
+
+| Роут | Что делает |
+|---|---|
+| `POST /ephemeral` | `{session_id, parent, cwd, project_id, boot}` → запись со штампом текущего инстанса приложения |
+| `POST /ephemeral/boot` | `{boot}` → `{stale: [id…]}` — сессии, оставшиеся от закрытого приложения |
+| `POST /ephemeral/drop` | убрать запись после удаления сессии |
+| `GET /state` | добавилось поле `ephemeral` (тот же store) |
+
+Удаление делает **фронтенд** каноническими RPC: `session.close` → `session.delete`
+(без `close` гейтвей отвечает `4023 cannot delete an active session`). Штамп `boot` — лизинг
+в `localStorage` (`project-map-ui:boot-lease`, 15 с обновление, 60 с срок): второе окно карты
+присоединяется к тому же инстансу и не подметает сессии соседнего. Sweep запускается в
+`register()` — на старте приложения, не на открытии страницы. Цена и альтернативы —
+ADR-010: между закрытием приложения и следующим запуском строка физически лежит в
+`state.db`, а в обычном сайдбаре ядра временная сессия неотличима от обычной.
+
+### 3.2 `patch-desktop-create-options` — единственная правка чужого дерева
+
+| Что | Где |
+|---|---|
+| Патч | `modules/patch-desktop-create-options/fix-canonical-create-options.patch` |
+| Цель | `hermes-agent/apps/desktop/src/api/canonical-protocol.ts` (+ `.test.ts`) |
+| Применение | `cd hermes-agent && git apply --3way <patch>` → `cd apps/desktop && npm run build` → заменить `release/win-unpacked/resources/app.asar.unpacked/dist` |
+| Проверка | `vitest run src/api/canonical-protocol.test.ts src/api/canonical-create-options.test.ts`, `tsc -p tsconfig.json --noEmit` |
+| Решение | ADR-011 |
+
+Причина: `session.create` в гейтвее принимает `parent_session_id`, `messages` и
+`idempotency_key` (`tui_gateway/contracts/sessions.py`), но canonical-клиент десктопа
+фильтровал их по белому списку и падал на форке несохранённой сессии с
+`Canonical gateway does not support explicit session options: parent_session_id`. Патч
+расширяет белый список и добавляет тест. **`hermes update` его затирает** — после каждого
+обновления патч применяется заново и renderer пересобирается; пока это не сделано, форк
+черновика снова падает.
+
+## 4. Матрица совместимости
+
+| Модуль | Требует | Конфликтует | Capability | Рестарт гейтвея |
+|---|---|---|---|---|
+| `ui-workspace` | `theme-hermesui` | `ui-project-map` (обе навигация в /main) | — | нет |
+| `ui-dispatcher` | — | `ui-workspace` (обе — глобальные настройки Hermes, дублируют переключатели) | — | нет (REST монтируется сразу) |
+| `patch-desktop-create-options` | — | — (правит файл ядра, конфликтует с `hermes update`) | — | нет (нужна пересборка renderer) |
+| `theme-hermesui` | — | другой активный скин (одна тема за раз) | — | нет |
+| `skill-hermes-adapt` | — | — | — | нет |
+| `guards` | — | — | `tools.override` | **да** |
+| `vault-sync` | доступ к vault | — | — | **да** (если плагин с хуком) |
+| `i18n-ru` | `ui-workspace` | — | — | нет |
+
+## 5. Анти-паттерны (реальные грабли Hermes)
+
+| Анти-паттерн | Что происходит | Правильно |
+|---|---|---|
+| `plugins/<id>` и `desktop-plugins/<id>` с общим id, но разные фичи | `duplicate id` → всё исчезает | один id = один пакет, либо переименовать оба |
+| `api: dashboard/plugin_api.py` | путь `dashboard/dashboard/…` → unsafe, роуты не встают | `api: plugin_api.py` |
+| забыт `dashboard/manifest.json` | REST молчит, UI выглядит «сломанным бэкендом» | копировать шаблон манифеста |
+| новая панель «не видна» после рестарта | layout помнит `"<id>:pane": {"open": false}` | проверить layout, не переустанавливать плагин |
+| `session.mutate` для скиллов на ходу | `invalid_params` / молчаливый отказ | политика через `pre_tool_call` |
+| `pre_tool_call` без `tools.override` | блокировка молча не срабатывает | объявить и попросить пользователя выдать |
+| hex-цвет в панели | панель не совпадает с темой | theme-переменные |
+| панель + страница для одного | два одинаковых полотна | выбрать одну поверхность |

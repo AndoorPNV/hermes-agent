@@ -1,0 +1,29 @@
+id: ui-dispatcher
+type: ui
+version: 0.1.0
+description: "Общий диспетчер: включает и выключает скиллы, плагины, наборы инструментов и MCP для всего Hermes; хранит именованные группы скиллов и плагинов, которые назначаются проектам и сессиям в политике карты проекта"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: desktop
+    src: plugin.js
+    dst: desktop-plugins/ui-dispatcher/plugin.js
+  - kind: python
+    src: plugin/
+    dst: plugins/ui-dispatcher/
+  - kind: state
+    src: groups.json
+    dst: plugins/ui-dispatcher/groups.json
+
+config:
+  plugins.enabled: ["ui-dispatcher"]
+
+hooks: []
+settings: {}

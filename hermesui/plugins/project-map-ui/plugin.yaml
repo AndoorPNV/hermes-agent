@@ -1,0 +1,9 @@
+name: project-map-ui
+version: 1.0.0
+description: "Policy backend for the Project Map desktop plugin: per-project / per-session skills, toolsets and MCP servers, inherited down the session tree, enforced at tool-call time. Also owns session linking (parent_session_id) for drag-to-nest in the map."
+author: "Hermes Agent (local)"
+api: plugin_api.py
+capabilities:
+  - tools.override
+provides_hooks:
+  - pre_tool_call
