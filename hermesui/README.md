@@ -51,6 +51,12 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 Не переезжает через git: `.env` (секреты) и включение desktop-плагинов в интерфейсе
 (это localStorage приложения, не `config.yaml`).
 
+**Аутентификация на второй машине.** GitHub не принимает пароль по HTTPS
+(`Password authentication is not supported`). Нужен один раз:
+`git config --global credential.helper "" && git config --global --add credential.helper manager`
+(это Git Credential Manager — OAuth в браузере) либо PAT в `credential.helper store`.
+Хелпер `helper-selector` из бандла Hermes пускает пароль — с ним пуш падает.
+
 ## Ловушки (проверено на переносе 2026-11-07)
 
 - **`skills.external_dirs` — read-only.** `skill_manage`/агент пишет новые скиллы в
