@@ -39,11 +39,12 @@
 - `$HERMES_HOME = C:\Users\mrkee\AppData\Local\hermes`
 - `state.db`: `schema_version` = **32** (таблица `schema_version`), таблиц **44**, FTS5 включён
 - Есть ещё `projects.db` (4 таблицы), `kanban.db` (8), `shared-state.db` (16)
-- **`hermesui.db` не существует** — `db/schema.sql` это проект из M0.3, не факт
+- **`hermesui.db` создана 2026-11-07** (`scripts/db_init.py`): 11 таблиц, 3 представления,
+  2 триггера, `integrity_check = ok`, `journal_mode=wal`, аудит append-only
+- **Capability `tools.override` у `project-map-ui` выдана 2026-11-07** (`granted_capabilities`
+  + legacy `allow_tool_override`), enforcement проверен боем: блокируются скиллы и наборы
+  инструментов, включая вызов отложенного тула через `tool_call` (обхода нет)
 - Скиллов в рантайме: 60 значащих (44 builtin, 8 hub, 8 local), из них 11 — external из репозитория
 - REST-роутов: **300** в 26 файлах `hermes_cli/web_routers/*.py` + `dashboard_auth/routes.py`
   (baseline 2026-10-30, на v0.22.6 не перепроверялось)
 - Python-плагины: `project-map-ui`, `ui-dispatcher` (`plugins.enabled`)
-- **Capability `tools.override` у `project-map-ui` не выдан** (проверено 2026-11-07:
-  `hermes plugins capabilities` → `not granted`, в `backups/config/*` записи тоже нет) —
-  значит политика проектов сейчас не применяется, `policy.json` хранит выбор без enforcement'а

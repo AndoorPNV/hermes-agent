@@ -89,6 +89,7 @@ git merge --ff-only upstream/main                          # подтянуть 
 git rebase main hermesui                                   # перевесить наши коммиты
 
 python hermesui/scripts/link.py status                     # связи с рантаймом
+python hermesui/scripts/db_init.py --status                # журнал учёта: есть ли, цел ли
 hermes skills list && hermes plugins list                   # что видит Hermes
 hermes config get skills.external_dirs
 ```

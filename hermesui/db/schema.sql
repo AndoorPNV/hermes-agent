@@ -1,8 +1,9 @@
 -- ============================================================================
 -- HermesUI — схема расширяющей БД (hermesui.db)
--- СТАТУС: проект (M0.3 в docs/07-ROADMAP.md). Файла hermesui.db в $HERMES_HOME НЕТ
---         на 2026-11-07; этот DDL описывает, какой она должна стать.
--- Расположение (план): $HERMES_HOME/hermesui.db   ($HERMES_HOME = C:\Users\<user>\AppData\Local\hermes)
+-- СТАТУС: СОЗДАНА 2026-11-07 скриптом `hermesui/scripts/db_init.py` (M0.3 закрыт).
+--         Проверено на живой базе: 11 таблиц, 3 представления, 2 триггера,
+--         integrity_check=ok, foreign_key_check чист, audit_log append-only.
+-- Расположение: $HERMES_HOME/hermesui.db   ($HERMES_HOME = C:\Users\<user>\AppData\Local\hermes)
 -- Репозиторий: F:\06_AI\hermes-agent\hermesui\db\schema.sql
 -- Версия схемы: 1
 -- Назначение: каталог модулей, учёт установленных артефактов, журнал изменений,

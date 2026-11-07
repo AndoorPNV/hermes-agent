@@ -111,7 +111,9 @@ task_events / task_comments / task_links / task_attachments / kanban_notify_subs
 
 ## 5. `hermesui.db` — наша БД
 
-DDL: [`db/schema.sql`](../db/schema.sql) · проверено `PRAGMA integrity_check = ok`.
+DDL: [`db/schema.sql`](../db/schema.sql) · **создана 2026-11-07** (`scripts/db_init.py`):
+11 таблиц, 3 представления, 2 триггера, `journal_mode=wal`, `integrity_check = ok`,
+`foreign_key_check` чист, `audit_log` append-only проверен попыткой UPDATE.
 
 ### 5.1 ER-диаграмма
 

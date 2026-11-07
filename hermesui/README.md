@@ -10,8 +10,9 @@
 | `desktop-plugins/` | `project-map`, `ui-dispatcher` (plugin.js) | junction `$HERMES_HOME/desktop-plugins/<id>` → здесь |
 | `docs/` | спецификация, архитектура, БД, API, модули, интеграции, roadmap | только чтение людьми/агентом |
 | `modules/` | декларации модулей (`module.yaml`) + патч-модуль | только чтение |
-| `db/` | `schema.sql` (DDL `hermesui.db`, **ещё не создана** — M0.3) | только чтение |
+| `db/` | `schema.sql` (DDL `hermesui.db` — создана 2026-11-07) | только чтение |
 | `scripts/link.py` | мост репозиторий ↔ `$HERMES_HOME` | — |
+| `scripts/db_init.py` | создание/проверка журнала `$HERMES_HOME/hermesui.db` | `hermesui.db` |
 
 Vault и журнал остались в `F:\06_AI\HermesUI` (Obsidian-хранилище открывается оттуда).
 
@@ -79,6 +80,7 @@ python hermesui/scripts/link.py apply && hermes gateway restart
 | Скиллы (11) | ✅ подключены как `external`, проверено `hermes skills list` |
 | Python-плагины (2) | ✅ junction, `hermes plugins list` = enabled, REST `/api/plugins/ui-dispatcher/groups` = 200 |
 | Desktop-плагины (2) | ✅ junction, `node --check` проходит |
-| `hermesui.db` + CLI `hermesui` | ⬜ не реализовано (M0.3 в `docs/07-ROADMAP.md`); `db/schema.sql` — проект, не факт |
-| Политика проекта (enforcement в `project-map-ui`) | ⬜ **выключена**: capability `tools.override` не выдан ни разу; карточки хранят выбор в `policy.json`, но `pre_tool_call` не блокирует. Доделать: `hermes plugins enable project-map-ui` (интерактивно, решение пользователя) + тест обхода через `tool_call` |
+| `hermesui.db` (журнал учёта) | ✅ создана 2026-11-07: 11 таблиц, 3 представления, 2 триггера, `integrity_check=ok`, аудит append-only (`python scripts/db_init.py --status`) |
+| CLI `hermesui` (plan/apply/rollback) | ⬜ M0.1–M0.2, M0.4 — не начато |
+| Политика проекта (enforcement в `project-map-ui`) | ✅ включена 2026-11-07: `tools.override` выдан (`granted_capabilities` + legacy), блокировки проверены на скиллах и наборах инструментов |
 | Темы/скины, i18n | ⬜ не начато |

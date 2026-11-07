@@ -13,9 +13,9 @@
 |---|---|---|---|
 | 0.1 | Скелет `hermesui` CLI (`plan/apply/rollback/doctor/list/log`) | `tools/hermesui.py` | `--help` + 6 подкоманд |
 | 0.2 | Загрузчик каталога + валидатор `module.yaml` | `hermesui/catalog.py` | битый манифест → `invalid_manifest` с номером строки |
-| 0.3 | Создание `hermesui.db` из `db/schema.sql` | `hermesui/db.py` | файл создан, `integrity_check=ok`, сиды на месте |
+| 0.3 | Создание `hermesui.db` из `db/schema.sql` | `scripts/db_init.py` — ✅ 2026-11-07 | файл создан, `integrity_check=ok`, сиды на месте |
 | 0.4 | `hermesui list` | — | таблица: id, type, version, enabled |
-| 0.5 | Фиксация ожиданий платформы в `settings` | — | `platform.version=0.22.5`, `state_db_schema=32` |
+| 0.5 | Фиксация ожиданий платформы в `settings` | — ✅ (`db_init.py` пишет сам) | `platform.version=0.22.6`, `state_db_schema=32` |
 
 Риск: YAML-парсер. Митигация: stdin-режим + `--json`, если PyYAML недоступен.
 
