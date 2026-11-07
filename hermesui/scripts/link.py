@@ -37,6 +37,7 @@ LINKS: list[tuple[str, Path, Path]] = [
     ("desktop-plugin", REPO / "desktop-plugins" / "project-map",   HERMES_HOME / "desktop-plugins" / "project-map"),
     ("desktop-plugin", REPO / "desktop-plugins" / "ui-dispatcher", HERMES_HOME / "desktop-plugins" / "ui-dispatcher"),
 ]
+PLUGIN_IDS: list[str] = [src.name for kind, src, _ in LINKS if kind == "plugin"]
 
 
 def is_junction(path: Path) -> bool:
@@ -93,63 +94,69 @@ def _config_path() -> Path:
 
 
 def external_dirs() -> list[str]:
-    """Читает config.yaml напрямую: `config get` печатает YAML, а не JSON."""
-    path = _config_path()
+    """`skills.external_dirs` из config.yaml (`config get` печатает YAML, а не JSON)."""
+    return _yaml_section_list(_config_path(), "skills", "external_dirs")
+
+
+def plugins_enabled() -> list[str]:
+    return _yaml_section_list(_config_path(), "plugins", "enabled")
+
+
+def _yaml_section_list(path: Path, section: str, key: str) -> list[str]:
     try:
         import yaml  # type: ignore
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        node = (data.get(section) or {}).get(key)
+        if isinstance(node, str):
+            return [node]
+        if isinstance(node, list):
+            return [str(v) for v in node if v]
+        return []
     except ImportError:
-        return _external_dirs_fallback(path)
+        return _yaml_section_list_fallback(path, section, key)
     except Exception as exc:
         print(f"! не удалось прочитать {path}: {exc}")
         return []
-    skills = data.get("skills") or {}
-    raw = skills.get("external_dirs")
-    if isinstance(raw, str):
-        return [raw]
-    if isinstance(raw, list):
-        return [str(v) for v in raw if v]
-    return []
 
 
-def _external_dirs_fallback(path: Path) -> list[str]:
-    """Без PyYAML: разбираем блок `skills:` -> `external_dirs:` по отступам."""
+def _yaml_section_list_fallback(path: Path, section: str, key: str) -> list[str]:
+    """Без PyYAML: `section:` → `key:` → `- item` по отступам."""
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except OSError as exc:
         print(f"! не удалось прочитать {path}: {exc}")
         return []
     out: list[str] = []
-    in_skills = False
-    skills_indent = 0
-    in_dirs = False
-    dirs_indent = 0
+    in_section = False
+    section_indent = 0
+    in_list = False
+    list_indent = 0
     for line in lines:
         s = line.rstrip()
         if not s.strip() or s.strip().startswith("#"):
             continue
         indent = len(s) - len(s.lstrip())
         stripped = s.strip()
-        if not in_skills:
-            if stripped == "skills:":
-                in_skills, skills_indent = True, indent
+        if not in_section:
+            if stripped == f"{section}:":
+                in_section, section_indent = True, indent
             continue
-        if indent <= skills_indent and not stripped.startswith("-"):
-            in_skills = in_dirs = False
+        if indent <= section_indent and not stripped.startswith("-"):
+            in_section = in_list = False
             continue
-        if not in_dirs:
-            if stripped.startswith("external_dirs:"):
+        if not in_list:
+            if stripped.startswith(f"{key}:"):
                 tail = stripped.split(":", 1)[1].strip()
-                if tail and tail not in ("[]", "null", "~"):
+                if tail and tail not in ("null", "~"):
+                    if tail == "[]":
+                        return []
                     out.append(tail.strip("\"'"))
                     return out
-                if tail == "[]":
-                    return []
-                in_dirs, dirs_indent = True, indent
+                in_list, list_indent = True, indent
             continue
-        if stripped.startswith("- ") and indent >= dirs_indent:
+        if stripped.startswith("- ") and indent >= list_indent:
             out.append(stripped[2:].strip().strip("\"'"))
-        elif indent <= dirs_indent:
+        elif indent <= list_indent:
             break
     return out
 
@@ -171,6 +178,10 @@ def status() -> int:
     ok = any(same_path(Path(p), Path(want)) for p in got if p)
     print(f"[skills] external_dirs = {got or '—'}  {'✓ подключён' if ok else '✗ НЕ подключён'}")
     print(f"         ожидается {want}\n")
+    enabled = plugins_enabled()
+    missing = [pid for pid in PLUGIN_IDS if pid not in enabled]
+    print(f"[plugins] enabled = {enabled or '—'}  "
+          f"{'✓ все наши включены' if not missing else f'✗ нет: {missing}'}\n")
     bad = 0
     for kind, src, dst in LINKS:
         state = "ОТСУТСТВУЕТ"
@@ -198,6 +209,18 @@ def apply() -> int:
         print(f"  + добавлено: {want}")
     else:
         print(f"  = уже есть: {want}")
+
+    print("\n== plugins.enabled ==")
+    enabled = plugins_enabled()
+    missing = [pid for pid in PLUGIN_IDS if pid not in enabled]
+    if missing:
+        proc = hermes("config", "set", "plugins.enabled", json.dumps(enabled + missing))
+        if proc.returncode != 0:
+            print(f"  ✗ {proc.stdout}{proc.stderr}")
+        else:
+            print(f"  + включено: {missing}")
+    else:
+        print(f"  = уже включены: {PLUGIN_IDS}")
 
     print("\n== junction'ы ==")
     stamp = time.strftime("%Y%m%d-%H%M%S")

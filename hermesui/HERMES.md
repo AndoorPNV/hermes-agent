@@ -43,10 +43,42 @@
 - [ ] `hermes skills list` / `hermes plugins list` показывают модуль в нужном статусе.
 - [ ] Заметка в vault обновлена (`Модули.md`), `docs/` обновлён в том же изменении.
 
-## Коммиты
+## Коммиты и пуши
 
 `feat(<module-id>): …`, `docs: …`, `fix(<module-id>): …`, `chore(hermesui): …`.
-Форк — `origin` = `AndoorPNV/hermes-agent`; пушим ветку `hermesui`, PR в апстрим не шлём.
+
+**Куда пушим:** только `origin` = `AndoorPNV/hermes-agent` (свой форк — он же канал обмена
+с коллегами и рабочим компьютером). Ветки: `hermesui` (наши коммиты) и `main` (чистый апстрим).
+
+**Куда НЕ пушим:** `upstream` = `NousResearch/hermes-agent` — только чтение и `git fetch`.
+Защита включена: у `upstream` push-URL заменён на `DISABLED_UPSTREAM_IS_READ_ONLY`, поэтому
+случайный `git push upstream` падает до сети. Снимать её не нужно; если понадобится, это
+осознанное решение с записью в ADR.
+
+```bash
+cd F:/06_AI/hermes-agent
+git fetch upstream && git merge --ff-only upstream/main   # взять обновления платформы
+git rebase main hermesui                                  # перевесить наши коммиты
+git push origin main hermesui                             # отдать своё в свой форк
+```
+
+## Работа с двух машин (дом ↔ работа)
+
+Схема: **один форк = один источник, две машины = две рабочие копии**.
+
+На второй машине один раз:
+
+```bash
+git clone https://github.com/AndoorPNV/hermes-agent.git F:/06_AI/hermes-agent
+cd F:/06_AI/hermes-agent && git checkout hermesui
+python hermesui/scripts/link.py apply     # external_dirs + plugins.enabled + junction'ы
+hermes gateway restart                    # python-плагины подхватятся только после рестарта
+```
+
+Дальше цикл: `git pull --rebase` → работа → `link.py status` → `git push`.
+Что `link.py` НЕ делает и придётся повторить руками на второй машине: включение
+**desktop**-плагинов в приложении (это localStorage страницы, не `config.yaml`), а также
+`.env` (секреты в git не ездят — переносить вручную/через менеджер паролей).
 
 ## Быстрые команды
 

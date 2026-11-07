@@ -26,11 +26,30 @@ python scripts/link.py unlink   # отключить, вернуть папки 
 Что делает `apply`:
 
 1. добавляет `hermesui/skills` в `skills.external_dirs` (через `hermes config set`, не руками);
-2. реальные папки в `$HERMES_HOME/{plugins,desktop-plugins}/<id>` переносит в
+2. включает наши плагины в `plugins.enabled` (объединение с тем, что уже включено);
+3. реальные папки в `$HERMES_HOME/{plugins,desktop-plugins}/<id>` переносит в
    `$HERMES_HOME/.hermesui-backup/<ts>/` и создаёт на их месте junction (`mklink /J`);
-3. проверяет результат и печатает его.
+4. проверяет результат и печатает его.
+
+`status` показывает то же без изменений: что подключено и что разошлось (exit code 1, если есть
+расхождение — годится для DoD-проверки).
 
 Ничего не удаляется. `unlink` снимает junction только если это действительно junction.
+
+## Обмен между машинами
+
+`origin` (`AndoorPNV/hermes-agent`) — единственный адрес записи; `upstream`
+(`NousResearch/hermes-agent`) только для `git fetch` (push-URL заблокирован). Ветка `hermesui`
+содержит наши коммиты, `main` — чистый апстрим.
+
+```bash
+git clone https://github.com/AndoorPNV/hermes-agent.git F:/06_AI/hermes-agent   # на второй машине
+cd F:/06_AI/hermes-agent && git checkout hermesui
+python hermesui/scripts/link.py apply && hermes gateway restart
+```
+
+Не переезжает через git: `.env` (секреты) и включение desktop-плагинов в интерфейсе
+(это localStorage приложения, не `config.yaml`).
 
 ## Ловушки (проверено на переносе 2026-11-07)
 
