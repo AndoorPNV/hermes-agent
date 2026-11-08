@@ -66,27 +66,32 @@ function consumeWindowFlag() {
 }
 
 // Starfield-ish: paper-white surfaces on a cool gray field, hairlines, one dark accent.
+// Поверхности и текст берутся из токенов оболочки (они меняются при переключении темы без
+// перезапуска), с нашими светлыми значениями в роли fallback — на случай, если карта
+// отрендерится вне темы (SSR-проба, отдельное окно без переменных).
 const T = {
-  bg: '#f2f3f5',
-  panel: '#ffffff',
-  line: 'rgba(18,22,28,0.12)',
-  lineSoft: 'rgba(18,22,28,0.07)',
-  text: '#12161c',
-  muted: '#5b6470',
-  faint: '#98a1ad',
-  accent: '#12161c',
-  glow: 'rgba(18,22,28,0.10)'
+  bg: 'var(--background, #f2f3f5)',
+  panel: 'var(--card, #ffffff)',
+  line: 'var(--border, rgba(18,22,28,0.12))',
+  lineSoft: 'color-mix(in srgb, var(--foreground, #12161c) 7%, transparent)',
+  text: 'var(--foreground, #12161c)',
+  muted: 'var(--muted-foreground, #5b6470)',
+  faint: 'color-mix(in srgb, var(--foreground, #12161c) 62%, transparent)',
+  accent: 'var(--accent, #12161c)',
+  glow: 'color-mix(in srgb, var(--foreground, #12161c) 10%, transparent)'
 }
 
 // One colour per session condition — the graph doubles as a status board. `pulse` marks the
 // states where a turn is actually running, so "where is the work" is visible at a glance.
+// Цвета — из `STATUS_CSS`: там светлый набор и `:root.dark` варианты, поэтому карта следует
+// теме приложения; fallback повторяет светлый набор, чтобы проба без темы не теряла цвет.
 const S = {
-  working: { ink: '#0d6b3f', line: '#8fd8b0', tint: '#f1fbf5', dot: '#16a34a', pulse: true, label: 'работает' },
-  open: { ink: '#1d4ed8', line: '#b4c8fb', tint: '#f2f6ff', dot: '#2563eb', pulse: false, label: 'открыта' },
-  done: { ink: '#334155', line: '#b9c0c9', tint: '#f4f6f8', dot: '#475569', pulse: false, label: 'завершена' },
-  idle: { ink: '#8a5a12', line: '#ecd6ad', tint: '#fdf9f0', dot: '#c98a1f', pulse: false, label: 'простой' },
-  empty: { ink: '#98a1ad', line: 'rgba(18,22,28,0.18)', tint: '#ffffff', dot: '#ffffff', pulse: false, label: 'нет работы' },
-  temp: { ink: '#5b21b6', line: '#c4b5fd', tint: '#f8f4ff', dot: '#7c3aed', pulse: false, label: 'временная' }
+  working: { ink: 'var(--pm-working-ink, #0d6b3f)', line: 'var(--pm-working-line, #8fd8b0)', tint: 'var(--pm-working-tint, #f1fbf5)', dot: 'var(--pm-working-dot, #16a34a)', pulse: true, label: 'работает' },
+  open: { ink: 'var(--pm-open-ink, #1d4ed8)', line: 'var(--pm-open-line, #b4c8fb)', tint: 'var(--pm-open-tint, #f2f6ff)', dot: 'var(--pm-open-dot, #2563eb)', pulse: false, label: 'открыта' },
+  done: { ink: 'var(--pm-done-ink, #334155)', line: 'var(--pm-done-line, #b9c0c9)', tint: 'var(--pm-done-tint, #f4f6f8)', dot: 'var(--pm-done-dot, #475569)', pulse: false, label: 'завершена' },
+  idle: { ink: 'var(--pm-idle-ink, #8a5a12)', line: 'var(--pm-idle-line, #ecd6ad)', tint: 'var(--pm-idle-tint, #fdf9f0)', dot: 'var(--pm-idle-dot, #c98a1f)', pulse: false, label: 'простой' },
+  empty: { ink: 'var(--pm-empty-ink, #667080)', line: 'var(--pm-empty-line, rgba(18,22,28,0.18))', tint: 'var(--pm-empty-tint, #ffffff)', dot: 'var(--pm-empty-dot, #ffffff)', pulse: false, label: 'нет работы' },
+  temp: { ink: 'var(--pm-temp-ink, #5b21b6)', line: 'var(--pm-temp-line, #c4b5fd)', tint: 'var(--pm-temp-tint, #f8f4ff)', dot: 'var(--pm-temp-dot, #7c3aed)', pulse: false, label: 'временная' }
 }
 
 // Live statuses that mean a turn is in flight (`session.active_list` → LiveSessionStatus).
@@ -95,7 +100,47 @@ const LIVE_BUSY = new Set(['working', 'streaming', 'starting', 'resuming', 'wait
 const STATUS_CSS = `
 @keyframes pm-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.78); } }
 .pm-dot-busy { animation: pm-pulse 1.5s ease-in-out infinite; }
-`
+
+/* ── поведение: анимации отключаемы (этап 6) ────────────────────────────────
+   Два независимых выключателя: системная настройка «уменьшить движение» и явный
+   класс .pm-no-motion на корне карты (переключатель в ⌘K). Оба гасят анимацию
+   точек статуса; переходы цвета тоже. */
+@media (prefers-reduced-motion: reduce) {
+  .pm-dot-busy { animation: none !important; }
+  .pm-root *, .pm-root *::before, .pm-root *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+.pm-no-motion .pm-dot-busy { animation: none !important; }
+.pm-no-motion *, .pm-no-motion *::before, .pm-no-motion *::after {
+  transition-duration: 0.001ms !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* ── цвета карты: одна палитра на две темы (этап 6) ─────────────────────────
+   Раньше карта рисовала собственные светлые цвета и не замечала тёмную тему.
+   Теперь токены берутся из оболочки приложения, а состояния — из этих
+   переменных: светлый набор обычный, :root.dark — светлые подписи на тёмных
+   подложках. Переключение темы не требует перезапуска: меняется класс. */
+.pm-root {
+  --pm-working-ink: #0d6b3f; --pm-working-tint: #f1fbf5; --pm-working-line: #8fd8b0; --pm-working-dot: #16a34a;
+  --pm-open-ink:    #1d4ed8; --pm-open-tint:    #f2f6ff; --pm-open-line:    #b4c8fb; --pm-open-dot:    #2563eb;
+  --pm-done-ink:    #334155; --pm-done-tint:    #f4f6f8; --pm-done-line:    #b9c0c9; --pm-done-dot:    #475569;
+  --pm-idle-ink:    #8a5a12; --pm-idle-tint:    #fdf9f0; --pm-idle-line:    #ecd6ad; --pm-idle-dot:    #c98a1f;
+  --pm-empty-ink:   #667080; --pm-empty-tint:   #ffffff; --pm-empty-line:   rgba(18,22,28,0.18); --pm-empty-dot: #ffffff;
+  --pm-temp-ink:    #5b21b6; --pm-temp-tint:    #f8f4ff; --pm-temp-line:    #c4b5fd; --pm-temp-dot:    #7c3aed;
+}
+:root.dark .pm-root {
+  --pm-working-ink: #7ee2a8; --pm-working-tint: #10251b; --pm-working-line: #1f6b46; --pm-working-dot: #4ade80;
+  --pm-open-ink:    #a8c1ff; --pm-open-tint:    #101830; --pm-open-line:    #2a4480; --pm-open-dot:    #60a5fa;
+  --pm-done-ink:    #cbd5e1; --pm-done-tint:    #191c20; --pm-done-line:    #3a4149; --pm-done-dot:    #94a3b8;
+  --pm-idle-ink:    #f0cf8a; --pm-idle-tint:    #241d10; --pm-idle-line:    #6b5424; --pm-idle-dot:    #fbbf24;
+  --pm-empty-ink:   #9aa3ae; --pm-empty-tint:   #161618; --pm-empty-line:   rgba(255,255,255,0.22); --pm-empty-dot: #161618;
+  --pm-temp-ink:    #cbb6ff; --pm-temp-tint:    #1b152b; --pm-temp-line:    #4f3f86; --pm-temp-dot:    #a78bfa;
+}`
 
 // Ephemeral sessions are stamped per app instance: a session carrying an older boot was left
 // behind by a closed app and gets deleted on the next launch (the "closed Hermes → gone" rule).
@@ -105,6 +150,10 @@ const STATUS_CSS = `
 // sessions the other window just created. The lease is refreshed every 15 s while any window is
 // alive, and expires after 60 s — that gap is what tells "closed" apart from "second window".
 const BOOT_LEASE = 'project-map-ui:boot-lease'
+// Явный выключатель анимаций: системная настройка «уменьшить движение» гасит их через @media,
+// это второй путь для тех, у кого такой настройки нет. Хранится в localStorage.
+const MOTION_KEY = 'project-map-ui:motion'
+let toggleMotionFromPalette = () => {}
 const BOOT_TTL = 60_000
 
 function leaseBoot() {
@@ -3355,6 +3404,34 @@ function ProjectMap({ variant }) {
   const [menu, setMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
   const [scaffold, setScaffold] = useState(null)
+  const [noMotion, setNoMotion] = useState(() => {
+    try {
+      return window.localStorage.getItem(MOTION_KEY) === 'off'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    toggleMotionFromPalette = () => {
+      setNoMotion(current => {
+        const next = !current
+        try {
+          window.localStorage.setItem(MOTION_KEY, next ? 'off' : 'on')
+        } catch {
+          /* приватный режим — живём без сохранения */
+        }
+        host.notify?.({
+          kind: 'info',
+          message: next ? 'анимации карты выключены' : 'анимации карты включены'
+        })
+        return next
+      })
+    }
+    return () => {
+      toggleMotionFromPalette = () => {}
+    }
+  }, [])
   const [selected, setSelected] = useState(null)
   const [dragId, setDragId] = useState(null)
   const [dropId, setDropId] = useState(null)
@@ -3632,7 +3709,7 @@ function ProjectMap({ variant }) {
   }
 
   return jsxs('div', {
-    className: 'flex h-full min-h-0',
+    className: noMotion ? 'pm-root pm-no-motion flex h-full min-h-0' : 'pm-root flex h-full min-h-0',
     style: { background: T.bg, color: T.text },
     children: [
       jsx('style', { children: STATUS_CSS }),
@@ -4137,6 +4214,15 @@ export default {
           label: 'Карта проекта',
           keywords: ['project', 'graph', 'sessions', 'дерево', 'граф', 'сессии', 'skills', 'mcp'],
           run: () => host.navigate(ROUTE)
+        }
+      },
+      {
+        id: 'command-motion',
+        area: PALETTE_AREA,
+        data: {
+          label: 'Карта проекта: анимации вкл/выкл',
+          keywords: ['motion', 'animation', 'анимация', 'движение', 'reduce'],
+          run: () => toggleMotionFromPalette()
         }
       }
     ])

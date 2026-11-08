@@ -44,7 +44,7 @@ light_colors:
   session_label: "#0F5E4C"
   status_bar_text: "#55665F"
   status_bar_strong: "#0F6B54"
-  status_bar_dim: "#6E8A80"
+  status_bar_dim: "#587267"
   status_bar_good: "#1B7F4B"
   status_bar_warn: "#9A5B00"
   status_bar_bad: "#A8471B"
