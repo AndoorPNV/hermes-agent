@@ -2410,7 +2410,7 @@ function NodeCard({ node, point, dim, hit, state, selected, dragging, dropTarget
     width: `${NODE_W}px`,
     height: `${NODE_H}px`,
     opacity: dim ? 0.3 : dragging ? 0.5 : 1,
-    background: isProject ? 'linear-gradient(135deg,#ffffff 0%,#eceff3 100%)' : look?.tint || T.panel,
+    background: isProject ? `linear-gradient(135deg, ${T.panel} 0%, ${T.bg} 100%)` : look?.tint || T.panel,
     borderStyle: state === 'temp' ? 'dashed' : 'solid',
     borderWidth: state === 'temp' ? 1.5 : 1,
     borderColor: selected || dropTarget || hit ? T.accent : look?.line || T.line,
