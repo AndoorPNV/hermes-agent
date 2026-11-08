@@ -70,15 +70,15 @@ function consumeWindowFlag() {
 // перезапуска), с нашими светлыми значениями в роли fallback — на случай, если карта
 // отрендерится вне темы (SSR-проба, отдельное окно без переменных).
 const T = {
-  bg: 'var(--background, #f2f3f5)',
-  panel: 'var(--card, #ffffff)',
-  line: 'var(--border, rgba(18,22,28,0.12))',
-  lineSoft: 'color-mix(in srgb, var(--foreground, #12161c) 7%, transparent)',
-  text: 'var(--foreground, #12161c)',
-  muted: 'var(--muted-foreground, #5b6470)',
-  faint: 'color-mix(in srgb, var(--foreground, #12161c) 62%, transparent)',
-  accent: 'var(--accent, #12161c)',
-  glow: 'color-mix(in srgb, var(--foreground, #12161c) 10%, transparent)'
+  bg: 'var(--pm-page)',
+  panel: 'var(--pm-surface)',
+  line: 'var(--pm-stroke)',
+  lineSoft: 'var(--pm-stroke-soft)',
+  text: 'var(--pm-ink)',
+  muted: 'var(--pm-ink-muted)',
+  faint: 'var(--pm-ink-faint)',
+  accent: 'var(--pm-accent)',
+  glow: 'var(--pm-stroke-soft)'
 }
 
 // One colour per session condition — the graph doubles as a status board. `pulse` marks the
@@ -126,6 +126,18 @@ const STATUS_CSS = `
    переменных: светлый набор обычный, :root.dark — светлые подписи на тёмных
    подложках. Переключение темы не требует перезапуска: меняется класс. */
 .pm-root {
+  /* Поверхности оболочки. Имена — настоящие токены темы (--dt-*); в теме НЕ объявлены
+     --card/--border, и var(--card, #fff) молча падал в белый: карта оставалась светлой
+     в тёмной теме. Один слой переменных, чтобы правка была в одном месте. */
+  --pm-page: var(--dt-background, #f2f3f5);
+  --pm-surface: var(--dt-card, #ffffff);
+  --pm-ink: var(--dt-card-foreground, #12161c);
+  --pm-ink-muted: var(--dt-muted-foreground, #5b6470);
+  --pm-stroke: var(--dt-border, rgba(18,22,28,0.12));
+  --pm-accent: var(--dt-accent, #12161c);
+  --pm-ink-faint: color-mix(in srgb, var(--pm-ink-muted) 80%, transparent);
+  --pm-stroke-soft: color-mix(in srgb, var(--pm-ink) 8%, transparent);
+
   --pm-working-ink: #0d6b3f; --pm-working-tint: #f1fbf5; --pm-working-line: #8fd8b0; --pm-working-dot: #16a34a;
   --pm-open-ink:    #1d4ed8; --pm-open-tint:    #f2f6ff; --pm-open-line:    #b4c8fb; --pm-open-dot:    #2563eb;
   --pm-done-ink:    #334155; --pm-done-tint:    #f4f6f8; --pm-done-line:    #b9c0c9; --pm-done-dot:    #475569;
@@ -153,6 +165,7 @@ const BOOT_LEASE = 'project-map-ui:boot-lease'
 // Явный выключатель анимаций: системная настройка «уменьшить движение» гасит их через @media,
 // это второй путь для тех, у кого такой настройки нет. Хранится в localStorage.
 const MOTION_KEY = 'project-map-ui:motion'
+const RAIL_WIDTH_KEY = 'project-map-ui:rail-width'
 let toggleMotionFromPalette = () => {}
 const BOOT_TTL = 60_000
 
@@ -2786,22 +2799,57 @@ function ProjectStats({ rows, project, policy, audit }) {
   })
 }
 
-function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, query, onQuery }) {
+function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, query, onQuery,
+                       width = 268, onResize, onHide }) {
   const needle = query.trim().toLowerCase()
   const shown = needle
     ? projects.filter(project => `${project.name} ${project.description || ''}`.toLowerCase().includes(needle))
     : projects
 
+  // Ручка ширины: тянется мышью, двойной клик возвращает 268. Ширина не может уйти в 0 —
+  // карточки с описанием ниже 240px перестают читаться.
+  const startResize = event => {
+    event.preventDefault()
+    const startX = event.clientX
+    const startWidth = width
+    const move = moveEvent => {
+      const next = Math.min(460, Math.max(240, startWidth + (moveEvent.clientX - startX)))
+      onResize?.(next)
+    }
+    const stop = () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', stop)
+      document.body.style.cursor = ''
+    }
+    document.body.style.cursor = 'col-resize'
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', stop)
+  }
+
   return jsxs('div', {
-    className: 'flex w-[268px] shrink-0 flex-col gap-2 p-3',
-    style: { borderRight: `1px solid ${T.line}`, background: T.bg },
+    className: 'relative flex shrink-0 flex-col gap-2 p-3',
+    style: { width, borderRight: `1px solid ${T.line}`, background: T.bg },
     children: [
-      jsx('button', {
-        type: 'button',
-        onClick: onNew,
-        className: 'flex items-center justify-center gap-2 rounded-xl py-2 text-[11px] uppercase tracking-[0.16em] transition-colors',
-        style: { background: T.accent, color: '#fff' },
-        children: [jsx(Codicon, { name: 'add', size: '0.75rem' }), 'новый проект']
+      jsxs('div', {
+        className: 'flex items-center gap-1',
+        children: [
+          jsx('button', {
+            type: 'button',
+            onClick: onNew,
+            className: 'flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-[11px] uppercase tracking-[0.16em] transition-colors',
+            style: { background: T.accent, color: '#fff' },
+            children: [jsx(Codicon, { name: 'add', size: '0.75rem' }), 'новый проект']
+          }),
+          jsx('button', {
+            type: 'button',
+            onClick: onHide,
+            title: 'скрыть панель проектов (вернуть — кнопкой «панель» в шапке)',
+            'aria-label': 'скрыть панель проектов',
+            className: 'rounded-lg px-1.5 py-2',
+            style: { border: `1px solid ${T.line}`, color: T.muted, background: T.panel },
+            children: jsx(Codicon, { name: 'chevron-left', size: '0.7rem' })
+          })
+        ]
       }),
       jsxs('div', {
         className: 'flex items-center gap-2 rounded-full px-2.5 py-1',
@@ -2858,6 +2906,22 @@ function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, q
               )
             )
           : jsx('div', { style: { fontSize: 11.5, color: T.faint, padding: 8 }, children: needle ? 'ничего не найдено' : 'проектов пока нет' })
+      }),
+      // Ручка ширины — по правому краю панели, поверх содержимого.
+      jsx('div', {
+        onMouseDown: startResize,
+        onDoubleClick: () => onResize?.(268),
+        title: 'потянуть — ширина панели · двойной клик — сброс',
+        'aria-label': 'ширина панели проектов',
+        style: {
+          position: 'absolute',
+          top: 0,
+          right: -3,
+          width: 6,
+          height: '100%',
+          cursor: 'col-resize',
+          zIndex: 2
+        }
       })
     ]
   })
@@ -3404,6 +3468,25 @@ function ProjectMap({ variant }) {
   const [menu, setMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
   const [scaffold, setScaffold] = useState(null)
+  // Ширина и видимость панели проектов: раньше 268px были зашиты, а список рос вниз — «уменьшить
+  // нельзя». Теперь тянется ручкой (240–460) и прячется; выбор переживает перезапуск.
+  const [railWidth, setRailWidth] = useState(() => {
+    try {
+      const saved = Number(window.localStorage.getItem(RAIL_WIDTH_KEY))
+      return saved >= 240 && saved <= 460 ? saved : 268
+    } catch {
+      return 268
+    }
+  })
+  const [railHidden, setRailHidden] = useState(false)
+  const resizeRail = next => {
+    setRailWidth(next)
+    try {
+      window.localStorage.setItem(RAIL_WIDTH_KEY, String(next))
+    } catch {
+      /* приватный режим */
+    }
+  }
   const [noMotion, setNoMotion] = useState(() => {
     try {
       return window.localStorage.getItem(MOTION_KEY) === 'off'
@@ -3713,11 +3796,16 @@ function ProjectMap({ variant }) {
     style: { background: T.bg, color: T.text },
     children: [
       jsx('style', { children: STATUS_CSS }),
-      jsx(ProjectRail, {
+      railHidden
+        ? null
+        : jsx(ProjectRail, {
         projects,
         rows: backend.data?.sessions || [],
         policy: backend.data?.policy,
         audit: backend.data?.audit,
+        width: railWidth,
+        onResize: resizeRail,
+        onHide: () => setRailHidden(true),
         activeId,
         onPick: id => {
           setPicked(id)
@@ -3782,6 +3870,7 @@ function ProjectMap({ variant }) {
               ...[
                 ['screen-full', 'вписать', fit],
                 ['refresh', 'обновить', () => { void tree.refetch(); void backend.refetch() }],
+                ['chevron-right', railHidden ? 'показать панель проектов' : 'скрыть панель проектов', () => setRailHidden(value => !value)],
                 ['layout', 'скрыть панели', focusMode],
                 ['link', 'в отдельном окне', openSeparateWindow],
                 ['settings-gear', 'политика проекта', () => project && setDialog({ scope: 'project', id: project.id, title: project.name })]
