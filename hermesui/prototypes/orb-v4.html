@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ядро v4 — рой частиц</title>
+<style>
+  html, body { margin: 0; background: #04070e; overflow: hidden; }
+  canvas { display: block; cursor: crosshair; }
+</style>
+</head>
+<body>
+<canvas id="c" width="440" height="420"></canvas>
+<script>
+(() => {
+  const cv = document.getElementById('c')
+  const ctx = cv.getContext('2d')
+  const W = cv.width, H = cv.height
+  const CX = W / 2, CY = H / 2 - 2, R = 150
+
+  const N_SHELL = 4200, N_INNER = 900
+  const N = N_SHELL + N_INNER
+  const PX = new Float32Array(N), PY = new Float32Array(N), PZ = new Float32Array(N)
+  const CR = new Float32Array(N), CG = new Float32Array(N), CB = new Float32Array(N)
+  const SZ = new Float32Array(N)
+
+  function hash(i) {
+    let n = (i * 2654435761) | 0
+    n = (n ^ (n >> 15)) * 2246822519 | 0
+    return ((n ^ (n >> 13)) >>> 0) / 4294967295
+  }
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v
+  const lerp3 = (a, b, t) => [a[0] + (b[0]-a[0])*t, a[1] + (b[1]-a[1])*t, a[2] + (b[2]-a[2])*t]
+
+  const CYAN = [52, 232, 246], MAG = [255, 52, 180], WHITE = [232, 255, 255], DEEP = [18, 34, 128]
+
+  const GA = Math.PI * (3 - Math.sqrt(5))
+  for (let i = 0; i < N; i++) {
+    let x, y, z
+    if (i < N_SHELL) {
+      y = 1 - 2 * (i + 0.5) / N_SHELL
+      const rad = Math.sqrt(Math.max(0, 1 - y * y))
+      const th = GA * i
+      const rr = 0.96 + 0.04 * hash(i * 3 + 1)
+      x = Math.cos(th) * rad * rr
+      z = Math.sin(th) * rad * rr
+    } else {
+      const j = i - N_SHELL
+      y = 1 - 2 * (j + 0.5) / N_INNER
+      const rad = Math.sqrt(Math.max(0, 1 - y * y))
+      const th = GA * j * 1.7
+      const k = 0.25 + 0.70 * Math.sqrt(hash(j * 7 + 5))
+      x = Math.cos(th) * rad * k
+      z = Math.sin(th) * rad * k
+      y *= k
+    }
+    x += (hash(i * 17 + 2) - 0.5) * 0.055
+    y += (hash(i * 19 + 4) - 0.5) * 0.055
+    z += (hash(i * 23 + 6) - 0.5) * 0.055
+    PX[i] = x; PY[i] = y; PZ[i] = z
+
+    // косые полосы-завихрения по сфере
+    const lat = Math.asin(Math.max(-1, Math.min(1, y)))
+    const lon = Math.atan2(z, x)
+    const v = Math.sin(7.6 * lat + 1.5 * lon + 0.9 * Math.sin(3.1 * lon + 0.4))
+              + 0.35 * Math.sin(3.2 * lon - 2.2 * lat + 0.9)
+    const belt = clamp01(0.5 + 0.5 * Math.tanh(v * 2.2))
+
+    // резкий переход: цвета держатся своих зон, а не смешиваются в фиолетовое
+    let col = belt < 0.5
+      ? lerp3(DEEP, CYAN, clamp01((0.5 - belt) * 4.5))
+      : lerp3(CYAN, MAG, clamp01((belt - 0.5) * 4.5))
+    const seam = Math.exp(-Math.pow((belt - 0.5) / 0.07, 2))
+    col = lerp3(col, WHITE, seam * 0.75)
+    CR[i] = col[0]; CG[i] = col[1]; CB[i] = col[2]
+
+    SZ[i] = i < N_SHELL ? 0.9 + 1.6 * hash(i * 11 + 3) : 0.7 + 1.3 * hash(i * 13 + 9)
+  }
+
+  // мягкий спрайт для ореолов
+  const SPR = 28
+  const sprite = document.createElement('canvas')
+  sprite.width = sprite.height = SPR
+  {
+    const s = sprite.getContext('2d')
+    const g = s.createRadialGradient(SPR/2, SPR/2, 0, SPR/2, SPR/2, SPR/2)
+    g.addColorStop(0, 'rgba(255,255,255,1)')
+    g.addColorStop(0.30, 'rgba(255,255,255,0.42)')
+    g.addColorStop(0.65, 'rgba(255,255,255,0.10)')
+    g.addColorStop(1, 'rgba(255,255,255,0)')
+    s.fillStyle = g
+    s.beginPath(); s.arc(SPR/2, SPR/2, SPR/2, 0, Math.PI*2); s.fill()
+  }
+
+  // кэш цветовых строк: частица × 8 уровней яркости
+  const LV = 8
+  const styleCache = new Array(N * LV)
+  function styleFor(i, lvl, energy) {
+    const key = i * LV + lvl
+    const cached = styleCache[key]
+    if (cached) return cached
+    const k = (0.30 + 0.70 * (lvl / (LV - 1)))
+    const s = `rgba(${Math.round(CR[i]*k)},${Math.round(CG[i]*k)},${Math.round(CB[i]*k)},0.92)`
+    styleCache[key] = s
+    return s
+  }
+
+  const t0 = performance.now()
+  let pulse = 0
+  cv.addEventListener('pointerdown', () => { pulse = 1 })
+
+  const SXp = new Float32Array(N), SYp = new Float32Array(N), SZp = new Float32Array(N)
+  const order = new Uint16Array(N)
+  const depthKey = new Float32Array(N)
+
+  function frame(now) {
+    const t = (now - t0) / 1000
+    pulse *= 0.93
+    const energy = 0.86 + 0.10 * Math.sin(t * 1.7) + pulse * 0.4
+    const ang = t * 0.26
+
+    ctx.clearRect(0, 0, W, H)
+    const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, W * 0.85)
+    bg.addColorStop(0, '#060f1d'); bg.addColorStop(1, '#04070e')
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
+
+    const ca = Math.cos(ang), sa = Math.sin(ang)
+    const tiltX = -0.24 + Math.sin(t * 0.21) * 0.10
+    const cb = Math.cos(tiltX), sb = Math.sin(tiltX)
+    const FOC = 3.4
+
+    for (let i = 0; i < N; i++) {
+      const x = PX[i], y = PY[i], z = PZ[i]
+      const swirl = 0.42 * Math.sin(y * 3.4 + t * 0.6) * (1 - Math.abs(y) * 0.6)
+      const cs = Math.cos(swirl), ss = Math.sin(swirl)
+      const x1 = x * cs - z * ss, z1 = x * ss + z * cs
+      const x2 = x1 * ca + z1 * sa, z2 = -x1 * sa + z1 * ca
+      const y3 = y * cb - z2 * sb, z3 = y * sb + z2 * cb
+      const s = FOC / (FOC - z3)
+      SXp[i] = CX + x2 * R * s
+      SYp[i] = CY + y3 * R * s
+      SZp[i] = z3
+      depthKey[i] = z3
+      order[i] = i
+    }
+
+    // сортировка по глубине (дальние первыми) — частицы рисуем с перекрытием
+    const idx = Array.from(order).sort((a, b) => depthKey[a] - depthKey[b])
+
+    // 1) дальняя дымка — объём
+    ctx.save()
+    ctx.globalCompositeOperation = 'lighter'
+    for (let i = 0; i < N; i += 2) {
+      if (SZp[i] > -0.1) continue
+      const d = 1 + SZp[i]
+      const sz = SZ[i] * (3.6 - 1.6 * d) * 3.0
+      ctx.globalAlpha = 0.024 + 0.05 * d
+      ctx.drawImage(sprite, SXp[i] - sz/2, SYp[i] - sz/2, sz, sz)
+    }
+    ctx.globalAlpha = 1
+    ctx.restore()
+
+    // 2) сами частицы: обычное наложение, цвет не выцветает в белый
+    ctx.save()
+    for (const i of idx) {
+      const z = SZp[i]
+      // видна только ближняя поверхность роя: иначе частицы дальней стороны
+      // просвечивают сквозь передние и полосы превращаются в кашу
+      if (z < 0.18) continue
+      const d = clamp01((z - 0.18) / 0.97)                      // 0..1 глубина
+      const lvl = Math.min(LV - 1, Math.max(0, Math.round(d * (LV - 1))))
+      const sz = SZ[i] * (0.55 + 1.05 * d)
+      ctx.fillStyle = styleFor(i, lvl, energy)
+      ctx.fillRect(SXp[i] - sz/2, SYp[i] - sz/2, sz, sz)
+    }
+    ctx.restore()
+
+    // 3) ближние частицы — мягкий ореол поверх
+    ctx.save()
+    ctx.globalCompositeOperation = 'lighter'
+    for (let i = 0; i < N; i += 6) {
+      const z = SZp[i]
+      if (z < 0.5) continue
+      const d = (z - 0.5) / 0.5
+      const sz = SZ[i] * (2.6 + 4.0 * d)
+      ctx.globalAlpha = Math.min(1, (0.045 + 0.10 * d) * energy)
+      ctx.drawImage(sprite, SXp[i] - sz/2, SYp[i] - sz/2, sz, sz)
+    }
+    ctx.globalAlpha = 1
+    ctx.restore()
+
+    // 4) ядро
+    ctx.save()
+    ctx.globalCompositeOperation = 'lighter'
+    const cr = R * (0.26 + 0.03 * Math.sin(t * 2.3) + pulse * 0.14)
+    const cg2 = ctx.createRadialGradient(CX, CY, 0, CX, CY, cr)
+    cg2.addColorStop(0, `rgba(240,254,255,${0.30 * energy})`)
+    cg2.addColorStop(0.4, `rgba(160,240,255,${0.11 * energy})`)
+    cg2.addColorStop(1, 'rgba(0,140,220,0)')
+    ctx.fillStyle = cg2
+    ctx.beginPath(); ctx.arc(CX, CY, cr, 0, Math.PI*2); ctx.fill()
+
+    // 5) контровой свет: слева магента, справа циан
+    const rimL = ctx.createRadialGradient(CX - R*0.99, CY, 0, CX - R*0.99, CY, R * 0.62)
+    rimL.addColorStop(0, `rgba(255,60,190,${0.22 * energy})`)
+    rimL.addColorStop(1, 'rgba(255,60,190,0)')
+    ctx.fillStyle = rimL; ctx.beginPath(); ctx.arc(CX - R*0.99, CY, R*0.62, 0, Math.PI*2); ctx.fill()
+
+    const rimR = ctx.createRadialGradient(CX + R*0.99, CY, 0, CX + R*0.99, CY, R * 0.62)
+    rimR.addColorStop(0, `rgba(180,250,255,${0.26 * energy})`)
+    rimR.addColorStop(1, 'rgba(180,250,255,0)')
+    ctx.fillStyle = rimR; ctx.beginPath(); ctx.arc(CX + R*0.99, CY, R*0.62, 0, Math.PI*2); ctx.fill()
+    ctx.restore()
+
+    requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame)
+})();
+</script>
+</body>
+</html>
