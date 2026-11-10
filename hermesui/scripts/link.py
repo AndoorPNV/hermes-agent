@@ -41,6 +41,7 @@ LINKS: list[tuple[str, Path, Path]] = [
     ("desktop-plugin", REPO / "desktop-plugins" / "ui-workspace",  HERMES_HOME / "desktop-plugins" / "ui-workspace"),
     ("plugin",        REPO / "plugins" / "save-loop",        HERMES_HOME / "plugins" / "save-loop"),
     ("desktop-plugin", REPO / "desktop-plugins" / "save-loop",     HERMES_HOME / "desktop-plugins" / "save-loop"),
+    ("desktop-plugin", REPO / "desktop-plugins" / "ui-core",       HERMES_HOME / "desktop-plugins" / "ui-core"),
 ]
 PLUGIN_IDS: list[str] = [src.name for kind, src, _ in LINKS if kind == "plugin"]
 
