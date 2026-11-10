@@ -149,11 +149,16 @@ class PolicyBody(BaseModel):
 
 class ScaffoldBody(BaseModel):
     project_id: str = Field(description="id проекта из projects.db")
-    profile: str = Field(default="standard", description="minimal | standard | full")
+    # Имя `scaffold_profile`, а не `profile`: `profile` — служебный параметр гейтвея (выбор профиля
+    # Hermes), и запрос с ним уходил в профиль `standard`, которого не существует.
+    scaffold_profile: str = Field(default="standard", description="профиль каркаса: minimal | standard | full")
+    profile: str = Field(default="", description="старое имя поля (совместимость)")
     storage: str = Field(default="sqlite", description="sqlite | hermesui | files | none")
     stack: str = ""
     confirm: bool = Field(default=False, description="запись в файловую систему требует явного да")
     reason: str = Field(default="", description="для отказа: почему структуру не создаём")
+    adopt: bool = Field(default=False,
+                        description="разрешить работу в непустом каталоге с чужой системой")
 
 
 def _scaffold():
@@ -508,14 +513,21 @@ def set_policy(body: PolicyBody) -> dict[str, Any]:
 
 
 @router.get("/scaffold/preview")
-def scaffold_preview(project_id: str, profile: str = "standard", storage: str = "sqlite") -> dict[str, Any]:
-    """Что будет создано — без записи. Кнопка в карточке сначала показывает план."""
+def scaffold_preview(project_id: str, scaffold_profile: str = "standard", storage: str = "sqlite",
+                     profile: str = "") -> dict[str, Any]:
+    """Что будет создано — без записи. Кнопка в карточке сначала показывает план.
+
+    Имя параметра — `scaffold_profile`, не `profile`: `profile` в гейтвее служебный (выбор профиля
+    Hermes), и `?profile=standard` роутился в профиль `standard`, которого нет — 400 «profile
+    'standard' does not exist». Старое имя принимаем, чтобы не ломать сохранённые ссылки.
+    """
+    choice = scaffold_profile or profile or "standard"
     path = _project_path(project_id)
     module = _scaffold()
     try:
         return {"ok": True, "project": path, **module.prepare(
             Path(path), path.split("\\")[-1] or path, "",
-            profile=profile, storage=storage, dry_run=True)}
+            profile=choice, storage=storage, dry_run=True)}
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail=str(exc)[:300]) from exc
 
@@ -526,9 +538,11 @@ def scaffold_apply(body: ScaffoldBody) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="нужен confirm: true — подготовка пишет файлы проекта")
     path = _project_path(body.project_id)
     module = _scaffold()
+    choice = body.scaffold_profile or body.profile or "standard"
     try:
         result = module.prepare(Path(path), path.rstrip("\\/").split("\\")[-1] or path,
-                                "", profile=body.profile, storage=body.storage, stack=body.stack)
+                                "", profile=choice, storage=body.storage, stack=body.stack,
+                                adopt=body.adopt)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail=str(exc)[:300]) from exc
     return {"ok": True, "project_id": body.project_id, **result}

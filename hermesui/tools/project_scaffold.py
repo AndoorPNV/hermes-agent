@@ -278,8 +278,13 @@ def _fix_status_line(text: str) -> str:
     )
 
 
-def render(project_root: Path) -> dict[str, Any]:
-    """Чистка заглушек в уже сгенерированных файлах; пустые документы удаляем.
+def render(project_root: Path, owned: Optional[set[Path]] = None) -> dict[str, Any]:
+    """Чистка заглушек в файлах, которые создал этот прогон; пустые документы удаляем.
+
+    `owned` — граница ответственности. Без неё функция чистит всё дерево, и тогда любой
+    посторонний markdown (заметки vault, архив, чужой репозиторий) теряет строки: ровно это
+    случилось 2026-11-10, когда каркас запустили на каталоге с vault внутри. `None` означает
+    «дерево целиком» и допустим только для CLI на заведомо пустом каталоге.
 
     Два прохода: удаление пустого документа делает ссылки на него битыми, поэтому после
     удаления ссылки чистятся заново — иначе «нет заглушек, но есть битые ссылки».
@@ -289,7 +294,9 @@ def render(project_root: Path) -> dict[str, Any]:
     for _ in range(2):
         round_removed: list[dict[str, str]] = []
         for path in sorted(project_root.rglob("*.md")):
-            if any(part in (".git", "node_modules") for part in path.parts):
+            if owned is not None and path not in owned:
+                continue
+            if any(part in (".git", "node_modules", ".obsidian") for part in path.parts):
                 continue
             text = path.read_text(encoding="utf-8", errors="replace")
             fresh = _drop_dead_links(text, path.parent)
@@ -357,11 +364,58 @@ def check(project_root: Path) -> dict[str, Any]:
             "findings": findings, "manifest": info}
 
 
+# ── границы ответственности ─────────────────────────────────────────────────
+
+# Каталоги-признаки чужой системы: если они есть в корне, каркас по умолчанию отказывается.
+FOREIGN_DIRS = ("Obsidian", ".obsidian", ".git", "node_modules", ".venv", "src", "apps")
+FOREIGN_MD_LIMIT = 60
+
+
+def _refuse_foreign(root: Path, adopt: bool) -> None:
+    """Каталог с чужой системой не трогаем без явного adopt=True.
+
+    Проверка дешёвая и нарочно грубая: лучше отказать живому проекту с оговоркой, чем
+    вычистить строки из заметок или архива, которые никто не просил трогать.
+    """
+    if adopt:
+        return
+    try:
+        entries = {p.name for p in root.iterdir()}
+    except OSError:
+        return
+    marks = [name for name in entries
+             if name in FOREIGN_DIRS or name.startswith("_archive")]
+    marks += [p.name for p in root.iterdir() if p.is_dir() and p.name == ".obsidian"]
+    if marks:
+        raise ValueError(
+            "каталог не пустой и содержит чужую систему (" + ", ".join(sorted(set(marks))[:4]) +
+            "). Каркас не запускаю: чистка документов задела бы посторонние файлы. "
+            "Если это правда целевой проект — повторите с adopt=True.")
+    md = [p for p in root.rglob("*.md") if ".git" not in p.parts]
+    if len(md) > FOREIGN_MD_LIMIT:
+        raise ValueError(
+            f"в каталоге уже {len(md)} markdown-документов — похоже, проект живой. "
+            "Каркас пишет шаблоны поверх и чистит их; если уверены — adopt=True.")
+
+
+def _written_paths(root: Path, stdout: str) -> set[Path]:
+    """Файлы, которых касался этот прогон: скрипт печатает `[write] …` / `[skip] …`."""
+    owned: set[Path] = set()
+    for line in stdout.splitlines():
+        line = line.strip()
+        for mark in ("[write]", "[skip]"):
+            if line.startswith(mark):
+                rel = line[len(mark):].strip().replace("\\", "/")
+                owned.add((root / rel).resolve())
+                break
+    return owned
+
+
 # ── команды ─────────────────────────────────────────────────────────────────
 
 def prepare(project_root: Path, name: str, desc: str, *, profile: str = "standard",
             storage: str = "sqlite", stack: str = "", vault: Optional[str] = None,
-            dry_run: bool = False) -> dict[str, Any]:
+            dry_run: bool = False, adopt: bool = False) -> dict[str, Any]:
     root = Path(project_root)
     if storage not in STORAGES:
         raise ValueError(f"storage: одно из {', '.join(STORAGES)}")
@@ -372,10 +426,13 @@ def prepare(project_root: Path, name: str, desc: str, *, profile: str = "standar
                 "storage_note": STORAGES[storage], "already_not_empty": existed,
                 "would": "скрипт скилла → чистка заглушек → проверка"}
 
+    if existed:
+        _refuse_foreign(root, adopt)
     root.mkdir(parents=True, exist_ok=True)
     before = {p for p in root.rglob("*")} if existed else set()
     run = scaffold(root, name, desc, profile, stack=stack, vault=vault)
-    cleaned = render(root)
+    owned = _written_paths(root, run.get("stdout", ""))
+    cleaned = render(root, owned=owned or None)
     report = check(root)
     created = sorted(str(p.relative_to(root)) for p in root.rglob("*")
                      if p.is_file() and p not in before)

@@ -2751,7 +2751,7 @@ function ScaffoldDialog({ project, onClose, onDone }) {
 
   useEffect(() => {
     let alive = true
-    apiGet(`/scaffold/preview?project_id=${encodeURIComponent(project.id)}&profile=${profile}&storage=${storage}`)
+    apiGet(`/scaffold/preview?project_id=${encodeURIComponent(project.id)}&scaffold_profile=${profile}&storage=${storage}`)
       .then(result => {
         if (!alive) return
         setPlan(result || null)
@@ -2766,7 +2766,7 @@ function ScaffoldDialog({ project, onClose, onDone }) {
     setBusy('create')
     setError('')
     try {
-      const result = await apiPost('/scaffold', { project_id: project.id, profile, storage, confirm: true })
+      const result = await apiPost('/scaffold', { project_id: project.id, scaffold_profile: profile, storage, confirm: true })
       const removed = (result.removed || []).length
       host.notify?.({
         kind: result.check?.ok ? 'info' : 'warning',
@@ -3333,7 +3333,7 @@ function ProjectWizard({ backend, onClose, onDone }) {
       try {
         scaffoldReport = await apiPost('/scaffold', {
           project_id: id,
-          profile: 'standard',
+          scaffold_profile: 'standard',
           storage: 'sqlite',
           confirm: true
         })
