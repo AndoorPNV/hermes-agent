@@ -1,0 +1,30 @@
+id: session-locks
+type: plugin
+version: 0.1.0
+description: "Владение файлами между сессиями: пока одна сессия правит файл, другая получает понятный отказ с командой --steal, а не тихую перезапись. pre_tool_call проверяет живую заявку, post_tool_call ставит заявку и продлевает heartbeat. Заявки — hermesui.db:session_claims, конфликты — audit_log result=conflict"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+capabilities:
+  - tools.override
+
+artifacts:
+  - kind: python
+    src: "@repo/plugins/session-locks"
+    dst: plugins/session-locks/
+
+config:
+  plugins.enabled: ["session-locks"]
+
+hooks:
+  - pre_tool_call
+  - post_tool_call
+
+settings:
+  ttl: "45 минут без heartbeat — заявка считается брошенной"
+  cli: "python tools/session_locks.py --list | --who PATH | --claim PATH --session ID | --steal PATH --session ID | --release [PATH] --session ID"
+  grant: "нужна выдача tools.override: hermes plugins enable session-locks --allow-tool-override + record_consent (как у guards)"

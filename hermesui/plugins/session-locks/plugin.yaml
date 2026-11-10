@@ -1,0 +1,10 @@
+name: session-locks
+version: 0.1.0
+description: "Владение файлами между сессиями: чужая живая заявка превращает запись в понятный отказ с командой --steal, а не в тихую перезапись. pre_tool_call проверяет заявку, post_tool_call продлевает heartbeat и ставит заявку после записи. Конфликты — в audit_log с result=conflict"
+author: "mrkee, СЭМ (SAM)"
+api: plugin_api.py
+capabilities:
+  - tools.override
+provides_hooks:
+  - pre_tool_call
+  - post_tool_call

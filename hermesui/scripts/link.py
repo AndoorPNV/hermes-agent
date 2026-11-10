@@ -36,6 +36,7 @@ LINKS: list[tuple[str, Path, Path]] = [
     ("plugin",        REPO / "plugins" / "ui-dispatcher",    HERMES_HOME / "plugins" / "ui-dispatcher"),
     ("plugin",        REPO / "plugins" / "ui-workspace",     HERMES_HOME / "plugins" / "ui-workspace"),
     ("plugin",        REPO / "plugins" / "guards",           HERMES_HOME / "plugins" / "guards"),
+    ("plugin",        REPO / "plugins" / "session-locks",    HERMES_HOME / "plugins" / "session-locks"),
     ("desktop-plugin", REPO / "desktop-plugins" / "project-map",   HERMES_HOME / "desktop-plugins" / "project-map"),
     ("desktop-plugin", REPO / "desktop-plugins" / "ui-dispatcher", HERMES_HOME / "desktop-plugins" / "ui-dispatcher"),
     ("desktop-plugin", REPO / "desktop-plugins" / "ui-workspace",  HERMES_HOME / "desktop-plugins" / "ui-workspace"),

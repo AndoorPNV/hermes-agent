@@ -113,6 +113,16 @@ def open_tasks(home: Path, limit: int = 5) -> list[dict[str, Any]]:
         conn.close()
 
 
+def live_claims(home: Path) -> list[dict[str, Any]]:
+    """Живые заявки на файлы: кто с кем может столкнуться прямо сейчас."""
+    try:
+        import session_locks  # noqa: PLC0415
+
+        return [row for row in session_locks.live(home) if row.get("alive")]
+    except Exception:  # noqa: BLE001 — нет плагина/таблицы — просто нет блока
+        return []
+
+
 def recent_notes(vault: Path, limit: int = 3) -> list[dict[str, Any]]:
     folder = vault / "sessions"
     if not folder.is_dir():
@@ -140,6 +150,7 @@ def build(home: Path, vault: Path) -> dict[str, Any]:
     counts = counters(home)
     tasks = open_tasks(home)
     notes = recent_notes(vault)
+    claims = live_claims(home)
     commit = layer_commit()
 
     lines: list[str] = [
@@ -179,6 +190,15 @@ def build(home: Path, vault: Path) -> dict[str, Any]:
         for row in tasks:
             lines.append(f"- {row['title']} ({row['status']})")
         lines.append("")
+
+    if claims:
+        lines += ["## Держат файлы (параллельные сессии)", ""]
+        for row in claims:
+            name = Path(row["path"]).name
+            lines.append(f"- `{name}` — {str(row['session_id'])[:12]} · {row['minutes_ago']} мин"
+                         + (f" · {row['note']}" if row.get("note") else ""))
+        lines += ["", "> Конфликт — не ошибка: чужая живая заявка даёт отказ с командой `--steal`,",
+                  "> `python tools/session_locks.py --list`.", ""]
 
     if notes:
         lines += ["## Свежие заметки сессий", ""]
