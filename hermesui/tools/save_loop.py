@@ -297,7 +297,7 @@ def write_atomic(path: Path, text: str) -> None:
 # ── команды ─────────────────────────────────────────────────────────────────
 
 def save(home: Path, vault: Path, *, session_id: str = "", title: str = "",
-         dry_run: bool = False) -> dict[str, Any]:
+         dry_run: bool = False, with_state: bool = True) -> dict[str, Any]:
     session = pick_session(home, session_id)
     if not session:
         raise RuntimeError("нет сессии для сохранения: не найдена ни в аргументе, ни в env, ни в state.db")
@@ -352,7 +352,17 @@ def save(home: Path, vault: Path, *, session_id: str = "", title: str = "",
         db_mod.audit(conn, "agent", "session.save",
                      detail={"session_id": session["id"], "note": str(path), "hash": note["hash"]})
         conn.commit()
-        return {**note, "indexed": indexed, "bytes": path.stat().st_size}
+        result = {**note, "indexed": indexed, "bytes": path.stat().st_size}
+        if with_state:
+            # STATE.md — короткая «где мы»: обновляется по кнопке/CLI, а не из автосейва
+            try:
+                import state_note  # noqa: PLC0415
+
+                state = state_note.write(home, vault)
+                result["state_md"] = {"path": state["path"], "changed": state["changed"]}
+            except Exception as exc:  # noqa: BLE001 — дайджест не должен ломать сохранение
+                result["state_md"] = {"error": str(exc)[:200]}
+        return result
     except Exception as exc:  # noqa: BLE001
         conn.execute("UPDATE save_runs SET status = 'failed', finished_at = datetime('now'),"
                      " error = ? WHERE id = ?", (str(exc)[:400], started))
@@ -543,7 +553,7 @@ def recent(home: Path, vault: Path, *, minutes: int = 60, min_messages: int = 10
                 saved.append({"session_id": session_id, "path": "", "title": note["title"],
                               "hash": note["hash"], "dry_run": True})
                 continue
-            info = save(home, vault, session_id=session_id)
+            info = save(home, vault, session_id=session_id, with_state=False)
             saved.append({"session_id": session_id, "path": info["path"],
                           "title": info["title"], "hash": info["hash"],
                           "sections": info["sections"]})
@@ -574,6 +584,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--kind", default="project", choices=("project", "any"),
                         help="какие сессии брать (temp не сохраняется никогда)")
     parser.add_argument("--limit", type=int, default=20, help="сколько сессий проверять за прогон")
+    parser.add_argument("--no-state", action="store_true",
+                        help="не обновлять STATE.md (по умолчанию обновляется)")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -596,7 +608,8 @@ def main(argv: Optional[list[str]] = None) -> int:
                     print(f"  ✗ {item['session_id'][:20]}: {item['error']}")
             return 0
         if args.save:
-            info = save(home, vault, session_id=args.session, title=args.title, dry_run=args.dry_run)
+            info = save(home, vault, session_id=args.session, title=args.title,
+                        dry_run=args.dry_run, with_state=not args.no_state)
             if args.json:
                 print(json.dumps(info, ensure_ascii=False, indent=1, default=str))
             else:

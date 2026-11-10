@@ -5,13 +5,15 @@
  *   palette    — ⌘K: «сохранить», «проверить», «что прочитает новая сессия»;
  *   keybinds   — ⌘⇧S по умолчанию, переназначается в панели горячих клавиш;
  *   chat.empty — на пустом транскрипте видно, когда сохранялись последний раз и сходится ли
- *                записанное (кнопка «проверить»).
+ *                записанное (кнопка «проверить»);
+ *   statusBar.right — видимый чип «сохранить»: не надо знать про ⌘K.
  *
  * Кнопки в самом поле ввода SDK не даёт: области «composer toolbar» в контракте плагинов нет.
  * Логика — в бэкенде `plugins/save-loop` (тот же код, что CLI `tools/save_loop.py`).
  */
 
-import { CHAT_EMPTY_AREA, Codicon, host, KEYBINDS_AREA, PALETTE_AREA, useQuery } from '@hermes/plugin-sdk'
+import { CHAT_EMPTY_AREA, Codicon, host, KEYBINDS_AREA, PALETTE_AREA, STATUSBAR_AREAS, useQuery } from '@hermes/plugin-sdk'
+import { useState } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
 const ID = 'save-loop'
@@ -100,6 +102,39 @@ async function showLast() {
 }
 
 // ── пустой чат: что известно о последнем сохранении ─────────────────────────
+
+function SaveChip() {
+  // Видимая кнопка: ⌘K и ⌘⇧S есть, но их надо знать. Чип в статусбаре отвечает на вопрос
+  // «где сохранить» без инструкции; состояние живёт 4 секунды и гаснет.
+  const [state, setState] = useState('')
+  const run = async () => {
+    if (state === 'busy') {
+      return
+    }
+    setState('busy')
+    const result = await saveNow()
+    setState(result ? 'ok' : 'fail')
+    setTimeout(() => setState(''), 4000)
+  }
+  const label = state === 'busy' ? 'сохранение…'
+    : state === 'ok' ? 'сохранено'
+      : state === 'fail' ? 'не вышло'
+        : 'сохранить'
+  return jsxs('button', {
+    type: 'button',
+    onClick: run,
+    disabled: state === 'busy',
+    title: 'Сохранить сессию в vault (save-loop) · ⌘⇧S',
+    'aria-label': 'сохранить сессию в vault',
+    className: 'flex items-center gap-1 rounded px-1.5 py-0.5 text-[10.5px] transition-colors disabled:opacity-60',
+    style: {
+      color: state === 'fail' ? 'var(--ui-error, #F2637B)' : 'var(--muted-foreground)',
+      background: 'transparent',
+      border: '1px solid transparent'
+    },
+    children: [jsx(Codicon, { name: state === 'busy' ? 'loading' : 'save', size: '0.7rem' }), label]
+  })
+}
 
 function EmptyHint({ sessionId }) {
   const backend = useQuery({ queryKey: ['save-loop', 'state'], queryFn: () => apiGet('/state'), refetchInterval: 30_000 })
@@ -200,6 +235,12 @@ export default {
           defaults: ['mod+shift+s'],
           run: () => void saveNow()
         }
+      },
+      {
+        id: 'status-chip',
+        area: STATUSBAR_AREAS.right,
+        order: 90,
+        render: () => jsx(SaveChip, {})
       },
       {
         id: 'empty-hint',

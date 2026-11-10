@@ -25,5 +25,7 @@ config:
 hooks: []
 
 settings:
+  surfaces: "palette, keybinds (mod+shift+s), chat.empty, statusBar.right"
+  state_note: "по сохранению обновляется STATE.md (1,9 КБ) — tools/state_note.py; автосейв его не трогает"
   keybind: "mod+shift+s (переназначается в панели горячих клавиш)"
   api: "POST /api/plugins/save-loop/save с confirm:true; GET /verify, /last, /state"
