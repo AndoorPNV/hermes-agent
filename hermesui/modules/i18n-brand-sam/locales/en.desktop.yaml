@@ -1,0 +1,269 @@
+# HermesUI · i18n-brand-sam — персонаж «Hermes» → «СЭМ». Продуктовые имена не меняются.
+appTour.capabilities.text: Skills, tools and plugins СЭМ can use. Add more here.
+appTour.messaging.text: Reach СЭМ from Telegram, Slack, Discord and more.
+assistant.approval.alwaysDescription: This adds the \u201C{0}\u201D pattern to your permanent allowlist (~/.hermes/config.yaml). СЭМ won\u2019t ask again for commands like this \u2014 in this session or any future one.
+assistant.approval.gatewayDisconnected: СЭМ is offline right now. The command is still waiting for your answer (until the approval timeout). Reconnect, then send it again.
+assistant.approval.timedOutSystemLine: Approval timed out — the command was not run. Ask СЭМ to try again, or raise the limit in Settings → Safety → Approval timeout.
+assistant.catalogInstall.requiresHermes: СЭМ {0}
+assistant.clarify.gatewayDisconnected: СЭМ is offline right now. Reconnect, then send it again.
+assistant.mcpSetup.gatewayDisconnected: СЭМ is offline right now. Reconnect, then send it again.
+assistant.themePicker.basicDetail: For talking to СЭМ.
+assistant.thread.errorCodes.SESSION_NOT_OWNED.body: This chat is open in another СЭМ window or terminal. Start a new chat here, or close it there first.
+assistant.thread.errorCodes.SESSION_OWNER_BUSY.title: СЭМ is busy in this chat
+assistant.thread.errorCodes.agent_init_failed.body: СЭМ couldn't connect to {0} for this chat. Retry; if it keeps failing, check the provider in Settings.
+assistant.thread.errorCodes.disk_full.body: СЭМ couldn't save this conversation. Free up space, then retry.
+assistant.thread.errorCodes.free_tier_model_not_free.body: СЭМ uses the free model for now. Sign in with a Nous account for more models, it's free.
+assistant.thread.errorCodes.loop_error.title: СЭМ couldn't finish this step
+assistant.thread.errorCodes.no_reply.body: СЭМ finished this turn, but no reply reached this window. Retry to send it again.
+assistant.thread.errorCodes.session_read_only.body: It is stored history СЭМ can show but not continue, so your message was not run. Start a new chat to send it.
+assistant.thread.errorCodes.timeout.body: СЭМ couldn't reach {0}. Check your connection, then retry.
+assistant.thread.errorLayerBodies.disk: Your disk is full, so СЭМ could not save this conversation. Free some space, then retry.
+assistant.thread.errorLayerBodies.endpoint: СЭМ can't reach your custom model server. Check that it is running, then send your message again.
+assistant.thread.errorLayerBodies.gateway: СЭМ hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.
+assistant.thread.errorLayerBodies.generic: Something went wrong while СЭМ was replying. Retry, or copy the details if it keeps happening.
+assistant.thread.errorLayerBodies.runtime: СЭМ hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.
+assistant.thread.errorLayers.generic: СЭМ couldn't finish this reply
+assistant.thread.errorLayers.runtime: СЭМ hit a problem
+assistant.thread.errorOpenHermesFolder: Open СЭМ folder
+assistant.thread.errorOpenHermesFolderFailed: Could not open the СЭМ folder
+assistant.thread.errorToastTitle: СЭМ couldn't finish the reply
+assistant.thread.loadingResponse: СЭМ is loading a response
+boot.causes.diskFull: The disk is full, so СЭМ could not start.
+boot.causes.exitedEarly: СЭМ' background service stopped right after starting.
+boot.causes.installMissing: Part of СЭМ' installation is missing. Choose Repair install to put it back.
+boot.causes.permission: СЭМ couldn't write to its data folder (permission problem).
+boot.causes.portInUse: Another program is using the network port СЭМ needs.
+boot.causes.timedOut: СЭМ' background service didn't answer in time.
+boot.errors.backendStopped: СЭМ stopped working in the background
+boot.errors.backgroundExitedDuringStartup: СЭМ stopped right after it started.
+boot.errors.desktopBootFailed: СЭМ couldn't start
+boot.errors.gatewayConnectionLost: СЭМ lost its connection
+boot.errors.gatewaySignInRequired: Your remote СЭМ signed you out
+boot.errors.restartHermes: Restart СЭМ
+boot.failure.description: СЭМ' background service didn't come up. Try one of the recovery steps below. Nothing here deletes your chats or settings.
+boot.failure.title: СЭМ couldn't start
+boot.failure.webappTitle: Sign in to СЭМ
+boot.steps.loadingSettings: Loading СЭМ settings
+boot.updateHold.confirmBody: The leftover update process may still be changing СЭМ' files. Starting now can load a half-updated install, which may not work until you run the update again. СЭМ records this choice in its log and leaves the update marker in place.
+boot.updateHold.confirmTitle: Start СЭМ while the update still holds it?
+boot.updateHold.description: СЭМ is holding off on starting so it can't load files an update may still be changing. It starts by itself as soon as the hold ends.
+boot.updateHold.quit: Quit СЭМ
+boot.updateHold.recoveryHint: 'This usually clears in a few minutes. If it does not: quit СЭМ, end leftover git or hermes processes (or restart the computer), then open СЭМ again.'
+boot.updateHold.startAnywayRefused: What holds the install changed before СЭМ could start. Review it and try again.
+boot.updateHold.title: An earlier update still holds СЭМ
+boot.updateHold.titleUnverified: СЭМ can't confirm the last update finished
+boot.updateHold.unverified: The update helper couldn't check who owns the Hermes install right now. СЭМ keeps checking.
+catalog.developer.title: Build for СЭМ
+catalog.toolsets.essentialsBlurb: What most СЭМ work runs on.
+catalog.toolsets.mostUsedBlurb: The toolsets СЭМ reaches for most on this profile.
+catalog.toolsets.themes.recall.blurb: What СЭМ remembers, and the skills and history it can search.
+commandCenter.generatePet.backgroundHint: You can close this — СЭМ will notify you when it’s done.
+commandCenter.generatePet.staleBackend: Update СЭМ to generate pets.
+commandCenter.hermesActiveSessions: СЭМ {0} \xB7 Active sessions {1}
+commandCenter.pets.staleBackend: Restart СЭМ to use pets — the backend predates this feature.
+commandCenter.updateHermes: Update СЭМ
+composer.attachUrlDesc: СЭМ will fetch the page and include it as context for this turn.
+composer.commandDescs./goal: Set a standing goal СЭМ works on across turns until achieved
+composer.commandDescs./profile: Switch the active СЭМ profile
+composer.newSessionPlaceholders: What are we building?,Give СЭМ a task,What's on your mind?,Describe what you need,What should we tackle?,Ask anything,Start with a goal
+composer.placeholderReconnecting: Reconnecting to СЭМ…
+composer.placeholderStarting: Starting СЭМ...
+composer.voiceEngineChained: Speech-to-text + СЭМ voice
+composer.voiceEngineLive: GPT-Live (full-duplex, delegates to СЭМ)
+connectors.disclaimer: Connecting is optional. Only authorize the apps you want СЭМ to use.
+connectors.namedAccount: СЭМ named this {0} account {1}.
+connectorsPage.accounts.removeBody: СЭМ stops acting as this account. Your other accounts stay connected.
+connectorsPage.dialog.appSwitch: СЭМ can use {0}
+connectorsPage.dialog.bothOn: Both are on, so СЭМ sees every {0} tool twice.
+connectorsPage.dialog.disconnectBody: СЭМ stops acting as this account. You can connect again at any time.
+connectorsPage.dialog.rulesSignIn: Sign in to change what СЭМ may do here.
+connectorsPage.page.disconnectNoAccount: СЭМ has no account to disconnect here. Refresh the page and try again.
+connectorsPage.page.noMatchBody: Nothing here matches. Point СЭМ at your own MCP server to add it.
+connectorsPage.tools.goneBody: СЭМ cannot call it any more. The row stays until you remove it, so nothing vanishes.
+connectorsPage.tools.summaryPreviewTitle: What СЭМ could do with {0} once you connect
+connectorsPage.tools.summaryTitle: What СЭМ may do with {0}
+cron.control.catchUpHint: What to do with runs missed while СЭМ was not running.
+cron.emptyDescNew: Schedule a prompt to run on a cron expression. СЭМ will run it and deliver results to the destination you pick.
+desktop.handoff.timedOut: СЭМ couldn't reach your messaging connection. Start it from Settings → Messaging, then try the handoff again.
+firstRun.intro.greeting: Hi, I'm СЭМ.
+freeTier.alreadySignedInBody: This СЭМ is already signed in to a Nous account.
+freeTier.busyBody: СЭМ couldn't finish signing you in because the Nous service is busy. Try again in {0}. Your session is still here in the meantime.
+freeTier.offer.body: You're on the free allowance. If you keep using СЭМ, you'll start running into limits. Sign in with a free Nous account for a bigger allowance.
+freeTier.offer.heading: Keep going with СЭМ
+freeTier.readyTitle: СЭМ is ready.
+freeTier.setupFailed.gateClosed: This version of СЭМ can't start without a Nous account. Sign in or create one, it's free and only takes a minute.
+freeTier.setupFailed.generic: СЭМ couldn't set up free access without signing in. Signing in is free, or connect another provider.
+freeTier.setupFailed.paused: Using СЭМ without signing in is paused for a moment. СЭМ will keep checking. Signing in is free and gets you going right now.
+freeTier.setupFailed.rateLimited: Lots of people are getting started right now, so СЭМ will try again in {0}. Signing in is free and skips the wait.
+freeTier.setupFailed.unreachable: СЭМ couldn't reach the Nous service. Check your internet connection, then tap Try again. Or connect another provider for now.
+freeTier.unreachableBody: СЭМ couldn't reach the Nous service to finish signing you in. Check your internet connection and try again. Your session is still here.
+install.connectExistingTitle: Connect to existing СЭМ
+install.failedDesc: One of the setup steps did not finish. This can happen when another copy of СЭМ is running, the internet connection dropped, or antivirus blocked the installer. Close other СЭМ windows, then choose Reload and retry. If it fails again, open the logs and send them to support.
+install.installLocalDesc: Download СЭМ, create its Python environment, and run the backend on this computer.
+install.installLocalTitle: Install СЭМ locally
+install.oneTimeTitle: СЭМ needs a one-time install
+install.probeError: СЭМ can't reach that address. Check the URL and that the other computer is running СЭМ — sign-in options appear once it answers.
+install.remoteSetupTitle: Connect to existing СЭМ
+install.setupChoiceDesc: Connect this app to a Hermes gateway you already run, or install СЭМ locally on this computer.
+install.setupChoiceDescLocal: Install СЭМ on this computer, or connect to a Hermes gateway you already run.
+install.useLocalTitle: Use СЭМ on this computer
+interfaceMode.hint: Changes what is shown, not what СЭМ can do.
+interfaceMode.simple.description: For talking to СЭМ. Sidebar and chat; no terminal, file or diff panes.
+keepAwakeOffer.message: СЭМ can keep your computer awake while a task runs. The screen still turns off, and on battery your computer may still sleep.
+keepAwakeOffer.title: Your computer slept while СЭМ was working
+messaging.restartFailedManual: СЭМ couldn't restart to apply your messaging settings
+messaging.telegramQr.quickHelp: Scan a QR code and confirm in Telegram. СЭМ creates the bot and detects your Telegram user ID automatically.
+modelAssignment.saveFailed: СЭМ did not save that model change.
+notifications.actions.restartHermes: Restart СЭМ
+notifications.desktopOutOfDateMessage: This СЭМ app is older than the backend it is connected to and may not work correctly. Update the app to align them.
+notifications.desktopOutOfDateTitle: СЭМ app out of date
+notifications.errors.codeSkewRestartRequired: СЭМ was updated but is still running the old version. Restart it to finish the update.
+notifications.errors.gatewayAuthFailed: This СЭМ no longer accepts your saved sign-in. Open Gateways and sign in again (or paste a new access token), then retry.
+notifications.errors.methodNotAllowed: СЭМ' background service is out of step with the app, probably after an update. Restart it to fix this.
+notifications.errors.restartHermesFailed: Couldn't restart СЭМ
+notifications.errors.storageFailure: СЭМ couldn't save to its data folder. Open Maintenance to check and repair it.
+notifications.native.inputBody: СЭМ is waiting for your response.
+notifications.native.turnDoneTitle: СЭМ finished
+notifications.updateHermes: Update СЭМ
+notifications.updateReadyMessageAppInstaller: A new version of СЭМ is ready. Update now and Windows will finish it for you.
+notifications.voice.liveDelegationFailed: Could not hand the request to СЭМ
+onboarding.apiKeyOptions.local.description: Point СЭМ at a local or self-hosted OpenAI-compatible endpoint (vLLM, llama.cpp, Ollama, etc).
+onboarding.authorizeThere: Authorize СЭМ there.
+onboarding.featuredPitch: One subscription, 300+ frontier models — the recommended way to run СЭМ
+onboarding.flowSubtitles.device_code: Opens a verification page in your browser — СЭМ connects automatically
+onboarding.preparingInstall: СЭМ is finishing install. This usually takes under a minute on first run.
+onboarding.setupSlowBody: СЭМ is still starting in the background.
+onboarding.starting: Starting СЭМ…
+preview.largeBody: '{0} is {1}. СЭМ will only show the first 512 KB.'
+preview.web.askRestart: Ask СЭМ to restart the server
+preview.web.blankPageBody: Type an address above to browse, or ask СЭМ to open a page.
+preview.web.lookingRestart: СЭМ is looking for a preview server to restart ({0})
+preview.web.restartFailedMessage: СЭМ could not restart the server.
+preview.web.restarting: СЭМ is restarting...
+preview.web.restartingMessage: СЭМ is working in the background. Watch the preview console for progress.
+preview.web.stillWorking: СЭМ is still working, but no restart result has arrived yet. The server command may be running in the foreground.
+profiles.createDesc: 'Profiles are independent СЭМ environments: separate config, skills, and SOUL.md.'
+profiles.defaultDescription: Used when СЭМ opens and for new chats. Existing sessions stay in their profiles.
+profiles.fleet.installDeviceDesc: This will install СЭМ locally, then open a fresh session on this computer. Nothing is installed until you confirm.
+profiles.fleet.installDeviceTitle: Install СЭМ on This device?
+profiles.fleet.localDevice: This device (local backend — installs СЭМ if missing, otherwise opens a fresh session)
+profiles.remoteOverride.description: Sessions in this profile will run on the remote СЭМ you point it at, instead of this computer.
+promptNotices.desktopCommands.historyHermes: СЭМ
+promptNotices.sessionCommands.busy: session busy \u2014 СЭМ is still replying. Stop the current reply first (Stop button, or Ctrl+C in a terminal), then run /{0}.
+promptNotices.sessionCommands.queueEditUnconfirmed: СЭМ could not confirm your edit. Save again to retry the same edit; it is never queued twice.
+prompts.gatewayDisconnected: СЭМ is offline right now. Reconnect, then send it again.
+prompts.secretDesc: СЭМ needs a credential to continue.
+prompts.sudoInstallDesc: СЭМ needs your sudo password to install the Bot Screen packages (TigerVNC + Xfce) on the gateway host. It is sent only to that host.
+prompts.vaultCodeDesc: '{0} is asking for a one-time code (text message, email or authenticator app). Enter it here and СЭМ types it into the page; the model never sees it.'
+prompts.vaultCodeFootnote: 'Tip: save the authenticator key with this login in Settings → Passwords & Logins and СЭМ enters codes for you.'
+prompts.vaultSaveDesc: СЭМ reached a sign-in page at {0} and has no login for it. Enter it once here; it is encrypted on this machine and filled into the page without the model ever seeing the password.
+sessionImport.chooseHelp: Choose a session to read its history before bringing it into СЭМ.
+sessionImport.continue: Continue in СЭМ
+sessionImport.open: Open in СЭМ
+sessionImport.snapshot: This conversation is already in СЭМ. Open your existing copy to continue.
+sessionImport.subtitle: Bring a conversation into СЭМ and pick up where you left off.
+settings.about.channel.heldBody: This build is newer than stable release {0}. Your sessions already use a gateway runtime that {0} cannot open, so СЭМ stays on this build until a newer stable release ships.
+settings.about.channel.rollbackBody: This build is newer than the stable release {0}. Installing it moves СЭМ back to that release.
+settings.about.channel.stableConfirmBody: СЭМ will move to the latest published release, which can be older than the code you run now. Data written by newer code may not read correctly, so back it up first.
+settings.appearance.colorModeDesc: Pick a fixed mode or let СЭМ follow your system setting.
+settings.appearance.pet.intro: Adopt an animated petdex mascot that floats over the app and reacts to what СЭМ is doing — running while tools execute, celebrating on success, sulking on errors.
+settings.appearance.pet.restartHint: Pets need a quick restart — the running app started before this feature was added. Quit and reopen СЭМ, then come back here.
+settings.appearance.reactionsDesc: iMessage-style emoji tapbacks — react to messages, and СЭМ can react to yours.
+settings.appearance.tipsDesc: Occasional hints from the app and СЭМ. Each tip appears once. Turns off automatically after your first 30 days; you can turn it back on.
+settings.appearance.toursDesc: Let СЭМ spotlight each step as it guides you through the app. Turns off automatically after your first 30 days; you can turn it back on.
+settings.billing.keepGoingOnCredits.description: 'Use your credits when included usage runs out. Off: СЭМ waits for the reset.'
+settings.config.minimizeToTrayDesc: Minimize windows or close the main window to hide them in the system tray (menu bar on macOS) and keep СЭМ running. Use Quit СЭМ from the tray menu or Cmd+Q to exit. Off by default; applies only to this device.
+settings.connections.headersDesc: Sent with every HTTP and WebSocket request to this gateway — for access proxies such as Cloudflare Access (CF-Access-Client-Id / CF-Access-Client-Secret). Values are stored encrypted. Headers СЭМ manages (Authorization, Cookie, Host…) are ignored.
+settings.fieldDescriptions.agent.maxTurns: Upper bound for tool-calling turns before СЭМ stops a run.
+settings.fieldDescriptions.approvals.mode: How СЭМ handles commands that need explicit approval.
+settings.fieldDescriptions.browser.useRealProfile: Local browsing uses your real logins. СЭМ copies your default browser's profile (cookies, logins, preferences) into a managed snapshot and drives it with its packaged Chromium — your live profile is never opened directly, and the copy is refreshed from it on each run. Also lets the agent open a local real-profile session on request even when a cloud browser backend is configured. Only Chromium browsers (Chrome, Edge, Brave, Brave Origin, Chromium) are supported; a non-Chromium default fails with a clear message. Off by default.
+settings.fieldDescriptions.fileReadMaxChars: Maximum characters СЭМ can read from one file request.
+settings.fieldDescriptions.voice.gptLive.instructions: Extra sentences for the live voice persona (tone, pace, language). СЭМ keeps its own system prompt.
+settings.fieldDescriptions.voice.voiceChatMode: 'chained: speech-to-text → СЭМ → text-to-speech with the providers below. gpt-live: one full-duplex OpenAI voice model (gpt-live-1) listens and talks, and hands every real request to СЭМ — any model you have selected answers with the full toolset. Needs an OpenAI API key; the voice layer bills $0.05 per minute.'
+settings.gateway.envOverrideDesc: A startup setting outside the app chose this connection, so the options below are read-only. Restart СЭМ without that setting — or ask whoever set it up — to change it here.
+settings.gateway.envOverrideTitle: This connection was fixed by the way СЭМ was launched.
+settings.gateway.probeError: СЭМ can't reach that address. Check the URL and that the other computer is running СЭМ — sign-in options appear once it answers.
+settings.gateway.sshDesc: СЭМ is launched on the remote over SSH and tunneled to this app — nothing to start or expose yourself. Requires working key-based SSH access to the host.
+settings.gateway.sshErrAuth: SSH authentication failed. Load your key into the ssh-agent (ssh-add) or set an IdentityFile in ~/.ssh/config — СЭМ runs ssh non-interactively.
+settings.gateway.sshErrInteractiveAuth: Tailscale SSH requires an interactive browser check. In Terminal, run `ssh <host> true`, complete the check, then retry — СЭМ runs SSH non-interactively.
+settings.gateway.sshErrNotInstalled: СЭМ is not installed on the remote host. Install it there (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh) or set the СЭМ path.
+settings.gateway.sshErrUpdateRequired: Update СЭМ on the remote host before connecting with Desktop SSH.
+settings.gateway.sshHermesPathTitle: СЭМ path (optional)
+settings.gateway.sshReachable: 'Reachable: {0} ({1}) \u2014 СЭМ found'
+settings.gateway.webAccess.intro: Open СЭМ on this computer from your phone or another computer, signed in with your Nous account. Whoever signs in can run commands on this computer.
+settings.gateway.webAccess.notRunningDetail: Start it to open СЭМ from another device.
+settings.hudModifier.missingHelper: This Hermes installation is missing the HUD gesture helper. Update or reinstall СЭМ, then retry.
+settings.hudModifier.permission: Allow СЭМ in System Settings → Privacy & Security → Input Monitoring, then retry. This gesture does not record keystrokes or capture your screen.
+settings.hudModifier.unavailable: The HUD gesture helper could not start or stopped unexpectedly. Retry, or restart СЭМ. The existing HUD shortcut still works inside СЭМ.
+settings.localModels.runtimeInstalledDetail: Build {0}, {1} backend. СЭМ starts and manages the server for you.
+settings.mcp.deepLinkDescription: A link asked to add this MCP server to СЭМ. Review the exact configuration below — it comes from the link, not from СЭМ.
+settings.memoryLayers.builtinDesc: MEMORY.md and USER.md are СЭМ’s own memory, separate from any external provider. Both load into sessions by default; the memory and user profile toggles in Settings › Memory & Context turn each off. A provider adds to this layer; it never replaces it.
+settings.memoryLayers.noProviderDesc: СЭМ uses only the built-in layer below. Choose an external provider under Settings › Memory & Context to add one.
+settings.memoryLayers.providerUnknownDesc: '{0} is the saved provider; СЭМ couldn''t read whether it is ready.'
+settings.model.subagents.routing.blockedDetail: This mode is saved, so СЭМ refuses every subagent instead of quietly using Default.
+settings.model.subagents.routing.blockedNotLoaded: Subagents will not start until СЭМ loads Advanced Delegation. Restart СЭМ to finish.
+settings.model.subagents.routing.pluginNotLoaded: Advanced Delegation is on, but СЭМ has not loaded it yet. Restart СЭМ to finish.
+settings.notifications.focusedHint: Completion alerts only fire while СЭМ is in the background.
+settings.notifications.kinds.input.description: СЭМ asked a question or needs a password or secret.
+settings.notifications.kinds.plugin.description: A desktop plugin sent a notification while СЭМ was in the background.
+settings.notifications.kinds.turnDone.description: A turn finished while СЭМ was in the background.
+settings.notifications.testTitle: СЭМ
+settings.plugins.installModal.installUncertain: СЭМ stopped waiting for the install result, but the plugin may still be installing. Close this dialog and use Rescan in Plugins before trying Install again.
+settings.providers.intro: Sign in with a subscription — no API key to copy. СЭМ runs the browser sign-in for you, right here in the app.
+settings.providers.localEndpoint.description: Point СЭМ at any OpenAI-compatible endpoint (Zyphra, vLLM, llama.cpp, Ollama, etc).
+settings.quickEntry.enabledDesc: Summon a small composer from anywhere with a global shortcut and fire a prompt without opening СЭМ.
+settings.resetConfirm: Reset all settings to СЭМ defaults?
+settings.screenshot.enabledDesc: Press both Command keys together from any app to capture its frontmost window and attach it to your current СЭМ draft. Never sends automatically. Off by default; applies only to this Mac. Window contents may be sensitive — review the attachment before sending.
+settings.screenshot.inputPermission: Input Monitoring permission lets СЭМ detect both Command keys while another app is active. Allow СЭМ in System Settings → Privacy & Security → Input Monitoring, then return here and retry.
+settings.screenshot.screenPermission: Screen Recording permission lets СЭМ capture the frontmost app window when you use this shortcut. Allow СЭМ in System Settings → Privacy & Security → Screen Recording, then return here and retry. Restart СЭМ if macOS asks.
+settings.toolsets.browserRealProfile.prompt.body: Let СЭМ browse with a snapshot of your default browser profile, so sites open already signed in.
+settings.toolsets.terminalBackend.unavailableMessage: 'СЭМ can''t run shell commands right now: {0} isn''t ready. Switch to Local, or finish setting up {0} and try again.'
+settings.uninstallSection.managedBody: This install is managed by your system, so СЭМ cannot remove itself.
+settings.uninstallSection.uninstallHermes: Uninstall СЭМ
+settings.vault.otpHint: The "setup key" the site shows when you enable 2FA. With it saved, СЭМ generates the codes itself.
+settings.vault.sources.disabledDesc: Detected but turned off for СЭМ.
+settings.vault.sources.notInstalled: Not detected. Install the {0} command-line tool and sign in to it; СЭМ picks it up automatically.
+settings.vault.sources.unlockedDesc: Unlocked for this session. Locks automatically after 30 minutes idle or when СЭМ closes.
+sharedMetrics.collectedMachine: 'Machine: OS, RAM range, GPU type, СЭМ version, local model use'
+sharedMetrics.consentBody: 'СЭМ can count how you use it: session length, which models and tools run, and when something fails. It never records your messages, files, paths or error text.'
+sharedMetrics.sending: If you share, СЭМ sends stats to Nous once a day with a random ID for this profile. Apart from a one-time note that СЭМ was installed, stats from before you opt in are never sent. Change this anytime in Settings.
+sidebar.projects.deleteConfirm: This removes the saved project from СЭМ. Files, git repos, and worktrees stay untouched.
+sidebar.storageCorrupt.action: 'Quit СЭМ on this profile, then inspect the file without changing it, or restore a snapshot:'
+sidebar.storageCorrupt.body: СЭМ can't read all of the session history for {0}. Chats missing from this list were not deleted; the file they are stored in is damaged.
+skills.plugins.deepLinkCatalogUnavailable: Could not load the СЭМ plugin catalog. Check your connection and open the link again.
+skills.plugins.deepLinkCatalogUnknown: \u201C{0}\u201D is not in the СЭМ plugin catalog. Nothing was installed.
+skills.plugins.defaultProfile: СЭМ (default)
+skills.plugins.folderAccess.refusedProtected: '{0} cannot use that folder: it holds СЭМ settings, keys or plugin data. Choose a folder that does not contain them.'
+skills.plugins.legacyBackend: This backend predates key-addressed plugin toggles — update СЭМ to manage it here.
+skills.plugins.previewScriptRevokeUnsaved: Couldn't save that change, so it lasts only until СЭМ restarts. {0} is blocked on {1} for now.
+starmap.emptyDesc: As СЭМ builds skills and memories for your work, they appear here.
+statusStack.coding.agentShip: Ask СЭМ to open PR
+tips.items.artifacts.title: Everything СЭМ made
+tips.items.messaging.title: СЭМ away from your desk
+tips.items.profiles.text: Each one is its own СЭМ — own keys, own memory, own sessions.
+tips.items.skills.text: Skills are folders of instructions СЭМ loads when the work calls for them.
+updates.appName: СЭМ
+updates.applyingBody: The Hermes updater takes over in its own window and reopens СЭМ automatically when it’s done. Please don’t reopen СЭМ yourself while it’s updating.
+updates.applyingBodyAppInstaller: СЭМ will close and Windows will finish the update. СЭМ will reopen when it’s done — you don’t need to do anything.
+updates.applyingBodyBackend: The remote backend is applying the update and will restart. СЭМ reconnects automatically when it’s back.
+updates.applyingClose: This window will close while the update runs, then СЭМ reopens on its own.
+updates.applyingCloseAppInstaller: This window will close, Windows finishes the update, and СЭМ reopens on its own.
+updates.availableBody: A new version of СЭМ is ready to install.
+updates.availableBodyAppInstaller: A new version of СЭМ is ready. СЭМ will close, Windows will finish the update, and СЭМ will reopen on its own.
+updates.blockerBody: СЭМ needs to stop these local previews before updating. This will not modify or delete your files.
+updates.blockerTitle: Close local previews to update СЭМ?
+updates.bundleSwapPendingAction: Restart СЭМ
+updates.bundleSwapPendingDesc: The updated app is already installed — СЭМ only needs to restart to load it. Chats and settings are untouched.
+updates.checkUnknownBodyAppInstaller: Windows couldn’t check for updates right now. Updates also install automatically when you restart СЭМ.
+updates.connectionRetry: СЭМ couldn't reach the update server. Check your internet connection and try again. If you use a remote СЭМ, make sure it is online.
+updates.discontinuedBody: This build of СЭМ is no longer supported and may break — uninstall it. Your data stays on disk.
+updates.discontinuedTitle: This build of СЭМ is no longer supported
+updates.foreignBlockerBody: СЭМ can’t safely close these processes automatically. Close the app, terminal, or service that owns each one, then try the update again.
+updates.foreignBlockerTitle: Close other processes to update СЭМ
+updates.gitUnusable: СЭМ could not run Git on this computer, so it could not check for updates.
+updates.manualBody: 'You installed СЭМ from the command line, so updates run there too. Paste this into your terminal:'
+updates.manualPickedUp: СЭМ will pick up the new version next time you launch it.
+updates.mixedBlockerBody: СЭМ can close the local previews listed below. Other processes must be closed manually before the update can continue.
+updates.stages.restart: Restarting СЭМ…
+updates.stages.update: Updating СЭМ…
+updates.unsupportedMessage: This version of СЭМ can’t update itself from inside the app.

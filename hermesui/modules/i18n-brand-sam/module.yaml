@@ -1,0 +1,28 @@
+id: i18n-brand-sam
+type: i18n
+version: 0.1.0
+description: "Персонаж «Hermes» → «СЭМ» в тексте интерфейса: overlay-слой locales/en.yaml (ядро, CLI, TUI, 79 ключей) и locales/en.desktop.yaml (Desktop UI, 268 ключей). Продуктовые имена не меняются: Hermes Agent/Cloud/Desktop/Hub/catalog/team/Gateway/CLI/config/state/update/install/host/process. Код платформы не правится — механизм штатный (i18n_layers overlay)"
+author: mrkee, СЭМ (SAM)
+license: MIT
+platforms: [windows, linux, macos]
+
+requires: []
+conflicts: []
+
+artifacts:
+  - kind: locale
+    src: "@repo/modules/i18n-brand-sam/locales/en.yaml"
+    dst: locales/en.yaml
+  - kind: locale
+    src: "@repo/modules/i18n-brand-sam/locales/en.desktop.yaml"
+    dst: locales/en.desktop.yaml
+
+config: {}
+
+settings:
+  surface: "overlay поверх встроенных en.yaml / en.desktop.yaml; откат = удалить файлы из $HERMES_HOME/locales"
+  rename_rule: "«Hermes» → «СЭМ», когда речь о собеседнике (говорит, думает, ждёт, сессия, чат, handoff); продуктовые имена остаются"
+  keep_list: "Agent, Cloud, Desktop, Hub, catalog, team, Gateway, CLI, TUI, config, state, update, backend, runtime, install, process, host, home, Path, Pro, Enterprise, server"
+  not_renamed: "команда hermes, $HERMES_HOME, имена пакетов и каталогов, 1148 вхождений в .tsx-компонентах, README/лицензия"
+  evidence: "review.tsv — построчная сверка «было → стало» по всем 641 строке с вхождением hermes: переименовано 347"
+  restart: "Desktop и TUI читают каталог при старте: после apply нужен перезапуск окна"

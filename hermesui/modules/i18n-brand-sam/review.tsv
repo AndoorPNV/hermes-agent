@@ -1,0 +1,641 @@
+core	approval.timeout	KEEP-product	      ⏱ No answer in {waited} — the command was not run. Ask again to retry, or raise the limit: her	      ⏱ No answer in {waited} — the command was not run. Ask again to retry, or raise the limit: her
+core	gateway.model.err_skew	KEEP-product	This gateway is running code from {boot_rev} but the checkout on disk is now {disk_rev}. Switching m	This gateway is running code from {boot_rev} but the checkout on disk is now {disk_rev}. Switching m
+core	gateway.background.no_credentials	KEEP-product	❌ The background task couldn't start because no AI model sign-in is configured. Use /login, or run `	❌ The background task couldn't start because no AI model sign-in is configured. Use /login, or run `
+core	gateway.compress.hygiene_timeout_doctor_hint	KEEP-product	 If this keeps happening, run `hermes doctor` on the host.	 If this keeps happening, run `hermes doctor` on the host.
+core	gateway.compress.hygiene_failed	KEEP-product	⚠️ Shortening the conversation history failed, so I kept everything as-is. Run /compress to try agai	⚠️ Shortening the conversation history failed, so I kept everything as-is. Run /compress to try agai
+core	gateway.debug.full_logs_hint	KEEP-product	For full log uploads, use `hermes debug share` from the CLI.	For full log uploads, use `hermes debug share` from the CLI.
+core	gateway.debug.share_hint	KEEP-product	Share these links with the Hermes team for support.	Share these links with the Hermes team for support.
+core	gateway.debug.local_refused	RENAME	`/debug local` keeps the report on the machine running Hermes, so it isn't available from a chat. Send `/debug` to upload the summary report	`/debug local` keeps the report on the machine running СЭМ, so it isn't available from a chat. Send `/debug` to upload the summary report.
+core	gateway.help.header	RENAME	📖 **Hermes Commands** ⏎ 	📖 **СЭМ Commands** ⏎ 
+core	gateway.kanban.truncated_suffix	KEEP-product	… (truncated; use `hermes kanban …` in your terminal for full output)	… (truncated; use `hermes kanban …` in your terminal for full output)
+core	gateway.kanban.ping.gave_up	KEEP-product	⛔ {head} is now blocked: {count}{last}. Fix the cause, then `hermes kanban unblock {task_id}` (or `h	⛔ {head} is now blocked: {count}{last}. Fix the cause, then `hermes kanban unblock {task_id}` (or `h
+core	gateway.restart.restarting	KEEP-product	♻ Restarting gateway. If you aren't notified within 60 seconds, restart from the console with `herme	♻ Restarting gateway. If you aren't notified within 60 seconds, restart from the console with `herme
+core	gateway.resume.matrix_blocked_no_origin	RENAME	⚠️ Matrix /resume blocked: this named session has no recorded room origin, so Hermes will not resume it inside the current room by default. 	⚠️ Matrix /resume blocked: this named session has no recorded room origin, so СЭМ will not resume it inside the current room by default. Use
+core	gateway.status.header	KEEP-product	📊 **Hermes Gateway Status**	📊 **Hermes Gateway Status**
+core	gateway.topic.thread_ready	RENAME	Telegram multi-session topics are enabled. ⏎  ⏎ This topic will be used as an independent Hermes session. Use /new to replace this topic's curre	Telegram multi-session topics are enabled. ⏎  ⏎ This topic will be used as an independent СЭМ session. Use /new to replace this topic's current 
+core	gateway.topic.default_title	RENAME	Hermes Chat	СЭМ Chat
+core	gateway.topic.root_lobby	RENAME	This main chat is reserved for system commands. ⏎  ⏎ To start a new Hermes chat, open the All Messages topic at the top of this bot interface an	This main chat is reserved for system commands. ⏎  ⏎ To start a new СЭМ chat, open the All Messages topic at the top of this bot interface and s
+core	gateway.topic.root_new	RENAME	To start a new parallel Hermes chat, open the All Messages topic at the top of this bot interface and send any message there. Telegram will 	To start a new parallel СЭМ chat, open the All Messages topic at the top of this bot interface and send any message there. Telegram will cre
+core	gateway.topic.new_header	RENAME	Started a new Hermes session in this topic. ⏎  ⏎ Tip: for parallel work, open All Messages and send a message there to create a separate topic i	Started a new СЭМ session in this topic. ⏎  ⏎ Tip: for parallel work, open All Messages and send a message there to create a separate topic inst
+core	gateway.topic.help	RENAME	/topic — enable multi-session DM mode (one bot, many parallel chats) ⏎  ⏎ Usage: ⏎   /topic             Enable topic mode, or show status if alrea	/topic — enable multi-session DM mode (one bot, many parallel chats) ⏎  ⏎ Usage: ⏎   /topic             Enable topic mode, or show status if alrea
+core	gateway.topic.system_topic_intro	RENAME	System topic for Hermes commands and status.	System topic for СЭМ commands and status.
+core	gateway.topic.mode_disabled	RENAME	Multi-session topic mode is now OFF for this chat. ⏎  ⏎ Existing topics in Telegram aren't removed — they'll just stop being gated as independen	Multi-session topic mode is now OFF for this chat. ⏎  ⏎ Existing topics in Telegram aren't removed — they'll just stop being gated as independen
+core	gateway.topic.status_how_to	RENAME	To create a new Hermes chat, open All Messages at the top of this bot interface and send any message there. Telegram will create a new topic	To create a new СЭМ chat, open All Messages at the top of this bot interface and send any message there. Telegram will create a new topic fo
+core	gateway.topic.restored_last_message	RENAME	 ⏎  ⏎ Last Hermes message: ⏎ {text}	 ⏎  ⏎ Last СЭМ message: ⏎ {text}
+core	gateway.update.platform_not_messaging	KEEP-product	✗ /update is only available from messaging platforms. Run `hermes update` from the terminal.	✗ /update is only available from messaging platforms. Run `hermes update` from the terminal.
+core	gateway.update.hermes_cmd_not_found	RENAME	✗ Could not locate the `hermes` command. Hermes is running, but the update command could not find the executable on PATH or via the current 	✗ Could not locate the `hermes` command. СЭМ is running, but the update command could not find the executable on PATH or via the current Pyt
+core	gateway.update.starting	KEEP-product	☤ Starting Hermes update… I'll stream progress here.	☤ Starting Hermes update… I'll stream progress here.
+core	gateway.update.failed_notice	KEEP-product	❌ Hermes update failed; the previous version is still running. Run `hermes update` on the host to se	❌ Hermes update failed; the previous version is still running. Run `hermes update` on the host to se
+core	gateway.update.finished	KEEP-product	✅ Hermes update finished.	✅ Hermes update finished.
+core	gateway.update.timed_out	KEEP-product	❌ Hermes update timed out after 30 minutes.	❌ Hermes update timed out after 30 minutes.
+core	gateway.update.finished_success	KEEP-product	✅ Hermes update finished successfully.	✅ Hermes update finished successfully.
+core	gateway.update.managed_action	KEEP-product	update Hermes Agent	update Hermes Agent
+core	gateway.update.not_applicable	KEEP-product	✗ `hermes update` does not apply to this install ({method}). ⏎ Update with: {command}	✗ `hermes update` does not apply to this install ({method}). ⏎ Update with: {command}
+core	gateway.verbose.mode_log	KEEP-product	⚙️ Tool progress: **LOG** — silent in chat; tool calls written to ~/.hermes/logs/tool_calls.log.	⚙️ Tool progress: **LOG** — silent in chat; tool calls written to ~/.hermes/logs/tool_calls.log.
+core	gateway.shared.history_unreadable	KEEP-product	⚠️ I can't read this conversation's history right now (your earlier messages exist but cannot be loa	⚠️ I can't read this conversation's history right now (your earlier messages exist but cannot be loa
+core	gateway.exec_approval.header	RENAME	Hermes wants to run a command that needs your OK	СЭМ wants to run a command that needs your OK
+core	gateway.notify.no_home_channel	RENAME	📬 No home channel is set for {platform}. A home channel is where Hermes delivers cron job results and cross-platform messages. ⏎  ⏎ Type {sethom	📬 No home channel is set for {platform}. A home channel is where СЭМ delivers cron job results and cross-platform messages. ⏎  ⏎ Type {sethome_c
+core	gateway.unauthorized.action_notice	KEEP-product	This bot is private and you're not on its allowed list. If you own it, run `hermes pairing approve {	This bot is private and you're not on its allowed list. If you own it, run `hermes pairing approve {
+core	gateway.unauthorized.owner_notice	KEEP-product	Dropped a message from unrecognized {platform} user {who}. If that is you or someone you trust, {all	Dropped a message from unrecognized {platform} user {who}. If that is you or someone you trust, {all
+core	gateway.errors.auth_failed	KEEP-product	⚠️ Sign-in to the AI model service failed. Use /login to sign in again, or ask whoever runs this bot	⚠️ Sign-in to the AI model service failed. Use /login to sign in again, or ask whoever runs this bot
+core	gateway.errors.connection_interrupted	KEEP-product	⚠️ The connection to the AI model service was interrupted mid-request — usually transient. Use /retr	⚠️ The connection to the AI model service was interrupted mid-request — usually transient. Use /retr
+core	gateway.errors.unreachable	KEEP-product	⚠️ The AI model service isn't reachable right now — the configured model endpoint is not running or 	⚠️ The AI model service isn't reachable right now — the configured model endpoint is not running or 
+core	gateway.errors.connection_unknown	RENAME	⚠️ Hermes could not reach the AI model service (no further detail from the SDK). Use /retry to try again; if it persists, run `hermes doctor	⚠️ СЭМ could not reach the AI model service (no further detail from the SDK). Use /retry to try again; if it persists, run `hermes doctor` o
+core	gateway.errors.provider_kept_failing	KEEP-product	⚠️ The AI model service kept failing. Use /retry to try again, or /model to switch models. Details a	⚠️ The AI model service kept failing. Use /retry to try again, or /model to switch models. Details a
+core	gateway.errors.generic_failed	KEEP-product	⚠️ Something went wrong and I couldn't finish this reply. Use /retry to try again, or /new to start 	⚠️ Something went wrong and I couldn't finish this reply. Use /retry to try again, or /new to start 
+core	gateway.errors.generic_failed_with_hint	KEEP-product	⚠️ Something went wrong and I couldn't finish this reply.{hint} ⏎ Use /retry to try again, or /new to 	⚠️ Something went wrong and I couldn't finish this reply.{hint} ⏎ Use /retry to try again, or /new to 
+core	gateway.errors.no_credentials	KEEP-product	⚠️ I couldn't connect to the AI model service, so this message wasn't processed. Use /login to sign 	⚠️ I couldn't connect to the AI model service, so this message wasn't processed. Use /login to sign 
+core	gateway.skills.disabled	KEEP-product	The **{name}** skill is installed but disabled. ⏎ Enable it with: `hermes skills config`	The **{name}** skill is installed but disabled. ⏎ Enable it with: `hermes skills config`
+core	gateway.skills.not_installed	KEEP-product	The **{name}** skill is available but not installed. ⏎ Install it with: `hermes skills install {instal	The **{name}** skill is available but not installed. ⏎ Install it with: `hermes skills install {instal
+core	gateway.skills.disabled_for_platform	KEEP-product	The **{name}** skill is disabled for {platform}. ⏎ Enable it with: `hermes skills config`	The **{name}** skill is disabled for {platform}. ⏎ Enable it with: `hermes skills config`
+core	gateway.skills.stacked_disabled	KEEP-product	The **{names}** skill(s) in this stacked invocation are disabled for {platform}. ⏎ Enable them with: `	The **{names}** skill(s) in this stacked invocation are disabled for {platform}. ⏎ Enable them with: `
+core	gateway.skills.diff_truncated	KEEP-product	 ⏎ … (truncated — full diff in ~/.hermes/pending/skills/{pending_id}.json)	 ⏎ … (truncated — full diff in ~/.hermes/pending/skills/{pending_id}.json)
+core	gateway.busy.behavior_queue_long	RENAME	Messages will be queued for the next turn while Hermes is busy.	Messages will be queued for the next turn while СЭМ is busy.
+core	gateway.busy.behavior_interrupt_long	RENAME	Messages will interrupt the current run while Hermes is busy.	Messages will interrupt the current run while СЭМ is busy.
+core	gateway.pause.not_paused	RENAME	Hermes wasn't paused.	СЭМ wasn't paused.
+core	gateway.pause.already_paused	RENAME	⏸️ Hermes is already paused{suffix}. Use `/pause off` to resume.	⏸️ СЭМ is already paused{suffix}. Use `/pause off` to resume.
+core	gateway.progress.task_card_title	RENAME	Hermes is working	СЭМ is working
+core	gateway.shutdown.cron_interrupted	RENAME	⚠️ Scheduled job '{job}' was cut short because Hermes is {action}; no result this run. It will run again on schedule, or run it now with `he	⚠️ Scheduled job '{job}' was cut short because СЭМ is {action}; no result this run. It will run again on schedule, or run it now with `herme
+core	gateway.shutdown.notice_shutdown	RENAME	⚠️ Hermes is shutting down — your current task will be interrupted. When it is back online, send any message and I'll try to pick up where w	⚠️ СЭМ is shutting down — your current task will be interrupted. When it is back online, send any message and I'll try to pick up where we l
+core	gateway.shutdown.notice_restart	RENAME	⚠️ Hermes is restarting — your current task will be interrupted. Send any message after the restart and I'll try to resume where you left of	⚠️ СЭМ is restarting — your current task will be interrupted. Send any message after the restart and I'll try to resume where you left off.
+core	gateway.startup.handoff_thread_title	RENAME	Hermes — {title}	СЭМ — {title}
+core	gateway.startup.online	RENAME	♻️ Gateway online — Hermes is back and ready.	♻️ Gateway online — СЭМ is back and ready.
+core	gateway.startup.db_corrupt	KEEP-product	⚠️ Session database corruption detected. Messages may not be persisted. Recovery options: ⏎ 1. Run `he	⚠️ Session database corruption detected. Messages may not be persisted. Recovery options: ⏎ 1. Run `he
+core	gateway.startup.db_fts_corrupt	KEEP-product	⚠️ Session database reported a corruption error confined to the search index (FTS5); the message tab	⚠️ Session database reported a corruption error confined to the search index (FTS5); the message tab
+core	gateway.startup.db_then_restart	KEEP-product	{action} Then `hermes {profile_arg}gateway restart`.	{action} Then `hermes {profile_arg}gateway restart`.
+core	gateway.platform.paused	KEEP-product	✓ {name} paused. Resume with `/platform resume {name}` or `hermes gateway restart` to reset.	✓ {name} paused. Resume with `/platform resume {name}` or `hermes gateway restart` to reset.
+core	gateway.bundles.none_plain	KEEP-product	No skill bundles installed. ⏎ Create one with: hermes bundles create <name> --skill <s1> --skill <s2> ⏎ 	No skill bundles installed. ⏎ Create one with: hermes bundles create <name> --skill <s1> --skill <s2> ⏎ 
+core	gateway.bundles.none	KEEP-product	No skill bundles installed. ⏎ Create one on the host with: ⏎   `hermes bundles create <name> --skill <s1	No skill bundles installed. ⏎ Create one on the host with: ⏎   `hermes bundles create <name> --skill <s1
+core	gateway.heartbeat.set	KEEP-product	♥ Heartbeat set (every {interval}): {prompt} ⏎ Fires as a normal turn whenever this session is idle an	♥ Heartbeat set (every {interval}): {prompt} ⏎ Fires as a normal turn whenever this session is idle an
+core	platform.discord.approval.question	RENAME	Do you want Hermes to run this command?	Do you want СЭМ to run this command?
+core	platform.discord.prompt.clarify_title	RENAME	Hermes needs your input	СЭМ needs your input
+core	platform.discord.command.reset.description	RENAME	Reset your Hermes session	Reset your СЭМ session
+core	platform.discord.command.status.description	RENAME	Show Hermes session status	Show СЭМ session status
+core	platform.discord.command.stop.description	KEEP-product	Stop the running Hermes agent	Stop the running Hermes agent
+core	platform.discord.command.reload_skills.description	KEEP-product	Re-scan ~/.hermes/skills/ for new or removed skills	Re-scan ~/.hermes/skills/ for new or removed skills
+core	platform.discord.command.restart.description	KEEP-product	Gracefully restart the Hermes gateway	Gracefully restart the Hermes gateway
+core	platform.discord.command.thread.description	RENAME	Create a new thread and start a Hermes session in it	Create a new thread and start a СЭМ session in it
+core	platform.discord.command.thread.arg_message	RENAME	Optional first message to send to Hermes in the thread	Optional first message to send to СЭМ in the thread
+core	platform.discord.command.skill.description	RENAME	Run a Hermes skill	Run a СЭМ skill
+core	platform.discord.thread.seed_message	RENAME	🧵 Thread created by Hermes: **{name}**	🧵 Thread created by СЭМ: **{name}**
+core	platform.discord.thread.default_name	RENAME	Hermes	СЭМ
+core	platform.discord.thread.handoff_seed	RENAME	🧵 Hermes handoff: **{name}**	🧵 СЭМ handoff: **{name}**
+core	platform.discord.thread.auto_create_failed	RENAME	⚠️ Hermes could not create a Discord thread for this message, so the request was not processed. Please retry.	⚠️ СЭМ could not create a Discord thread for this message, so the request was not processed. Please retry.
+core	platform.telegram.install_hint	KEEP-product	Run `hermes setup` to install Telegram support.	Run `hermes setup` to install Telegram support.
+core	platform.slack.task_card.title	RENAME	Hermes is working	СЭМ is working
+core	platform.slack.handoff.seed	RENAME	:thread: Hermes handoff — *{name}*	:thread: СЭМ handoff — *{name}*
+core	platform.matrix.handoff.default_name	RENAME	Hermes session	СЭМ session
+core	platform.google_chat.typing.thinking	RENAME	Hermes is thinking…	СЭМ is thinking…
+core	platform.email.standalone_subject	KEEP-product	Hermes Agent	Hermes Agent
+core	platform.irc.quit_message	KEEP-product	Hermes Agent shutting down	Hermes Agent shutting down
+core	slash.update.description	KEEP-product	Update Hermes Agent to the latest version	Update Hermes Agent to the latest version
+core	slash.hermes.description	RENAME	Talk to Hermes or run a subcommand	Talk to СЭМ or run a subcommand
+core	slash.snapshot.description	KEEP-product	Create or restore state snapshots of Hermes config/state	Create or restore state snapshots of Hermes config/state
+core	slash.discard.description	RENAME	Drop a turn lost when Hermes restarted so this chat's queue runs again	Drop a turn lost when СЭМ restarted so this chat's queue runs again
+core	slash.goal.description	RENAME	Set a standing goal Hermes works on across turns until achieved	Set a standing goal СЭМ works on across turns until achieved
+core	slash.plan.description	KEEP-product	Write a markdown implementation plan to .hermes/plans/ without executing anything	Write a markdown implementation plan to .hermes/plans/ without executing anything
+core	slash.wake.description	RENAME	Toggle the 'Hey Hermes' wake word listener	Toggle the 'Hey СЭМ' wake word listener
+core	slash.busy.description	RENAME	Control how messages behave while Hermes is working	Control how messages behave while СЭМ is working
+core	slash.reload-skills.description	KEEP-product	Re-scan ~/.hermes/skills/ for newly installed or removed skills	Re-scan ~/.hermes/skills/ for newly installed or removed skills
+core	slash.version.description	KEEP-product	Show Hermes Agent version	Show Hermes Agent version
+core	cli.billing.run_portal_then	KEEP-product	Run `hermes portal` to log in, then {cmd}.	Run `hermes portal` to log in, then {cmd}.
+core	cli.billing.killswitch_reason_overview	KEEP-product	A billing admin can turn it on from the portal's Hermes Agent page to add funds here.	A billing admin can turn it on from the portal's Hermes Agent page to add funds here.
+core	cli.billing.killswitch_reason_buy	KEEP-product	A billing admin can turn it on from the portal's Hermes Agent page before adding funds.	A billing admin can turn it on from the portal's Hermes Agent page before adding funds.
+core	cli.billing.keep_going_off_line	RENAME	Keep going on credits: off (Hermes waits for the reset)	Keep going on credits: off (СЭМ waits for the reset)
+core	cli.billing.keep_going_confirm_body	RENAME	Use your credits when included usage runs out. Off: Hermes waits for the reset.	Use your credits when included usage runs out. Off: СЭМ waits for the reset.
+core	cli.billing.keep_going_keep_off_desc	RENAME	keep it off: Hermes waits for the reset	keep it off: СЭМ waits for the reset
+core	cli.billing.keep_going_turn_off_desc	RENAME	Hermes waits for the reset	СЭМ waits for the reset
+core	cli.billing.keep_going_turned_off	RENAME	✅ Keep going on credits: off. Hermes waits for the reset.	✅ Keep going on credits: off. СЭМ waits for the reset.
+core	cli.billing.charge_error_remote_spending_disabled	KEEP-product	Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Ag	Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Ag
+core	cli.billing.revoked_reconnect	KEEP-product	🔴 {who} Reconnect to restore — run `hermes portal` to re-authorize.	🔴 {who} Reconnect to restore — run `hermes portal` to re-authorize.
+core	cli.billing.session_logged_out	KEEP-product	🔴 Your session was logged out. Run `hermes portal` to log in again.	🔴 Your session was logged out. Run `hermes portal` to log in again.
+core	cli.billing.charge_stepup_noninteractive	KEEP-product	Run `hermes portal` and allow Remote Spending, then retry.	Run `hermes portal` and allow Remote Spending, then retry.
+core	cli.billing.allowed_but_org_off	KEEP-product	Remote Spending is allowed for this terminal, but it's still off for this org. A billing admin can t	Remote Spending is allowed for this terminal, but it's still off for this org. A billing admin can t
+core	cli.subscription.stepup_noninteractive	KEEP-product	Run `hermes portal` and allow Remote Spending, then re-run /subscription.	Run `hermes portal` and allow Remote Spending, then re-run /subscription.
+core	cli.model.desc_switch_anyway	RENAME	Use this model for the current Hermes session.	Use this model for the current СЭМ session.
+core	cli.tui.welcome	KEEP-product	Welcome to Hermes Agent! Type your message or /help for commands.	Welcome to Hermes Agent! Type your message or /help for commands.
+core	cli.tui.stdin_unavailable	KEEP-product	Error: stdin (fd 0) is not available. ⏎ This can happen with certain Python installations (e.g. uv-man	Error: stdin (fd 0) is not available. ⏎ This can happen with certain Python installations (e.g. uv-man
+core	cli.voice.err_stt_provider	RENAME	Voice mode requires an STT provider for transcription. ⏎ Run hermes tools and configure Speech-to-Text, then restart Hermes.	Voice mode requires an STT provider for transcription. ⏎ Run hermes tools and configure Speech-to-Text, then restart СЭМ.
+core	cli.voice.wake_profile_hint	KEEP-product	Wake phrase for profile '{profile}' — run: hermes -p {profile}	Wake phrase for profile '{profile}' — run: hermes -p {profile}
+core	cli.voice.mic_silent_macos_hint	KEEP-manual	On macOS: System Settings > Privacy & Security > Microphone — allow your terminal/Hermes, then /wake	On macOS: System Settings > Privacy & Security > Microphone — allow your terminal/Hermes, then /wake
+core	cli.render.banner_version	KEEP-product	Hermes Agent v{version} ({date})	Hermes Agent v{version} ({date})
+core	cli.connect.named_account	RENAME	Hermes named this {name} account {alias}. Rename it anytime.	СЭМ named this {name} account {alias}. Rename it anytime.
+core	cli.plugins.install_hint	KEEP-product	Install one: hermes plugins install owner/repo	Install one: hermes plugins install owner/repo
+core	cli.plugins.bundled_available	KEEP-product	({count} bundled plugins available — see: hermes plugins list)	({count} bundled plugins available — see: hermes plugins list)
+core	cli.plugins.bundled_more	KEEP-product	(+{count} bundled — see: hermes plugins list)	(+{count} bundled — see: hermes plugins list)
+core	cli.plugins.enable_disable_hint	KEEP-product	Enable/disable: hermes plugins enable/disable <name>	Enable/disable: hermes plugins enable/disable <name>
+core	cli.resume.session_id_hint	KEEP-product	Use a session ID from a previous CLI run (hermes sessions list).	Use a session ID from a previous CLI run (hermes sessions list).
+core	cli.startup.sign_in_was_lost	KEEP-product	The {provider} sign-in was lost ({reason}); run `hermes auth add {provider}` to sign in again.	The {provider} sign-in was lost ({reason}); run `hermes auth add {provider}` to sign in again.
+core	cli.startup.run_model_or_setup	KEEP-product	Run 'hermes model' to choose a provider, or 'hermes setup' for first-time setup.	Run 'hermes model' to choose a provider, or 'hermes setup' for first-time setup.
+core	cli.startup.empty_base_url	KEEP-product	⚠️  Provider resolver returned an empty base URL. Check your provider config or run: hermes setup	⚠️  Provider resolver returned an empty base URL. Check your provider config or run: hermes setup
+core	cli.startup.first_run_skipped	KEEP-product	Skipped. Run 'hermes model' or 'hermes setup' any time.	Skipped. Run 'hermes model' or 'hermes setup' any time.
+core	cli.startup.first_run_cancelled	KEEP-product	Setup cancelled. Run 'hermes model' any time.	Setup cancelled. Run 'hermes model' any time.
+core	cli.startup.run_model_to_retry	KEEP-product	Run 'hermes model' to try again.	Run 'hermes model' to try again.
+core	cli.startup.provider_setup_incomplete	KEEP-product	Provider setup didn't complete. Run 'hermes model' to retry.	Provider setup didn't complete. Run 'hermes model' to retry.
+core	cli.startup.stdin_unusable	KEEP-product	 ⏎ Error: stdin is not usable ({error}). ⏎ This can happen with certain Python installations (e.g. uv-ma	 ⏎ Error: stdin is not usable ({error}). ⏎ This can happen with certain Python installations (e.g. uv-ma
+core	cli.session.status_title	KEEP-product	Hermes CLI Status	Hermes CLI Status
+core	cli.session.save_resume_hint	KEEP-product	Resume the live session with: hermes --resume {session_id}	Resume the live session with: hermes --resume {session_id}
+core	cli.commands.busy.long_queue	RENAME	Enter will queue follow-up input while Hermes is busy.	Enter will queue follow-up input while СЭМ is busy.
+core	cli.commands.busy.long_interrupt	RENAME	Enter will redirect the current run while Hermes is busy; /stop still cancels it.	Enter will redirect the current run while СЭМ is busy; /stop still cancels it.
+core	cli.commands.diff.not_enabled	KEEP-product	Checkpoints are not enabled, so there's no session baseline. ⏎ Enable with: hermes --checkpoints ⏎ Or in	Checkpoints are not enabled, so there's no session baseline. ⏎ Enable with: hermes --checkpoints ⏎ Or in
+core	cli.commands.diff.no_session_changes	RENAME	No changes — Hermes hasn't edited any files here yet.	No changes — СЭМ hasn't edited any files here yet.
+core	cli.commands.rollback.not_enabled	KEEP-product	Checkpoints are not enabled. ⏎ Enable with: hermes --checkpoints ⏎ Or in config.yaml: checkpoints: { ena	Checkpoints are not enabled. ⏎ Enable with: hermes --checkpoints ⏎ Or in config.yaml: checkpoints: { ena
+core	cli.commands.export.share_hint	KEEP-product	Share it: the other user runs /import or `hermes profile import <archive>`.	Share it: the other user runs /import or `hermes profile import <archive>`.
+core	cli.commands.import.use_it	KEEP-product	Use it: hermes -p {name}	Use it: hermes -p {name}
+core	cli.commands.handoff.timed_out	KEEP-product	Timed out waiting for the gateway. Is `hermes gateway` running?	Timed out waiting for the gateway. Is `hermes gateway` running?
+core	cli.commands.resume.tip_find_sessions	KEEP-product	Tip:   Use /history or `hermes sessions list` to find sessions.	Tip:   Use /history or `hermes sessions list` to find sessions.
+core	cli.commands.resume.not_found_hint	KEEP-product	Use /sessions or `hermes sessions list` to see available sessions.	Use /sessions or `hermes sessions list` to see available sessions.
+core	cli.commands.bundles.create_hint	KEEP-product	Create one with: hermes bundles create <name> --skill <s1> --skill <s2>	Create one with: hermes bundles create <name> --skill <s1> --skill <s2>
+core	cli.commands.bundles.invoke_hint	KEEP-product	Invoke a bundle with /<slug>. Manage with `hermes bundles`.	Invoke a bundle with /<slug>. Manage with `hermes bundles`.
+core	cli.commands.heartbeat.set_note	KEEP-product	Fires as a normal turn whenever the session is idle and the interval has elapsed. /heartbeat pause |	Fires as a normal turn whenever the session is idle and the interval has elapsed. /heartbeat pause |
+core	cli.commands.update.managed_action	KEEP-product	update Hermes Agent	update Hermes Agent
+core	cli.commands.update.choice_update_desc	KEEP-product	exit the current session and update Hermes Agent	exit the current session and update Hermes Agent
+core	cli.commands.update.title	KEEP-product	☤  Update Hermes Agent	☤  Update Hermes Agent
+core	cli.commands.update.detail	KEEP-product	This will exit the current session and run `hermes update`.	This will exit the current session and run `hermes update`.
+core	cli.banner.context_minimum	RENAME	Hermes needs at least {tokens} tokens. Tool schemas + system prompt use a large fixed prefix.	СЭМ needs at least {tokens} tokens. Tool schemas + system prompt use a large fixed prefix.
+core	cli.banner.hermes_models_not_agentic	KEEP-manual	⚠  Nous Research Hermes 3 & 4 models are NOT agentic and are not designed for use with Hermes Agent.	⚠  Nous Research Hermes 3 & 4 models are NOT agentic and are not designed for use with Hermes Agent.
+core	cli.banner.project_skills_untrusted	KEEP-product	◆ {count} project skill(s) found in {root} but not loaded — run `hermes skills trust` to enable them	◆ {count} project skill(s) found in {root} but not loaded — run `hermes skills trust` to enable them
+core	cli.error.auth	KEEP-product	Your {provider} key was rejected. Run `hermes model` to re-enter it.	Your {provider} key was rejected. Run `hermes model` to re-enter it.
+core	cli.error.unknown	KEEP-product	The model request failed. Run /model to switch or `hermes doctor` to check the setup.	The model request failed. Run /model to switch or `hermes doctor` to check the setup.
+core	cli.error.agent_init_failed	RENAME	Hermes couldn't start the model connection: {error}. Your message was not sent. Run `hermes doctor` to check the setup, or /model to pick a 	СЭМ couldn't start the model connection: {error}. Your message was not sent. Run `hermes doctor` to check the setup, or /model to pick a dif
+core	cli.gateway.starting	KEEP-product	Starting Hermes Gateway (messaging platforms)...	Starting Hermes Gateway (messaging platforms)...
+core	cli.usage.reset_switch_hint	KEEP-product	Switch with `/model` or `hermes auth` first.	Switch with `/model` or `hermes auth` first.
+core	cli.worktree.next_session_deepens	KEEP-product	The next `hermes -w` session deepens the clone and prunes merged worktrees automatically.	The next `hermes -w` session deepens the clone and prunes merged worktrees automatically.
+core	cli.worktree.restore_hint	KEEP-product	Restore it with: hermes worktree restore {name}	Restore it with: hermes worktree restore {name}
+core	explainer.persistence.turn_lease	KEEP-product	the turn was stopped because another Hermes process took over this session. Your reply was not saved	the turn was stopped because another Hermes process took over this session. Your reply was not saved
+core	explainer.persistence.session_row_missing	RENAME	this session was deleted from storage while the chat was still open, and Hermes could not recreate it, so this message was not saved. Send y	this session was deleted from storage while the chat was still open, and СЭМ could not recreate it, so this message was not saved. Send your
+core	explainer.persistence.locked	KEEP-product	the turn was stopped because session storage was busy (another Hermes process was writing to the sta	the turn was stopped because session storage was busy (another Hermes process was writing to the sta
+core	explainer.persistence.replaced	RENAME	the session database file was replaced while Hermes was running, so this message was not saved (a copy is kept in {home}/sessions/). Stop He	the session database file was replaced while СЭМ was running, so this message was not saved (a copy is kept in {home}/sessions/). Stop СЭМ (
+core	explainer.persistence.deleted_wal	RENAME	another Hermes process still holds an old copy of the session database's write-ahead log, so Hermes stopped writing to keep the file safe an	another Hermes process still holds an old copy of the session database's write-ahead log, so СЭМ stopped writing to keep the file safe and t
+core	explainer.persistence.corrupt	KEEP-product	the turn was stopped because the state database reported structural corruption (the transcript would	the turn was stopped because the state database reported structural corruption (the transcript would
+core	explainer.persistence.fts_index	RENAME	the turn was stopped because the session search index (FTS5) is corrupt and could not be detached, so this message was not saved. The messag	the turn was stopped because the session search index (FTS5) is corrupt and could not be detached, so this message was not saved. The messag
+core	explainer.persistence.disk	RENAME	Hermes couldn't save this conversation to disk, so it stopped rather than lose your messages. The disk is probably full: free some space (or	СЭМ couldn't save this conversation to disk, so it stopped rather than lose your messages. The disk is probably full: free some space (or fi
+core	explainer.persistence.default	RENAME	Hermes couldn't save this conversation, so it stopped rather than lose your messages. Possible causes: the drive is out of room, or another 	СЭМ couldn't save this conversation, so it stopped rather than lose your messages. Possible causes: the drive is out of room, or another Her
+core	tips.t007	KEEP-product	/title "my project" names your session — resume it later with /resume or hermes -c.	/title "my project" names your session — resume it later with /resume or hermes -c.
+core	tips.t043	RENAME	Ctrl+Z suspends Hermes to the background — run fg in your shell to resume.	Ctrl+Z suspends СЭМ to the background — run fg in your shell to resume.
+core	tips.t048	KEEP-product	hermes -c resumes your most recent CLI session. hermes -c "project name" resumes by title.	hermes -c resumes your most recent CLI session. hermes -c "project name" resumes by title.
+core	tips.t049	KEEP-product	hermes -w creates an isolated git worktree — perfect for parallel agent workflows.	hermes -w creates an isolated git worktree — perfect for parallel agent workflows.
+core	tips.t050	KEEP-product	hermes -w -q "Fix issue #42" combines worktree isolation with a one-shot query.	hermes -w -q "Fix issue #42" combines worktree isolation with a one-shot query.
+core	tips.t051	KEEP-product	hermes chat -t web,terminal enables only specific toolsets for a focused session.	hermes chat -t web,terminal enables only specific toolsets for a focused session.
+core	tips.t052	KEEP-product	hermes chat -s github-pr-workflow preloads a skill at launch.	hermes chat -s github-pr-workflow preloads a skill at launch.
+core	tips.t053	KEEP-product	hermes chat -q "query" runs a single non-interactive query and exits.	hermes chat -q "query" runs a single non-interactive query and exits.
+core	tips.t054	KEEP-product	hermes chat --max-turns 1000 overrides the default 500-iteration limit per turn.	hermes chat --max-turns 1000 overrides the default 500-iteration limit per turn.
+core	tips.t055	KEEP-product	hermes chat --checkpoints enables filesystem snapshots before every destructive file change.	hermes chat --checkpoints enables filesystem snapshots before every destructive file change.
+core	tips.t056	KEEP-product	hermes --yolo bypasses all dangerous command approval prompts for the entire session.	hermes --yolo bypasses all dangerous command approval prompts for the entire session.
+core	tips.t057	KEEP-product	hermes chat --source telegram tags the session for filtering in hermes sessions list.	hermes chat --source telegram tags the session for filtering in hermes sessions list.
+core	tips.t058	KEEP-product	hermes -p work chat runs under a specific profile without changing your default.	hermes -p work chat runs under a specific profile without changing your default.
+core	tips.t059	KEEP-product	hermes doctor --fix diagnoses and auto-repairs config and dependency issues.	hermes doctor --fix diagnoses and auto-repairs config and dependency issues.
+core	tips.t060	KEEP-product	hermes dump outputs a compact setup summary — great for bug reports.	hermes dump outputs a compact setup summary — great for bug reports.
+core	tips.t061	KEEP-product	hermes config set KEY VALUE auto-routes secrets to .env and everything else to config.yaml.	hermes config set KEY VALUE auto-routes secrets to .env and everything else to config.yaml.
+core	tips.t062	KEEP-product	hermes config edit opens config.yaml in your default editor.	hermes config edit opens config.yaml in your default editor.
+core	tips.t063	KEEP-product	hermes config check scans for missing or stale configuration options.	hermes config check scans for missing or stale configuration options.
+core	tips.t064	KEEP-product	hermes sessions browse opens an interactive session picker with search.	hermes sessions browse opens an interactive session picker with search.
+core	tips.t065	KEEP-product	hermes sessions stats shows session counts by platform and database size.	hermes sessions stats shows session counts by platform and database size.
+core	tips.t066	KEEP-product	hermes sessions prune --older-than 30 cleans up old sessions.	hermes sessions prune --older-than 30 cleans up old sessions.
+core	tips.t067	KEEP-product	hermes skills search react --source skills-sh searches the skills.sh public directory.	hermes skills search react --source skills-sh searches the skills.sh public directory.
+core	tips.t068	KEEP-product	hermes skills check scans installed hub skills for upstream updates.	hermes skills check scans installed hub skills for upstream updates.
+core	tips.t069	KEEP-product	hermes skills tap add myorg/skills-repo adds a custom GitHub skill source.	hermes skills tap add myorg/skills-repo adds a custom GitHub skill source.
+core	tips.t070	KEEP-product	hermes skills snapshot export setup.json exports your skill configuration for backup or sharing.	hermes skills snapshot export setup.json exports your skill configuration for backup or sharing.
+core	tips.t071	KEEP-product	hermes mcp add github --command npx adds MCP servers from the command line.	hermes mcp add github --command npx adds MCP servers from the command line.
+core	tips.t072	KEEP-manual	hermes mcp-serve runs Hermes itself as an MCP server for other agents.	hermes mcp-serve runs Hermes itself as an MCP server for other agents.
+core	tips.t073	KEEP-product	hermes auth add lets you add multiple API keys for credential pool rotation.	hermes auth add lets you add multiple API keys for credential pool rotation.
+core	tips.t074	KEEP-product	hermes completion bash >> ~/.bashrc enables tab completion for all commands and profiles.	hermes completion bash >> ~/.bashrc enables tab completion for all commands and profiles.
+core	tips.t075	KEEP-product	hermes logs -f follows agent.log in real time. --level WARNING --since 1h filters output.	hermes logs -f follows agent.log in real time. --level WARNING --since 1h filters output.
+core	tips.t076	KEEP-product	hermes backup creates a zip backup of your entire Hermes home directory.	hermes backup creates a zip backup of your entire Hermes home directory.
+core	tips.t077	KEEP-product	hermes profile create coder creates an isolated profile that becomes its own command.	hermes profile create coder creates an isolated profile that becomes its own command.
+core	tips.t078	KEEP-product	hermes profile create work --clone copies your current config and keys to a new profile.	hermes profile create work --clone copies your current config and keys to a new profile.
+core	tips.t079	KEEP-product	hermes update syncs new bundled skills to ALL profiles automatically.	hermes update syncs new bundled skills to ALL profiles automatically.
+core	tips.t080	RENAME	hermes gateway install sets up Hermes as a system service (systemd/launchd).	hermes gateway install sets up СЭМ as a system service (systemd/launchd).
+core	tips.t081	KEEP-product	hermes memory setup lets you configure an external memory provider (Honcho, Mem0, etc.).	hermes memory setup lets you configure an external memory provider (Honcho, Mem0, etc.).
+core	tips.t082	KEEP-product	hermes webhook subscribe creates event-driven webhook routes with HMAC validation.	hermes webhook subscribe creates event-driven webhook routes with HMAC validation.
+core	tips.t083	KEEP-product	Save money: hermes tools disables unused tools, hermes skills config trims skills down.	Save money: hermes tools disables unused tools, hermes skills config trims skills down.
+core	tips.t085	KEEP-product	hermes models routes vision, compression, and aux tasks to cheaper models — cuts background token co	hermes models routes vision, compression, and aux tasks to cheaper models — cuts background token co
+core	tips.t099	KEEP-product	Set worktree: true in config.yaml to always create a git worktree (same as hermes -w).	Set worktree: true in config.yaml to always create a git worktree (same as hermes -w).
+core	tips.t107	RENAME	execute_code runs Python scripts that call Hermes tools programmatically — results stay out of context.	execute_code runs Python scripts that call СЭМ tools programmatically — results stay out of context.
+core	tips.t128	KEEP-product	Profile names become shell commands — 'hermes profile create coder' creates the 'coder' command.	Profile names become shell commands — 'hermes profile create coder' creates the 'coder' command.
+core	tips.t129	KEEP-product	hermes profile export coder -o backup.tar.gz creates a portable profile archive.	hermes profile export coder -o backup.tar.gz creates a portable profile archive.
+core	tips.t133	RENAME	When exiting, Hermes prints a resume command with session ID and stats.	When exiting, СЭМ prints a resume command with session ID and stats.
+core	tips.t134	KEEP-product	hermes sessions export backup.jsonl exports all sessions for backup or analysis.	hermes sessions export backup.jsonl exports all sessions for backup or analysis.
+core	tips.t135	KEEP-product	hermes -r SESSION_ID resumes any specific past session by its ID.	hermes -r SESSION_ID resumes any specific past session by its ID.
+core	tips.t142	KEEP-product	hermes skills install official/security/1password installs optional skills from the repo.	hermes skills install official/security/1password installs optional skills from the repo.
+core	tips.t146	KEEP-product	/plan writes a markdown implementation plan to .hermes/plans/ without executing anything.	/plan writes a markdown implementation plan to .hermes/plans/ without executing anything.
+core	tips.t147	KEEP-product	Cron jobs can attach skills: hermes cron add --skill blogwatcher "Check for new posts".	Cron jobs can attach skills: hermes cron add --skill blogwatcher "Check for new posts".
+core	tips.t157	RENAME	Hermes runs on 21 messaging platforms: Telegram, Discord, Slack, WhatsApp, Signal, Matrix, IRC, Microsoft Teams, email, and more.	СЭМ runs on 21 messaging platforms: Telegram, Discord, Slack, WhatsApp, Signal, Matrix, IRC, Microsoft Teams, email, and more.
+core	tips.t158	KEEP-product	hermes gateway install sets it up as a system service that starts on boot.	hermes gateway install sets it up as a system service that starts on boot.
+core	tips.t160	RENAME	BlueBubbles brings iMessage to Hermes via a local macOS server.	BlueBubbles brings iMessage to СЭМ via a local macOS server.
+core	tips.t172	KEEP-product	Context files (.hermes.md, AGENTS.md) are security-scanned for prompt injection before loading.	Context files (.hermes.md, AGENTS.md) are security-scanned for prompt injection before loading.
+core	tips.t177	RENAME	Hermes loads project context from .hermes.md, AGENTS.md, CLAUDE.md, or .cursorrules (first match).	СЭМ loads project context from .hermes.md, AGENTS.md, CLAUDE.md, or .cursorrules (first match).
+core	tips.t181	KEEP-product	Camofox (anti-detection Firefox) is a plugin now: hermes plugins install camofox.	Camofox (anti-detection Firefox) is a plugin now: hermes plugins install camofox.
+core	tips.t184	KEEP-product	hermes mcp opens an interactive picker of Nous-approved MCPs you can install in one keystroke.	hermes mcp opens an interactive picker of Nous-approved MCPs you can install in one keystroke.
+core	tips.t185	KEEP-product	hermes mcp catalog lists Nous-approved MCP servers shipped with the repo.	hermes mcp catalog lists Nous-approved MCP servers shipped with the repo.
+core	tips.t186	KEEP-product	hermes mcp install <name> installs a catalog entry, prompts for credentials, and lets you pick which	hermes mcp install <name> installs a catalog entry, prompts for credentials, and lets you pick which
+core	tips.t189	KEEP-product	MCP servers auto-generate toolsets at runtime — hermes tools can toggle them per platform.	MCP servers auto-generate toolsets at runtime — hermes tools can toggle them per platform.
+core	tips.t194	KEEP-product	Checkpoints use shadow repos in ~/.hermes/checkpoints/ — your project's .git is never touched.	Checkpoints use shadow repos in ~/.hermes/checkpoints/ — your project's .git is never touched.
+core	tips.t196	KEEP-product	hermes chat -Q enables quiet mode for programmatic use — suppresses banner and spinner.	hermes chat -Q enables quiet mode for programmatic use — suppresses banner and spinner.
+core	tips.t199	KEEP-product	hermes plugins install owner/repo installs plugins directly from GitHub.	hermes plugins install owner/repo installs plugins directly from GitHub.
+core	tips.t200	KEEP-product	External memory providers: Honcho, Hindsight, Mem0, OpenViking and more via hermes plugins install.	External memory providers: Honcho, Hindsight, Mem0, OpenViking and more via hermes plugins install.
+core	tips.t208	RENAME	hermes acp runs Hermes as an ACP server for VS Code, Zed, and JetBrains integration.	hermes acp runs СЭМ as an ACP server for VS Code, Zed, and JetBrains integration.
+core	tips.t212	KEEP-product	hermes auth add nous or hermes auth add openai-codex sets up OAuth-based providers.	hermes auth add nous or hermes auth add openai-codex sets up OAuth-based providers.
+core	tips.t215	KEEP-product	hermes status --deep runs deeper diagnostic checks across all components.	hermes status --deep runs deeper diagnostic checks across all components.
+core	tips.t217	KEEP-product	Cron scripts live in ~/.hermes/scripts/ and run before the agent — perfect for data collection pipel	Cron scripts live in ~/.hermes/scripts/ and run before the agent — perfect for data collection pipel
+core	tips.t219	RENAME	SOUL.md completely replaces the agent's default identity — rewrite it to make Hermes your own.	SOUL.md completely replaces the agent's default identity — rewrite it to make СЭМ your own.
+core	tips.t223	RENAME	Before a gateway session reset, Hermes auto-flushes important facts to memory in the background.	Before a gateway session reset, СЭМ auto-flushes important facts to memory in the background.
+core	tips.t228	KEEP-product	execute_code helpers require explicit imports: from hermes_tools import json_parse, shell_quote, ret	execute_code helpers require explicit imports: from hermes_tools import json_parse, shell_quote, ret
+core	tips.t243	KEEP-product	The skills audit log at ~/.hermes/skills/.hub/audit.log tracks every install and removal operation.	The skills audit log at ~/.hermes/skills/.hub/audit.log tracks every install and removal operation.
+core	tips.t244	KEEP-product	Stale git worktrees are auto-cleaned: clean merged trees are removed; idle dirty or unpushed trees a	Stale git worktrees are auto-cleaned: clean merged trees are removed; idle dirty or unpushed trees a
+core	tips.t245	KEEP-manual	Profiles scope Hermes state via HERMES_HOME; host tool subprocesses keep your real HOME unless termi	Profiles scope Hermes state via HERMES_HOME; host tool subprocesses keep your real HOME unless termi
+core	tips.t249	KEEP-product	Every interrupt during an agent run is logged to ~/.hermes/interrupt_debug.log with timestamps.	Every interrupt during an agent run is logged to ~/.hermes/interrupt_debug.log with timestamps.
+core	tips.t267	KEEP-product	Profile names cannot collide with existing PATH binaries — 'hermes profile create ls' would be rejec	Profile names cannot collide with existing PATH binaries — 'hermes profile create ls' would be rejec
+core	tips.t268	KEEP-product	hermes profile create backup --clone-all copies everything (config, keys, SOUL.md, memories, skills,	hermes profile create backup --clone-all copies everything (config, keys, SOUL.md, memories, skills,
+core	tips.t275	KEEP-product	hermes import-agent openclaw --dry-run previews OpenClaw migration without writing anything.	hermes import-agent openclaw --dry-run previews OpenClaw migration without writing anything.
+core	tips.t280	KEEP-product	Each MCP server gets its own toolset (mcp-servername) that can be toggled independently via hermes t	Each MCP server gets its own toolset (mcp-servername) that can be toggled independently via hermes t
+core	tips.t281	KEEP-product	MCP ${ENV_VAR} placeholders in config are resolved at server spawn — including vars from ~/.hermes/.	MCP ${ENV_VAR} placeholders in config are resolved at server spawn — including vars from ~/.hermes/.
+core	tips.t283	KEEP-product	The skills quarantine at ~/.hermes/skills/.hub/quarantine/ holds skills pending security review.	The skills quarantine at ~/.hermes/skills/.hub/quarantine/ holds skills pending security review.
+core	tips.t285	RENAME	/goal <text> sets a standing Ralph-loop objective — Hermes auto-continues turn after turn until a judge says done.	/goal <text> sets a standing Ralph-loop objective — СЭМ auto-continues turn after turn until a judge says done.
+core	tips.t286	KEEP-product	/snapshot create [label] saves a full state snapshot of Hermes config; /snapshot restore <id> revert	/snapshot create [label] saves a full state snapshot of Hermes config; /snapshot restore <id> revert
+core	tips.t291	RENAME	/busy queue|steer|interrupt controls what pressing Enter does while Hermes is working.	/busy queue|steer|interrupt controls what pressing Enter does while СЭМ is working.
+core	tips.t296	KEEP-product	/reload reloads ~/.hermes/.env into the running session — pick up new API keys without restarting.	/reload reloads ~/.hermes/.env into the running session — pick up new API keys without restarting.
+core	tips.t300	KEEP-product	Gateway hooks live under ~/.hermes/hooks/<name>/ with HOOK.yaml + handler.py — handler must be named	Gateway hooks live under ~/.hermes/hooks/<name>/ with HOOK.yaml + handler.py — handler must be named
+core	tips.t302	KEEP-product	Drop a ~/.hermes/BOOT.md checklist and a gateway:startup hook runs it as a one-shot agent every boot	Drop a ~/.hermes/BOOT.md checklist and a gateway:startup hook runs it as a one-shot agent every boot
+core	tips.t303	KEEP-product	hermes curator run --dry-run previews what the curator would archive or consolidate without mutating	hermes curator run --dry-run previews what the curator would archive or consolidate without mutating
+core	tips.t304	KEEP-product	hermes curator pin <skill> hard-fences a skill against both auto-archival and the agent's skill_mana	hermes curator pin <skill> hard-fences a skill against both auto-archival and the agent's skill_mana
+core	tips.t305	KEEP-product	hermes curator rollback restores skills from a pre-run snapshot — backups live under skills/.curator	hermes curator rollback restores skills from a pre-run snapshot — backups live under skills/.curator
+core	tips.t306	KEEP-product	hermes auth reset <provider> [target] clears cooldowns and exhaustion flags on a whole credential po	hermes auth reset <provider> [target] clears cooldowns and exhaustion flags on a whole credential po
+core	tips.t315	KEEP-product	hermes dashboard launches a local web UI at 127.0.0.1:9119 — zero data leaves localhost.	hermes dashboard launches a local web UI at 127.0.0.1:9119 — zero data leaves localhost.
+core	tips.t316	KEEP-product	hermes dashboard embeds the full Hermes TUI in your browser via xterm.js and a WebSocket PTY.	hermes dashboard embeds the full Hermes TUI in your browser via xterm.js and a WebSocket PTY.
+core	tips.t317	KEEP-product	Drop a YAML in ~/.hermes/dashboard-themes/ with two palette colors to reskin the entire dashboard.	Drop a YAML in ~/.hermes/dashboard-themes/ with two palette colors to reskin the entire dashboard.
+core	tips.t318	KEEP-product	Dashboard plugins are drop-in: manifest.json + JS bundle in ~/.hermes/dashboard-plugins/ — no npm bu	Dashboard plugins are drop-in: manifest.json + JS bundle in ~/.hermes/dashboard-plugins/ — no npm bu
+core	tips.t327	KEEP-product	tts.provider: piper runs 44-language local TTS on CPU — voices auto-download to ~/.hermes/cache/pipe	tts.provider: piper runs 44-language local TTS on CPU — voices auto-download to ~/.hermes/cache/pipe
+core	tips.t344	KEEP-product	/reload-skills re-scans ~/.hermes/skills/ so drop-in skills appear without restarting the session.	/reload-skills re-scans ~/.hermes/skills/ so drop-in skills appear without restarting the session.
+core	tips.t347	KEEP-product	hermes -z "<prompt>" is the purest one-shot: final answer on stdout, nothing else — ideal for piping	hermes -z "<prompt>" is the purest one-shot: final answer on stdout, nothing else — ideal for piping
+core	tips.t348	KEEP-product	hermes chat --pass-session-id injects the session ID into the system prompt so the agent can self-re	hermes chat --pass-session-id injects the session ID into the system prompt so the agent can self-re
+core	tips.t349	KEEP-product	hermes chat --image path/to/pic.png attaches a local image to a single -q query without a separate u	hermes chat --image path/to/pic.png attaches a local image to a single -q query without a separate u
+core	tips.t350	KEEP-product	hermes chat --ignore-user-config skips the active user config — reproducible bug reports and CI runs	hermes chat --ignore-user-config skips the active user config — reproducible bug reports and CI runs
+core	tips.t351	KEEP-product	hermes chat --source tool tags programmatic chats so they don't clutter hermes sessions list.	hermes chat --source tool tags programmatic chats so they don't clutter hermes sessions list.
+core	tips.t352	KEEP-product	hermes dump --show-keys includes redacted API key fingerprints for deeper support debugging.	hermes dump --show-keys includes redacted API key fingerprints for deeper support debugging.
+core	tips.t353	KEEP-product	hermes sessions rename <ID> "new title" renames any past session; hermes sessions delete <ID> remove	hermes sessions rename <ID> "new title" renames any past session; hermes sessions delete <ID> remove
+core	tips.t354	RENAME	hermes import restores a full Hermes backup zip; session JSON/JSONL exports import from the dashboard Sessions page.	hermes import restores a full СЭМ backup zip; session JSON/JSONL exports import from the dashboard Sessions page.
+core	tips.t355	KEEP-product	hermes fallback manages the fallback_model chain interactively — no hand-editing config.yaml.	hermes fallback manages the fallback_model chain interactively — no hand-editing config.yaml.
+core	tips.t356	KEEP-product	hermes pairing rotates the DM pairing token — the first messager after rotation claims access to the	hermes pairing rotates the DM pairing token — the first messager after rotation claims access to the
+core	tips.t357	KEEP-product	hermes setup walks first-time users through provider, keys, and platform wiring in one interactive f	hermes setup walks first-time users through provider, keys, and platform wiring in one interactive f
+core	tips.t358	KEEP-product	hermes status --deep runs the full health sweep across every component; plain hermes status is the q	hermes status --deep runs the full health sweep across every component; plain hermes status is the q
+core	tips.t360	KEEP-product	HERMES_ENABLE_PROJECT_PLUGINS=1 auto-loads repo-local plugins from ./.hermes/plugins/ — trust-gated 	HERMES_ENABLE_PROJECT_PLUGINS=1 auto-loads repo-local plugins from ./.hermes/plugins/ — trust-gated 
+core	tips.t376	KEEP-product	Dashboard plugins are served from /dashboard-plugins/<name>/ — drop files into ~/.hermes/dashboard-p	Dashboard plugins are served from /dashboard-plugins/<name>/ — drop files into ~/.hermes/dashboard-p
+core	tips.t377	KEEP-product	--source tool chats are excluded from hermes sessions list by default — set --source explicitly to s	--source tool chats are excluded from hermes sessions list by default — set --source explicitly to s
+desktop	sharedMetrics.consentBody	RENAME	Hermes can count how you use it: session length, which models and tools run, and when something fails. It never records your messages, files	СЭМ can count how you use it: session length, which models and tools run, and when something fails. It never records your messages, files, p
+desktop	sharedMetrics.collectedMachine	RENAME	Machine: OS, RAM range, GPU type, Hermes version, local model use	Machine: OS, RAM range, GPU type, СЭМ version, local model use
+desktop	sharedMetrics.sending	RENAME	If you share, Hermes sends stats to Nous once a day with a random ID for this profile. Apart from a one-time note that Hermes was installed,	If you share, СЭМ sends stats to Nous once a day with a random ID for this profile. Apart from a one-time note that СЭМ was installed, stats
+desktop	sharedMetrics.unavailable	KEEP-product	Update the Hermes backend to change this setting.	Update the Hermes backend to change this setting.
+desktop	appTour.capabilities.text	RENAME	Skills, tools and plugins Hermes can use. Add more here.	Skills, tools and plugins СЭМ can use. Add more here.
+desktop	appTour.messaging.text	RENAME	Reach Hermes from Telegram, Slack, Discord and more.	Reach СЭМ from Telegram, Slack, Discord and more.
+desktop	firstRun.intro.greeting	RENAME	Hi, I'm Hermes.	Hi, I'm СЭМ.
+desktop	connectors.disclaimer	RENAME	Connecting is optional. Only authorize the apps you want Hermes to use.	Connecting is optional. Only authorize the apps you want СЭМ to use.
+desktop	connectors.namedAccount	RENAME	Hermes named this {0} account {1}.	СЭМ named this {0} account {1}.
+desktop	catalog.snapshotHint	KEEP-product	From the Hermes catalog. Browsing never contacts source repositories.	From the Hermes catalog. Browsing never contacts source repositories.
+desktop	catalog.developer.title	RENAME	Build for Hermes	Build for СЭМ
+desktop	catalog.toolsets.mostUsedBlurb	RENAME	The toolsets Hermes reaches for most on this profile.	The toolsets СЭМ reaches for most on this profile.
+desktop	catalog.toolsets.essentialsBlurb	RENAME	What most Hermes work runs on.	What most СЭМ work runs on.
+desktop	catalog.toolsets.themes.recall.blurb	RENAME	What Hermes remembers, and the skills and history it can search.	What СЭМ remembers, and the skills and history it can search.
+desktop	connectorsPage.card.inCatalog	KEEP-product	In the Hermes catalog	In the Hermes catalog
+desktop	connectorsPage.page.noMatchBody	RENAME	Nothing here matches. Point Hermes at your own MCP server to add it.	Nothing here matches. Point СЭМ at your own MCP server to add it.
+desktop	connectorsPage.page.disconnectNoAccount	RENAME	Hermes has no account to disconnect here. Refresh the page and try again.	СЭМ has no account to disconnect here. Refresh the page and try again.
+desktop	connectorsPage.dialog.disconnectBody	RENAME	Hermes stops acting as this account. You can connect again at any time.	СЭМ stops acting as this account. You can connect again at any time.
+desktop	connectorsPage.dialog.appSwitch	RENAME	Hermes can use {0}	СЭМ can use {0}
+desktop	connectorsPage.dialog.bothOn	RENAME	Both are on, so Hermes sees every {0} tool twice.	Both are on, so СЭМ sees every {0} tool twice.
+desktop	connectorsPage.dialog.rulesSignIn	RENAME	Sign in to change what Hermes may do here.	Sign in to change what СЭМ may do here.
+desktop	connectorsPage.accounts.removeBody	RENAME	Hermes stops acting as this account. Your other accounts stay connected.	СЭМ stops acting as this account. Your other accounts stay connected.
+desktop	connectorsPage.tools.summaryTitle	RENAME	What Hermes may do with {0}	What СЭМ may do with {0}
+desktop	connectorsPage.tools.summaryPreviewTitle	RENAME	What Hermes could do with {0} once you connect	What СЭМ could do with {0} once you connect
+desktop	connectorsPage.tools.goneBody	RENAME	Hermes cannot call it any more. The row stays until you remove it, so nothing vanishes.	СЭМ cannot call it any more. The row stays until you remove it, so nothing vanishes.
+desktop	sessionImport.subtitle	RENAME	Bring a conversation into Hermes and pick up where you left off.	Bring a conversation into СЭМ and pick up where you left off.
+desktop	sessionImport.chooseHelp	RENAME	Choose a session to read its history before bringing it into Hermes.	Choose a session to read its history before bringing it into СЭМ.
+desktop	sessionImport.snapshot	RENAME	This conversation is already in Hermes. Open your existing copy to continue.	This conversation is already in СЭМ. Open your existing copy to continue.
+desktop	sessionImport.open	RENAME	Open in Hermes	Open in СЭМ
+desktop	sessionImport.continue	RENAME	Continue in Hermes	Continue in СЭМ
+desktop	boot.ready	KEEP-product	Hermes Desktop is ready	Hermes Desktop is ready
+desktop	boot.steps.loadingSettings	RENAME	Loading Hermes settings	Loading СЭМ settings
+desktop	boot.steps.retryingRemoteBackend	KEEP-product	Reconnecting to the remote Hermes backend…	Reconnecting to the remote Hermes backend…
+desktop	boot.steps.startingHermesDesktop	KEEP-product	Starting Hermes Desktop…	Starting Hermes Desktop…
+desktop	boot.errors.backgroundExitedDuringStartup	RENAME	Hermes stopped right after it started.	СЭМ stopped right after it started.
+desktop	boot.errors.backendStopped	RENAME	Hermes stopped working in the background	СЭМ stopped working in the background
+desktop	boot.errors.restartHermes	RENAME	Restart Hermes	Restart СЭМ
+desktop	boot.errors.desktopBootFailed	RENAME	Hermes couldn't start	СЭМ couldn't start
+desktop	boot.errors.gatewayConnectionLost	RENAME	Hermes lost its connection	СЭМ lost its connection
+desktop	boot.errors.gatewaySignInRequired	RENAME	Your remote Hermes signed you out	Your remote СЭМ signed you out
+desktop	boot.errors.ipcBridgeUnavailable	KEEP-product	Hermes Desktop couldn't talk to its own background layer. Restart the app.	Hermes Desktop couldn't talk to its own background layer. Restart the app.
+desktop	boot.causes.exitedEarly	RENAME	Hermes' background service stopped right after starting.	СЭМ' background service stopped right after starting.
+desktop	boot.causes.timedOut	RENAME	Hermes' background service didn't answer in time.	СЭМ' background service didn't answer in time.
+desktop	boot.causes.permission	RENAME	Hermes couldn't write to its data folder (permission problem).	СЭМ couldn't write to its data folder (permission problem).
+desktop	boot.causes.diskFull	RENAME	The disk is full, so Hermes could not start.	The disk is full, so СЭМ could not start.
+desktop	boot.causes.portInUse	RENAME	Another program is using the network port Hermes needs.	Another program is using the network port СЭМ needs.
+desktop	boot.causes.installMissing	RENAME	Part of Hermes' installation is missing. Choose Repair install to put it back.	Part of СЭМ' installation is missing. Choose Repair install to put it back.
+desktop	boot.failure.title	RENAME	Hermes couldn't start	СЭМ couldn't start
+desktop	boot.failure.description	RENAME	Hermes' background service didn't come up. Try one of the recovery steps below. Nothing here deletes your chats or settings.	СЭМ' background service didn't come up. Try one of the recovery steps below. Nothing here deletes your chats or settings.
+desktop	boot.failure.webappTitle	RENAME	Sign in to Hermes	Sign in to СЭМ
+desktop	boot.failure.webappDescription	KEEP-product	Run hermes webapp on this computer to sign this browser in.	Run hermes webapp on this computer to sign this browser in.
+desktop	boot.updateHold.title	RENAME	An earlier update still holds Hermes	An earlier update still holds СЭМ
+desktop	boot.updateHold.titleUnverified	RENAME	Hermes can't confirm the last update finished	СЭМ can't confirm the last update finished
+desktop	boot.updateHold.description	RENAME	Hermes is holding off on starting so it can't load files an update may still be changing. It starts by itself as soon as the hold ends.	СЭМ is holding off on starting so it can't load files an update may still be changing. It starts by itself as soon as the hold ends.
+desktop	boot.updateHold.heldByProcess	KEEP-product	The update (process {0}) exited, but a process it started still holds the Hermes install.	The update (process {0}) exited, but a process it started still holds the Hermes install.
+desktop	boot.updateHold.heldUnknown	KEEP-product	An update exited, but a process it started still holds the Hermes install.	An update exited, but a process it started still holds the Hermes install.
+desktop	boot.updateHold.unverified	RENAME	The update helper couldn't check who owns the Hermes install right now. Hermes keeps checking.	The update helper couldn't check who owns the Hermes install right now. СЭМ keeps checking.
+desktop	boot.updateHold.recoveryHint	RENAME	This usually clears in a few minutes. If it does not: quit Hermes, end leftover git or hermes processes (or restart the computer), then open	This usually clears in a few minutes. If it does not: quit СЭМ, end leftover git or hermes processes (or restart the computer), then open СЭ
+desktop	boot.updateHold.quit	RENAME	Quit Hermes	Quit СЭМ
+desktop	boot.updateHold.confirmTitle	RENAME	Start Hermes while the update still holds it?	Start СЭМ while the update still holds it?
+desktop	boot.updateHold.confirmBody	RENAME	The leftover update process may still be changing Hermes' files. Starting now can load a half-updated install, which may not work until you 	The leftover update process may still be changing СЭМ' files. Starting now can load a half-updated install, which may not work until you run
+desktop	boot.updateHold.startAnywayRefused	RENAME	What holds the install changed before Hermes could start. Review it and try again.	What holds the install changed before СЭМ could start. Review it and try again.
+desktop	notifications.sharedProfileWarning	KEEP-product	Another Hermes installation is using this profile. Both installations share its settings and data, s	Another Hermes installation is using this profile. Both installations share its settings and data, s
+desktop	notifications.backendOutOfDateMessage	KEEP-product	Your Hermes backend is older than this desktop build and may not work correctly. Update to align the	Your Hermes backend is older than this desktop build and may not work correctly. Update to align the
+desktop	notifications.desktopOutOfDateTitle	RENAME	Hermes app out of date	СЭМ app out of date
+desktop	notifications.desktopOutOfDateMessage	RENAME	This Hermes app is older than the backend it is connected to and may not work correctly. Update the app to align them.	This СЭМ app is older than the backend it is connected to and may not work correctly. Update the app to align them.
+desktop	notifications.updateHermes	RENAME	Update Hermes	Update СЭМ
+desktop	notifications.updateReadyMessageAppInstaller	RENAME	A new version of Hermes is ready. Update now and Windows will finish it for you.	A new version of СЭМ is ready. Update now and Windows will finish it for you.
+desktop	notifications.errors.storageFailure	RENAME	Hermes couldn't save to its data folder. Open Maintenance to check and repair it.	СЭМ couldn't save to its data folder. Open Maintenance to check and repair it.
+desktop	notifications.errors.gatewayAuthFailed	RENAME	This Hermes no longer accepts your saved sign-in. Open Gateways and sign in again (or paste a new access token), then retry.	This СЭМ no longer accepts your saved sign-in. Open Gateways and sign in again (or paste a new access token), then retry.
+desktop	notifications.errors.methodNotAllowed	RENAME	Hermes' background service is out of step with the app, probably after an update. Restart it to fix this.	СЭМ' background service is out of step with the app, probably after an update. Restart it to fix this.
+desktop	notifications.errors.codeSkewRestartRequired	RENAME	Hermes was updated but is still running the old version. Restart it to finish the update.	СЭМ was updated but is still running the old version. Restart it to finish the update.
+desktop	notifications.errors.restartHermesFailed	RENAME	Couldn't restart Hermes	Couldn't restart СЭМ
+desktop	notifications.actions.restartHermes	RENAME	Restart Hermes	Restart СЭМ
+desktop	notifications.voice.liveDelegationFailed	RENAME	Could not hand the request to Hermes	Could not hand the request to СЭМ
+desktop	notifications.native.inputBody	RENAME	Hermes is waiting for your response.	СЭМ is waiting for your response.
+desktop	notifications.native.turnDoneTitle	RENAME	Hermes finished	СЭМ finished
+desktop	butterbar.legal.before	KEEP-product	Use of Hermes Agent is subject to our 	Use of Hermes Agent is subject to our 
+desktop	promptNotices.sessionCommands.busy	RENAME	session busy \u2014 Hermes is still replying. Stop the current reply first (Stop button, or Ctrl+C in a terminal), then run /{0}.	session busy \u2014 СЭМ is still replying. Stop the current reply first (Stop button, or Ctrl+C in a terminal), then run /{0}.
+desktop	promptNotices.sessionCommands.queueEditUnconfirmed	RENAME	Hermes could not confirm your edit. Save again to retry the same edit; it is never queued twice.	СЭМ could not confirm your edit. Save again to retry the same edit; it is never queued twice.
+desktop	promptNotices.desktopCommands.configFooter	KEEP-product	Change settings in Settings, or edit config.yaml with `hermes config edit` on the gateway host.	Change settings in Settings, or edit config.yaml with `hermes config edit` on the gateway host.
+desktop	promptNotices.desktopCommands.historyHermes	RENAME	Hermes	СЭМ
+desktop	promptNotices.desktopCommands.exportRemote	KEEP-product	/export packages a profile from the gateway host, which is not this machine. Run `hermes profile exp	/export packages a profile from the gateway host, which is not this machine. Run `hermes profile exp
+desktop	promptNotices.desktopCommands.importRemote	KEEP-product	/import installs a profile on the gateway host, which is not this machine. Run `hermes profile impor	/import installs a profile on the gateway host, which is not this machine. Run `hermes profile impor
+desktop	keepAwakeOffer.title	RENAME	Your computer slept while Hermes was working	Your computer slept while СЭМ was working
+desktop	keepAwakeOffer.message	RENAME	Hermes can keep your computer awake while a task runs. The screen still turns off, and on battery your computer may still sleep.	СЭМ can keep your computer awake while a task runs. The screen still turns off, and on battery your computer may still sleep.
+desktop	sendDiagnostics.failedHint	KEEP-product	You can also run `hermes debug share --nous` from a terminal, or `hermes debug share --local` to pri	You can also run `hermes debug share --nous` from a terminal, or `hermes debug share --local` to pri
+desktop	settings.resetConfirm	RENAME	Reset all settings to Hermes defaults?	Reset all settings to СЭМ defaults?
+desktop	settings.plugins.installModal.installUncertain	RENAME	Hermes stopped waiting for the install result, but the plugin may still be installing. Close this dialog and use Rescan in Plugins before tr	СЭМ stopped waiting for the install result, but the plugin may still be installing. Close this dialog and use Rescan in Plugins before tryin
+desktop	settings.vault.otpHint	RENAME	The "setup key" the site shows when you enable 2FA. With it saved, Hermes generates the codes itself.	The "setup key" the site shows when you enable 2FA. With it saved, СЭМ generates the codes itself.
+desktop	settings.vault.sources.notInstalled	RENAME	Not detected. Install the {0} command-line tool and sign in to it; Hermes picks it up automatically.	Not detected. Install the {0} command-line tool and sign in to it; СЭМ picks it up automatically.
+desktop	settings.vault.sources.disabledDesc	RENAME	Detected but turned off for Hermes.	Detected but turned off for СЭМ.
+desktop	settings.vault.sources.unlockedDesc	RENAME	Unlocked for this session. Locks automatically after 30 minutes idle or when Hermes closes.	Unlocked for this session. Locks automatically after 30 minutes idle or when СЭМ closes.
+desktop	settings.notifications.focusedHint	RENAME	Completion alerts only fire while Hermes is in the background.	Completion alerts only fire while СЭМ is in the background.
+desktop	settings.notifications.kinds.input.description	RENAME	Hermes asked a question or needs a password or secret.	СЭМ asked a question or needs a password or secret.
+desktop	settings.notifications.kinds.turnDone.description	RENAME	A turn finished while Hermes was in the background.	A turn finished while СЭМ was in the background.
+desktop	settings.notifications.kinds.plugin.description	RENAME	A desktop plugin sent a notification while Hermes was in the background.	A desktop plugin sent a notification while СЭМ was in the background.
+desktop	settings.notifications.testTitle	RENAME	Hermes	СЭМ
+desktop	settings.searchPlaceholder.about	KEEP-product	About Hermes Desktop	About Hermes Desktop
+desktop	settings.appearance.colorModeDesc	RENAME	Pick a fixed mode or let Hermes follow your system setting.	Pick a fixed mode or let СЭМ follow your system setting.
+desktop	settings.appearance.reactionsDesc	RENAME	iMessage-style emoji tapbacks — react to messages, and Hermes can react to yours.	iMessage-style emoji tapbacks — react to messages, and СЭМ can react to yours.
+desktop	settings.appearance.tipsDesc	RENAME	Occasional hints from the app and Hermes. Each tip appears once. Turns off automatically after your first 30 days; you can turn it back on.	Occasional hints from the app and СЭМ. Each tip appears once. Turns off automatically after your first 30 days; you can turn it back on.
+desktop	settings.appearance.toursDesc	RENAME	Let Hermes spotlight each step as it guides you through the app. Turns off automatically after your first 30 days; you can turn it back on.	Let СЭМ spotlight each step as it guides you through the app. Turns off automatically after your first 30 days; you can turn it back on.
+desktop	settings.appearance.pet.intro	RENAME	Adopt an animated petdex mascot that floats over the app and reacts to what Hermes is doing — running while tools execute, celebrating on su	Adopt an animated petdex mascot that floats over the app and reacts to what СЭМ is doing — running while tools execute, celebrating on succe
+desktop	settings.appearance.pet.restartHint	RENAME	Pets need a quick restart — the running app started before this feature was added. Quit and reopen Hermes, then come back here.	Pets need a quick restart — the running app started before this feature was added. Quit and reopen СЭМ, then come back here.
+desktop	settings.fieldDescriptions.browser.useRealProfile	RENAME	Local browsing uses your real logins. Hermes copies your default browser's profile (cookies, logins, preferences) into a managed snapshot an	Local browsing uses your real logins. СЭМ copies your default browser's profile (cookies, logins, preferences) into a managed snapshot and d
+desktop	settings.fieldDescriptions.agent.maxTurns	RENAME	Upper bound for tool-calling turns before Hermes stops a run.	Upper bound for tool-calling turns before СЭМ stops a run.
+desktop	settings.fieldDescriptions.fileReadMaxChars	RENAME	Maximum characters Hermes can read from one file request.	Maximum characters СЭМ can read from one file request.
+desktop	settings.fieldDescriptions.approvals.mode	RENAME	How Hermes handles commands that need explicit approval.	How СЭМ handles commands that need explicit approval.
+desktop	settings.fieldDescriptions.voice.voiceChatMode	RENAME	chained: speech-to-text → Hermes → text-to-speech with the providers below. gpt-live: one full-duplex OpenAI voice model (gpt-live-1) listen	chained: speech-to-text → СЭМ → text-to-speech with the providers below. gpt-live: one full-duplex OpenAI voice model (gpt-live-1) listens a
+desktop	settings.fieldDescriptions.voice.gptLive.instructions	RENAME	Extra sentences for the live voice persona (tone, pace, language). Hermes keeps its own system prompt.	Extra sentences for the live voice persona (tone, pace, language). СЭМ keeps its own system prompt.
+desktop	settings.fieldDescriptions.updates.nonInteractiveLocalChanges	KEEP-product	When Hermes updates itself from the app (no terminal prompt), keep local source edits (stash) or thr	When Hermes updates itself from the app (no terminal prompt), keep local source edits (stash) or thr
+desktop	settings.uninstallSection.uninstallHermes	RENAME	Uninstall Hermes	Uninstall СЭМ
+desktop	settings.uninstallSection.managedBody	RENAME	This install is managed by your system, so Hermes cannot remove itself.	This install is managed by your system, so СЭМ cannot remove itself.
+desktop	settings.uninstallSection.options.gui.description	KEEP-product	Remove this desktop app. The Hermes agent, your config, and chats all stay.	Remove this desktop app. The Hermes agent, your config, and chats all stay.
+desktop	settings.uninstallSection.options.lite.description	KEEP-product	Remove the app and the Hermes agent, but keep config, chats, and secrets for a future reinstall.	Remove the app and the Hermes agent, but keep config, chats, and secrets for a future reinstall.
+desktop	settings.uninstallSection.options.lite.consequence	KEEP-product	the Chat GUI and the Hermes agent (config, chats, and secrets are kept)	the Chat GUI and the Hermes agent (config, chats, and secrets are kept)
+desktop	settings.uninstallSection.options.full.consequence	KEEP-product	EVERYTHING — the Chat GUI, the Hermes agent, and all of your config, chats, secrets, and logs	EVERYTHING — the Chat GUI, the Hermes agent, and all of your config, chats, secrets, and logs
+desktop	settings.memoryLayers.noProviderDesc	RENAME	Hermes uses only the built-in layer below. Choose an external provider under Settings › Memory & Context to add one.	СЭМ uses only the built-in layer below. Choose an external provider under Settings › Memory & Context to add one.
+desktop	settings.memoryLayers.providerUnknownDesc	RENAME	{0} is the saved provider; Hermes couldn't read whether it is ready.	{0} is the saved provider; СЭМ couldn't read whether it is ready.
+desktop	settings.memoryLayers.builtinDesc	RENAME	MEMORY.md and USER.md are Hermes’s own memory, separate from any external provider. Both load into sessions by default; the memory and user 	MEMORY.md and USER.md are СЭМ’s own memory, separate from any external provider. Both load into sessions by default; the memory and user pro
+desktop	settings.about.channel.stableConfirmBody	RENAME	Hermes will move to the latest published release, which can be older than the code you run now. Data written by newer code may not read corr	СЭМ will move to the latest published release, which can be older than the code you run now. Data written by newer code may not read correct
+desktop	settings.about.channel.rollbackBody	RENAME	This build is newer than the stable release {0}. Installing it moves Hermes back to that release.	This build is newer than the stable release {0}. Installing it moves СЭМ back to that release.
+desktop	settings.about.channel.heldBody	RENAME	This build is newer than stable release {0}. Your sessions already use a gateway runtime that {0} cannot open, so Hermes stays on this build	This build is newer than stable release {0}. Your sessions already use a gateway runtime that {0} cannot open, so СЭМ stays on this build un
+desktop	settings.config.minimizeToTrayDesc	RENAME	Minimize windows or close the main window to hide them in the system tray (menu bar on macOS) and keep Hermes running. Use Quit Hermes from 	Minimize windows or close the main window to hide them in the system tray (menu bar on macOS) and keep СЭМ running. Use Quit СЭМ from the tr
+desktop	settings.config.loading	KEEP-product	Loading Hermes configuration...	Loading Hermes configuration...
+desktop	settings.hudModifier.permission	RENAME	Allow Hermes in System Settings → Privacy & Security → Input Monitoring, then retry. This gesture does not record keystrokes or capture your	Allow СЭМ in System Settings → Privacy & Security → Input Monitoring, then retry. This gesture does not record keystrokes or capture your sc
+desktop	settings.hudModifier.unavailable	RENAME	The HUD gesture helper could not start or stopped unexpectedly. Retry, or restart Hermes. The existing HUD shortcut still works inside Herme	The HUD gesture helper could not start or stopped unexpectedly. Retry, or restart СЭМ. The existing HUD shortcut still works inside СЭМ.
+desktop	settings.hudModifier.missingHelper	RENAME	This Hermes installation is missing the HUD gesture helper. Update or reinstall Hermes, then retry.	This Hermes installation is missing the HUD gesture helper. Update or reinstall СЭМ, then retry.
+desktop	settings.screenshot.enabledDesc	RENAME	Press both Command keys together from any app to capture its frontmost window and attach it to your current Hermes draft. Never sends automa	Press both Command keys together from any app to capture its frontmost window and attach it to your current СЭМ draft. Never sends automatic
+desktop	settings.screenshot.inputPermission	RENAME	Input Monitoring permission lets Hermes detect both Command keys while another app is active. Allow Hermes in System Settings → Privacy & Se	Input Monitoring permission lets СЭМ detect both Command keys while another app is active. Allow СЭМ in System Settings → Privacy & Security
+desktop	settings.screenshot.screenPermission	RENAME	Screen Recording permission lets Hermes capture the frontmost app window when you use this shortcut. Allow Hermes in System Settings → Priva	Screen Recording permission lets СЭМ capture the frontmost app window when you use this shortcut. Allow СЭМ in System Settings → Privacy & S
+desktop	settings.quickEntry.enabledDesc	RENAME	Summon a small composer from anywhere with a global shortcut and fire a prompt without opening Hermes.	Summon a small composer from anywhere with a global shortcut and fire a prompt without opening СЭМ.
+desktop	settings.connections.intro	KEEP-product	Manage this device and every Hermes gateway it can reach through remote, SSH, or Cloud connections.	Manage this device and every Hermes gateway it can reach through remote, SSH, or Cloud connections.
+desktop	settings.connections.updateSkippedCloud	KEEP-product	Managed by Hermes Cloud	Managed by Hermes Cloud
+desktop	settings.connections.kindCloud	KEEP-product	Hermes Cloud	Hermes Cloud
+desktop	settings.connections.kindLocalDesc	KEEP-product	The Hermes runtime managed by this app.	The Hermes runtime managed by this app.
+desktop	settings.connections.kindRemoteDesc	KEEP-product	A Hermes gateway reachable over HTTP(S) — LAN, Tailscale, or the internet.	A Hermes gateway reachable over HTTP(S) — LAN, Tailscale, or the internet.
+desktop	settings.connections.kindCloudDesc	KEEP-product	A hosted instance discovered through your Hermes Cloud account.	A hosted instance discovered through your Hermes Cloud account.
+desktop	settings.connections.kindSshDesc	KEEP-product	A Hermes install reached over SSH.	A Hermes install reached over SSH.
+desktop	settings.connections.headersDesc	RENAME	Sent with every HTTP and WebSocket request to this gateway — for access proxies such as Cloudflare Access (CF-Access-Client-Id / CF-Access-C	Sent with every HTTP and WebSocket request to this gateway — for access proxies such as Cloudflare Access (CF-Access-Client-Id / CF-Access-C
+desktop	settings.connections.cloudAddHint	KEEP-product	Tip: signing in under Hermes Cloud above discovers your agents automatically — use this form only to	Tip: signing in under Hermes Cloud above discovers your agents automatically — use this form only to
+desktop	settings.gateway.unavailableDesc	KEEP-product	Connection settings can only be changed from the Hermes Desktop app on the computer running it.	Connection settings can only be changed from the Hermes Desktop app on the computer running it.
+desktop	settings.gateway.webappHostTitle	KEEP-product	Hermes host	Hermes host
+desktop	settings.gateway.webappHostDesc	KEEP-product	The Webapp always uses the Hermes host that serves it. To switch gateways, sign in to Hermes Cloud o	The Webapp always uses the Hermes host that serves it. To switch gateways, sign in to Hermes Cloud o
+desktop	settings.gateway.webAccess.intro	RENAME	Open Hermes on this computer from your phone or another computer, signed in with your Nous account. Whoever signs in can run commands on thi	Open СЭМ on this computer from your phone or another computer, signed in with your Nous account. Whoever signs in can run commands on this c
+desktop	settings.gateway.webAccess.notRunningDetail	RENAME	Start it to open Hermes from another device.	Start it to open СЭМ from another device.
+desktop	settings.gateway.intro	KEEP-product	Local by default. Use remote when this app should drive a Hermes backend elsewhere. Gateway connecti	Local by default. Use remote when this app should drive a Hermes backend elsewhere. Gateway connecti
+desktop	settings.gateway.envOverrideTitle	RENAME	This connection was fixed by the way Hermes was launched.	This connection was fixed by the way СЭМ was launched.
+desktop	settings.gateway.envOverrideDesc	RENAME	A startup setting outside the app chose this connection, so the options below are read-only. Restart Hermes without that setting — or ask wh	A startup setting outside the app chose this connection, so the options below are read-only. Restart СЭМ without that setting — or ask whoev
+desktop	settings.gateway.localDesc	KEEP-product	Start a private Hermes backend on localhost. This is the default and works offline.	Start a private Hermes backend on localhost. This is the default and works offline.
+desktop	settings.gateway.remoteDesc	KEEP-product	Connect this desktop shell to a remote Hermes backend.	Connect this desktop shell to a remote Hermes backend.
+desktop	settings.gateway.cloudTitle	KEEP-product	Hermes Cloud	Hermes Cloud
+desktop	settings.gateway.cloudDesc	KEEP-product	Sign in once to Hermes Cloud and pick from the agents on your account — no URL to paste.	Sign in once to Hermes Cloud and pick from the agents on your account — no URL to paste.
+desktop	settings.gateway.cloudSignInTitle	KEEP-product	Hermes Cloud	Hermes Cloud
+desktop	settings.gateway.cloudSignIn	KEEP-product	Sign in to Hermes Cloud	Sign in to Hermes Cloud
+desktop	settings.gateway.cloudSignedIn	KEEP-product	Signed in to Hermes Cloud	Signed in to Hermes Cloud
+desktop	settings.gateway.cloudNeedsSignIn	KEEP-product	Sign in to Hermes Cloud to discover the agents on your account.	Sign in to Hermes Cloud to discover the agents on your account.
+desktop	settings.gateway.cloudDiscoverFailed	KEEP-product	Could not load your Hermes Cloud agents	Could not load your Hermes Cloud agents
+desktop	settings.gateway.cloudSignInFailed	KEEP-product	Hermes Cloud sign-in failed	Hermes Cloud sign-in failed
+desktop	settings.gateway.cloudSignedOutTitle	KEEP-product	Signed out of Hermes Cloud	Signed out of Hermes Cloud
+desktop	settings.gateway.cloudSignedOutMessage	KEEP-product	Cleared the Hermes Cloud session.	Cleared the Hermes Cloud session.
+desktop	settings.gateway.remoteUrlDesc	KEEP-product	Base URL for the remote dashboard backend. Path prefixes are supported, for example /hermes.	Base URL for the remote dashboard backend. Path prefixes are supported, for example /hermes.
+desktop	settings.gateway.probeError	RENAME	Hermes can't reach that address. Check the URL and that the other computer is running Hermes — sign-in options appear once it answers.	СЭМ can't reach that address. Check the URL and that the other computer is running СЭМ — sign-in options appear once it answers.
+desktop	settings.gateway.restartingMessage	KEEP-product	Hermes Desktop will reconnect using the saved settings — the shell stays open.	Hermes Desktop will reconnect using the saved settings — the shell stays open.
+desktop	settings.gateway.connectedTo	SKIP-fn	(baseUrl, version) => `Connected to ${baseUrl}${version ? ` \xB7 Hermes ${version}` : ""}`	
+desktop	settings.gateway.sshDesc	RENAME	Hermes is launched on the remote over SSH and tunneled to this app — nothing to start or expose yourself. Requires working key-based SSH acc	СЭМ is launched on the remote over SSH and tunneled to this app — nothing to start or expose yourself. Requires working key-based SSH access
+desktop	settings.gateway.sshHermesPathTitle	RENAME	Hermes path (optional)	СЭМ path (optional)
+desktop	settings.gateway.sshHermesPathDesc	KEEP-product	Full path to the remote hermes binary. Blank = auto-detect.	Full path to the remote hermes binary. Blank = auto-detect.
+desktop	settings.gateway.sshReachable	RENAME	Reachable: {0} ({1}) \u2014 Hermes found	Reachable: {0} ({1}) \u2014 СЭМ found
+desktop	settings.gateway.sshErrAuth	RENAME	SSH authentication failed. Load your key into the ssh-agent (ssh-add) or set an IdentityFile in ~/.ssh/config — Hermes runs ssh non-interact	SSH authentication failed. Load your key into the ssh-agent (ssh-add) or set an IdentityFile in ~/.ssh/config — СЭМ runs ssh non-interactive
+desktop	settings.gateway.sshErrNotInstalled	RENAME	Hermes is not installed on the remote host. Install it there (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh) or set the H	СЭМ is not installed on the remote host. Install it there (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh) or set the СЭМ 
+desktop	settings.gateway.sshErrPlatform	KEEP-product	Unsupported remote platform. Hermes Desktop SSH mode supports Linux, macOS, and Windows remote hosts	Unsupported remote platform. Hermes Desktop SSH mode supports Linux, macOS, and Windows remote hosts
+desktop	settings.gateway.sshErrUpdateRequired	RENAME	Update Hermes on the remote host before connecting with Desktop SSH.	Update СЭМ on the remote host before connecting with Desktop SSH.
+desktop	settings.gateway.sshErrInteractiveAuth	RENAME	Tailscale SSH requires an interactive browser check. In Terminal, run `ssh <host> true`, complete the check, then retry — Hermes runs SSH no	Tailscale SSH requires an interactive browser check. In Terminal, run `ssh <host> true`, complete the check, then retry — СЭМ runs SSH non-i
+desktop	settings.mcp.deepLinkDescription	RENAME	A link asked to add this MCP server to Hermes. Review the exact configuration below — it comes from the link, not from Hermes.	A link asked to add this MCP server to СЭМ. Review the exact configuration below — it comes from the link, not from СЭМ.
+desktop	settings.model.subagents.routing.pluginNotLoaded	RENAME	Advanced Delegation is on, but Hermes has not loaded it yet. Restart Hermes to finish.	Advanced Delegation is on, but СЭМ has not loaded it yet. Restart СЭМ to finish.
+desktop	settings.model.subagents.routing.blockedDetail	RENAME	This mode is saved, so Hermes refuses every subagent instead of quietly using Default.	This mode is saved, so СЭМ refuses every subagent instead of quietly using Default.
+desktop	settings.model.subagents.routing.blockedNotLoaded	RENAME	Subagents will not start until Hermes loads Advanced Delegation. Restart Hermes to finish.	Subagents will not start until СЭМ loads Advanced Delegation. Restart СЭМ to finish.
+desktop	settings.localModels.runtimeInstalledDetail	RENAME	Build {0}, {1} backend. Hermes starts and manages the server for you.	Build {0}, {1} backend. СЭМ starts and manages the server for you.
+desktop	settings.billing.keepGoingOnCredits.description	RENAME	Use your credits when included usage runs out. Off: Hermes waits for the reset.	Use your credits when included usage runs out. Off: СЭМ waits for the reset.
+desktop	settings.billing.errors.cliBillingDisabled.message	KEEP-product	Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Ag	Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Ag
+desktop	settings.providers.intro	RENAME	Sign in with a subscription — no API key to copy. Hermes runs the browser sign-in for you, right here in the app.	Sign in with a subscription — no API key to copy. СЭМ runs the browser sign-in for you, right here in the app.
+desktop	settings.providers.localEndpoint.description	RENAME	Point Hermes at any OpenAI-compatible endpoint (Zyphra, vLLM, llama.cpp, Ollama, etc).	Point СЭМ at any OpenAI-compatible endpoint (Zyphra, vLLM, llama.cpp, Ollama, etc).
+desktop	settings.toolsets.terminalBackend.unavailableMessage	RENAME	Hermes can't run shell commands right now: {0} isn't ready. Switch to Local, or finish setting up {0} and try again.	СЭМ can't run shell commands right now: {0} isn't ready. Switch to Local, or finish setting up {0} and try again.
+desktop	settings.toolsets.browserRealProfile.prompt.body	RENAME	Let Hermes browse with a snapshot of your default browser profile, so sites open already signed in.	Let СЭМ browse with a snapshot of your default browser profile, so sites open already signed in.
+desktop	skills.skillArchivedMessage	KEEP-product	Restorable via hermes curator restore.	Restorable via hermes curator restore.
+desktop	skills.plugins.defaultProfile	RENAME	Hermes (default)	СЭМ (default)
+desktop	skills.plugins.legacyBackend	RENAME	This backend predates key-addressed plugin toggles — update Hermes to manage it here.	This backend predates key-addressed plugin toggles — update СЭМ to manage it here.
+desktop	skills.plugins.catalogProvenance	SKIP-fn	(sha) => `Installed from the Hermes catalog${sha ? ` at pin ${sha}` : ""}.`	
+desktop	skills.plugins.folderAccess.refusedProtected	RENAME	{0} cannot use that folder: it holds Hermes settings, keys or plugin data. Choose a folder that does not contain them.	{0} cannot use that folder: it holds СЭМ settings, keys or plugin data. Choose a folder that does not contain them.
+desktop	skills.plugins.previewScriptRevokeUnsaved	RENAME	Couldn't save that change, so it lasts only until Hermes restarts. {0} is blocked on {1} for now.	Couldn't save that change, so it lasts only until СЭМ restarts. {0} is blocked on {1} for now.
+desktop	skills.plugins.deepLinkCatalogUnknown	RENAME	\u201C{0}\u201D is not in the Hermes plugin catalog. Nothing was installed.	\u201C{0}\u201D is not in the СЭМ plugin catalog. Nothing was installed.
+desktop	skills.plugins.deepLinkCatalogUnavailable	RENAME	Could not load the Hermes plugin catalog. Check your connection and open the link again.	Could not load the СЭМ plugin catalog. Check your connection and open the link again.
+desktop	starmap.emptyDesc	RENAME	As Hermes builds skills and memories for your work, they appear here.	As СЭМ builds skills and memories for your work, they appear here.
+desktop	commandCenter.pets.staleBackend	RENAME	Restart Hermes to use pets — the backend predates this feature.	Restart СЭМ to use pets — the backend predates this feature.
+desktop	commandCenter.generatePet.staleBackend	RENAME	Update Hermes to generate pets.	Update СЭМ to generate pets.
+desktop	commandCenter.generatePet.backgroundHint	RENAME	You can close this — Hermes will notify you when it’s done.	You can close this — СЭМ will notify you when it’s done.
+desktop	commandCenter.nav.settings.detail	KEEP-product	Configure Hermes desktop	Configure Hermes desktop
+desktop	commandCenter.hermesActiveSessions	RENAME	Hermes {0} \xB7 Active sessions {1}	СЭМ {0} \xB7 Active sessions {1}
+desktop	commandCenter.updateHermes	RENAME	Update Hermes	Update СЭМ
+desktop	messaging.restartFailedManual	RENAME	Hermes couldn't restart to apply your messaging settings	СЭМ couldn't restart to apply your messaging settings
+desktop	messaging.telegramQr.subtitle	KEEP-product	Both options connect a bot you control and save its credentials only to this Hermes installation.	Both options connect a bot you control and save its credentials only to this Hermes installation.
+desktop	messaging.telegramQr.quickHelp	RENAME	Scan a QR code and confirm in Telegram. Hermes creates the bot and detects your Telegram user ID automatically.	Scan a QR code and confirm in Telegram. СЭМ creates the bot and detects your Telegram user ID automatically.
+desktop	messaging.fieldCopy.MATRIX_USER_ID.placeholder	KEEP-product	@hermes:example.org	@hermes:example.org
+desktop	profiles.exportNeedsHost	KEEP-product	The browser can't save a profile archive. On the Hermes host, run: hermes profile export {0}	The browser can't save a profile archive. On the Hermes host, run: hermes profile export {0}
+desktop	profiles.fleet.localDevice	RENAME	This device (local backend — installs Hermes if missing, otherwise opens a fresh session)	This device (local backend — installs СЭМ if missing, otherwise opens a fresh session)
+desktop	profiles.fleet.installDeviceTitle	RENAME	Install Hermes on This device?	Install СЭМ on This device?
+desktop	profiles.fleet.installDeviceDesc	RENAME	This will install Hermes locally, then open a fresh session on this computer. Nothing is installed until you confirm.	This will install СЭМ locally, then open a fresh session on this computer. Nothing is installed until you confirm.
+desktop	profiles.remoteOverride.description	RENAME	Sessions in this profile will run on the remote Hermes you point it at, instead of this computer.	Sessions in this profile will run on the remote СЭМ you point it at, instead of this computer.
+desktop	profiles.remoteOverride.urlPlaceholder	KEEP-product	https://hermes.example.com	https://hermes.example.com
+desktop	profiles.defaultDescription	RENAME	Used when Hermes opens and for new chats. Existing sessions stay in their profiles.	Used when СЭМ opens and for new chats. Existing sessions stay in their profiles.
+desktop	profiles.createDesc	RENAME	Profiles are independent Hermes environments: separate config, skills, and SOUL.md.	Profiles are independent СЭМ environments: separate config, skills, and SOUL.md.
+desktop	modelAssignment.saveFailed	RENAME	Hermes did not save that model change.	СЭМ did not save that model change.
+desktop	cron.control.catchUpHint	RENAME	What to do with runs missed while Hermes was not running.	What to do with runs missed while СЭМ was not running.
+desktop	cron.emptyDescNew	RENAME	Schedule a prompt to run on a cron expression. Hermes will run it and deliver results to the destination you pick.	Schedule a prompt to run on a cron expression. СЭМ will run it and deliver results to the destination you pick.
+desktop	sidebar.storageCorrupt.body	RENAME	Hermes can't read all of the session history for {0}. Chats missing from this list were not deleted; the file they are stored in is damaged.	СЭМ can't read all of the session history for {0}. Chats missing from this list were not deleted; the file they are stored in is damaged.
+desktop	sidebar.storageCorrupt.action	RENAME	Quit Hermes on this profile, then inspect the file without changing it, or restore a snapshot:	Quit СЭМ on this profile, then inspect the file without changing it, or restore a snapshot:
+desktop	sidebar.projects.staleBackend	KEEP-product	Update the Hermes backend to create projects — your backend is older than this desktop app (Settings	Update the Hermes backend to create projects — your backend is older than this desktop app (Settings
+desktop	sidebar.projects.deleteConfirm	RENAME	This removes the saved project from Hermes. Files, git repos, and worktrees stay untouched.	This removes the saved project from СЭМ. Files, git repos, and worktrees stay untouched.
+desktop	sidebar.projects.worktreeStaleBackend	KEEP-product	Update the Hermes backend to create worktrees over this remote connection — it predates the git work	Update the Hermes backend to create worktrees over this remote connection — it predates the git work
+desktop	composer.placeholderStarting	RENAME	Starting Hermes...	Starting СЭМ...
+desktop	composer.placeholderReconnecting	RENAME	Reconnecting to Hermes…	Reconnecting to СЭМ…
+desktop	composer.newSessionPlaceholders	RENAME	What are we building?,Give Hermes a task,What's on your mind?,Describe what you need,What should we tackle?,Ask anything,Start with a goal	What are we building?,Give СЭМ a task,What's on your mind?,Describe what you need,What should we tackle?,Ask anything,Start with a goal
+desktop	composer.voiceEngineChained	RENAME	Speech-to-text + Hermes voice	Speech-to-text + СЭМ voice
+desktop	composer.voiceEngineLive	RENAME	GPT-Live (full-duplex, delegates to Hermes)	GPT-Live (full-duplex, delegates to СЭМ)
+desktop	composer.commandDescs./quit	KEEP-product	exit hermes	exit hermes
+desktop	composer.commandDescs./goal	RENAME	Set a standing goal Hermes works on across turns until achieved	Set a standing goal СЭМ works on across turns until achieved
+desktop	composer.commandDescs./plan	KEEP-product	Write a markdown implementation plan to .hermes/plans/ without executing anything	Write a markdown implementation plan to .hermes/plans/ without executing anything
+desktop	composer.commandDescs./profile	RENAME	Switch the active Hermes profile	Switch the active СЭМ profile
+desktop	composer.commandDescs./version	KEEP-product	Show Hermes Agent version	Show Hermes Agent version
+desktop	composer.attachUrlDesc	RENAME	Hermes will fetch the page and include it as context for this turn.	СЭМ will fetch the page and include it as context for this turn.
+desktop	statusStack.coding.agentShip	RENAME	Ask Hermes to open PR	Ask СЭМ to open PR
+desktop	updates.discontinuedTitle	RENAME	This build of Hermes is no longer supported	This build of СЭМ is no longer supported
+desktop	updates.discontinuedBody	RENAME	This build of Hermes is no longer supported and may break — uninstall it. Your data stays on disk.	This build of СЭМ is no longer supported and may break — uninstall it. Your data stays on disk.
+desktop	updates.bundleSwapPendingDesc	RENAME	The updated app is already installed — Hermes only needs to restart to load it. Chats and settings are untouched.	The updated app is already installed — СЭМ only needs to restart to load it. Chats and settings are untouched.
+desktop	updates.bundleSwapPendingAction	RENAME	Restart Hermes	Restart СЭМ
+desktop	updates.stages.update	RENAME	Updating Hermes…	Updating СЭМ…
+desktop	updates.stages.restart	RENAME	Restarting Hermes…	Restarting СЭМ…
+desktop	updates.unsupportedMessage	RENAME	This version of Hermes can’t update itself from inside the app.	This version of СЭМ can’t update itself from inside the app.
+desktop	updates.connectionRetry	RENAME	Hermes couldn't reach the update server. Check your internet connection and try again. If you use a remote Hermes, make sure it is online.	СЭМ couldn't reach the update server. Check your internet connection and try again. If you use a remote СЭМ, make sure it is online.
+desktop	updates.gitUnusable	RENAME	Hermes could not run Git on this computer, so it could not check for updates.	СЭМ could not run Git on this computer, so it could not check for updates.
+desktop	updates.availableBody	RENAME	A new version of Hermes is ready to install.	A new version of СЭМ is ready to install.
+desktop	updates.availableBodyBackend	KEEP-product	A newer version of the connected Hermes backend is ready to install.	A newer version of the connected Hermes backend is ready to install.
+desktop	updates.availableBodyAppInstaller	RENAME	A new version of Hermes is ready. Hermes will close, Windows will finish the update, and Hermes will reopen on its own.	A new version of СЭМ is ready. СЭМ will close, Windows will finish the update, and СЭМ will reopen on its own.
+desktop	updates.manualBody	RENAME	You installed Hermes from the command line, so updates run there too. Paste this into your terminal:	You installed СЭМ from the command line, so updates run there too. Paste this into your terminal:
+desktop	updates.manualBodyBackend	KEEP-product	The Hermes backend is managed outside this app. Run this on the server that hosts it:	The Hermes backend is managed outside this app. Run this on the server that hosts it:
+desktop	updates.manualPickedUp	RENAME	Hermes will pick up the new version next time you launch it.	СЭМ will pick up the new version next time you launch it.
+desktop	updates.guiSkewBody	KEEP-product	The backend was updated, but this desktop app package wasn’t changed. Update or reinstall the Hermes	The backend was updated, but this desktop app package wasn’t changed. Update or reinstall the Hermes
+desktop	updates.applyingBody	RENAME	The Hermes updater takes over in its own window and reopens Hermes automatically when it’s done. Please don’t reopen Hermes yourself while i	The Hermes updater takes over in its own window and reopens СЭМ automatically when it’s done. Please don’t reopen СЭМ yourself while it’s up
+desktop	updates.applyingBodyBackend	RENAME	The remote backend is applying the update and will restart. Hermes reconnects automatically when it’s back.	The remote backend is applying the update and will restart. СЭМ reconnects automatically when it’s back.
+desktop	updates.applyingClose	RENAME	This window will close while the update runs, then Hermes reopens on its own.	This window will close while the update runs, then СЭМ reopens on its own.
+desktop	updates.applyingBodyAppInstaller	RENAME	Hermes will close and Windows will finish the update. Hermes will reopen when it’s done — you don’t need to do anything.	СЭМ will close and Windows will finish the update. СЭМ will reopen when it’s done — you don’t need to do anything.
+desktop	updates.applyingCloseAppInstaller	RENAME	This window will close, Windows finishes the update, and Hermes reopens on its own.	This window will close, Windows finishes the update, and СЭМ reopens on its own.
+desktop	updates.checkUnknownBodyAppInstaller	RENAME	Windows couldn’t check for updates right now. Updates also install automatically when you restart Hermes.	Windows couldn’t check for updates right now. Updates also install automatically when you restart СЭМ.
+desktop	updates.blockerTitle	RENAME	Close local previews to update Hermes?	Close local previews to update СЭМ?
+desktop	updates.blockerBody	RENAME	Hermes needs to stop these local previews before updating. This will not modify or delete your files.	СЭМ needs to stop these local previews before updating. This will not modify or delete your files.
+desktop	updates.foreignBlockerTitle	RENAME	Close other processes to update Hermes	Close other processes to update СЭМ
+desktop	updates.foreignBlockerBody	RENAME	Hermes can’t safely close these processes automatically. Close the app, terminal, or service that owns each one, then try the update again.	СЭМ can’t safely close these processes automatically. Close the app, terminal, or service that owns each one, then try the update again.
+desktop	updates.mixedBlockerBody	RENAME	Hermes can close the local previews listed below. Other processes must be closed manually before the update can continue.	СЭМ can close the local previews listed below. Other processes must be closed manually before the update can continue.
+desktop	updates.applyStatus.owed	KEEP-product	Backend updated, but still owed: {0}. Re-run \`hermes update\` to finish them.	Backend updated, but still owed: {0}. Re-run \`hermes update\` to finish them.
+desktop	updates.appName	RENAME	Hermes	СЭМ
+desktop	updates.bundleOutOfSyncDesc	KEEP-product	The Hermes runtime was updated, but the desktop app itself is still an older build. Update it to pic	The Hermes runtime was updated, but the desktop app itself is still an older build. Update it to pic
+desktop	updates.versionDetailsDistributionSourceInstallerDesktop	KEEP-product	Source (install script) + hermes desktop	Source (install script) + hermes desktop
+desktop	updates.versionDetailsDistributionSourceDesktop	KEEP-product	Source + hermes desktop	Source + hermes desktop
+desktop	install.oneTimeTitle	RENAME	Hermes needs a one-time install	СЭМ needs a one-time install
+desktop	install.setupChoiceTitle	KEEP-product	Set up Hermes Desktop	Set up Hermes Desktop
+desktop	install.setupChoiceDesc	RENAME	Connect this app to a Hermes gateway you already run, or install Hermes locally on this computer.	Connect this app to a Hermes gateway you already run, or install СЭМ locally on this computer.
+desktop	install.setupChoiceDescLocal	RENAME	Install Hermes on this computer, or connect to a Hermes gateway you already run.	Install СЭМ on this computer, or connect to a Hermes gateway you already run.
+desktop	install.connectExistingTitle	RENAME	Connect to existing Hermes	Connect to existing СЭМ
+desktop	install.installLocalTitle	RENAME	Install Hermes locally	Install СЭМ locally
+desktop	install.installLocalDesc	RENAME	Download Hermes, create its Python environment, and run the backend on this computer.	Download СЭМ, create its Python environment, and run the backend on this computer.
+desktop	install.useLocalTitle	RENAME	Use Hermes on this computer	Use СЭМ on this computer
+desktop	install.useLocalDesc	KEEP-product	A Hermes runtime is already installed here — start it with one click. Nothing downloads.	A Hermes runtime is already installed here — start it with one click. Nothing downloads.
+desktop	install.bundledLocalDesc	KEEP-product	Use the Hermes runtime included with this app — the bundled backend is the local install.	Use the Hermes runtime included with this app — the bundled backend is the local install.
+desktop	install.localStartUnavailable	KEEP-product	Local installation could not start. Restart Hermes Desktop and try again.	Local installation could not start. Restart Hermes Desktop and try again.
+desktop	install.remoteSetupTitle	RENAME	Connect to existing Hermes	Connect to existing СЭМ
+desktop	install.remoteSetupDesc	KEEP-product	Enter your gateway URL. Hermes Desktop will detect whether it needs a token or browser sign-in.	Enter your gateway URL. Hermes Desktop will detect whether it needs a token or browser sign-in.
+desktop	install.remoteUrlDesc	KEEP-product	Use the base URL of the Hermes gateway, including https:// when remote.	Use the base URL of the Hermes gateway, including https:// when remote.
+desktop	install.remoteUrlPlaceholder	KEEP-product	https://gateway.example.com/hermes	https://gateway.example.com/hermes
+desktop	install.probeError	RENAME	Hermes can't reach that address. Check the URL and that the other computer is running Hermes — sign-in options appear once it answers.	СЭМ can't reach that address. Check the URL and that the other computer is running СЭМ — sign-in options appear once it answers.
+desktop	install.settingUpTitle	KEEP-product	Setting up Hermes Agent	Setting up Hermes Agent
+desktop	install.failedDesc	RENAME	One of the setup steps did not finish. This can happen when another copy of Hermes is running, the internet connection dropped, or antivirus	One of the setup steps did not finish. This can happen when another copy of СЭМ is running, the internet connection dropped, or antivirus bl
+desktop	install.activeDesc	KEEP-product	This is a one-time setup. The Hermes installer is downloading dependencies and configuring your mach	This is a one-time setup. The Hermes installer is downloading dependencies and configuring your mach
+desktop	onboarding.headerTitle	KEEP-product	Let's get you setup with Hermes Agent	Let's get you setup with Hermes Agent
+desktop	onboarding.preparingInstall	RENAME	Hermes is finishing install. This usually takes under a minute on first run.	СЭМ is finishing install. This usually takes under a minute on first run.
+desktop	onboarding.starting	RENAME	Starting Hermes…	Starting СЭМ…
+desktop	onboarding.setupSlowBody	RENAME	Hermes is still starting in the background.	СЭМ is still starting in the background.
+desktop	onboarding.featuredPitch	RENAME	One subscription, 300+ frontier models — the recommended way to run Hermes	One subscription, 300+ frontier models — the recommended way to run СЭМ
+desktop	onboarding.apiKeyOptions.local.description	RENAME	Point Hermes at a local or self-hosted OpenAI-compatible endpoint (vLLM, llama.cpp, Ollama, etc).	Point СЭМ at a local or self-hosted OpenAI-compatible endpoint (vLLM, llama.cpp, Ollama, etc).
+desktop	onboarding.flowSubtitles.device_code	RENAME	Opens a verification page in your browser — Hermes connects automatically	Opens a verification page in your browser — СЭМ connects automatically
+desktop	onboarding.authorizeThere	RENAME	Authorize Hermes there.	Authorize СЭМ there.
+desktop	freeTier.readyTitle	RENAME	Hermes is ready.	СЭМ is ready.
+desktop	freeTier.busyBody	RENAME	Hermes couldn't finish signing you in because the Nous service is busy. Try again in {0}. Your session is still here in the meantime.	СЭМ couldn't finish signing you in because the Nous service is busy. Try again in {0}. Your session is still here in the meantime.
+desktop	freeTier.unreachableBody	RENAME	Hermes couldn't reach the Nous service to finish signing you in. Check your internet connection and try again. Your session is still here.	СЭМ couldn't reach the Nous service to finish signing you in. Check your internet connection and try again. Your session is still here.
+desktop	freeTier.alreadySignedInBody	RENAME	This Hermes is already signed in to a Nous account.	This СЭМ is already signed in to a Nous account.
+desktop	freeTier.offer.heading	RENAME	Keep going with Hermes	Keep going with СЭМ
+desktop	freeTier.offer.body	RENAME	You're on the free allowance. If you keep using Hermes, you'll start running into limits. Sign in with a free Nous account for a bigger allo	You're on the free allowance. If you keep using СЭМ, you'll start running into limits. Sign in with a free Nous account for a bigger allowan
+desktop	freeTier.setupFailed.gateClosed	RENAME	This version of Hermes can't start without a Nous account. Sign in or create one, it's free and only takes a minute.	This version of СЭМ can't start without a Nous account. Sign in or create one, it's free and only takes a minute.
+desktop	freeTier.setupFailed.paused	RENAME	Using Hermes without signing in is paused for a moment. Hermes will keep checking. Signing in is free and gets you going right now.	Using СЭМ without signing in is paused for a moment. СЭМ will keep checking. Signing in is free and gets you going right now.
+desktop	freeTier.setupFailed.rateLimited	RENAME	Lots of people are getting started right now, so Hermes will try again in {0}. Signing in is free and skips the wait.	Lots of people are getting started right now, so СЭМ will try again in {0}. Signing in is free and skips the wait.
+desktop	freeTier.setupFailed.unreachable	RENAME	Hermes couldn't reach the Nous service. Check your internet connection, then tap Try again. Or connect another provider for now.	СЭМ couldn't reach the Nous service. Check your internet connection, then tap Try again. Or connect another provider for now.
+desktop	freeTier.setupFailed.generic	RENAME	Hermes couldn't set up free access without signing in. Signing in is free, or connect another provider.	СЭМ couldn't set up free access without signing in. Signing in is free, or connect another provider.
+desktop	shell.statusbar.desktopVersion	KEEP-product	Hermes Desktop v{0}	Hermes Desktop v{0}
+desktop	shell.statusbar.connectionCloudTooltip	KEEP-product	Hermes Cloud \xB7 {0}	Hermes Cloud \xB7 {0}
+desktop	preview.largeBody	RENAME	{0} is {1}. Hermes will only show the first 512 KB.	{0} is {1}. СЭМ will only show the first 512 KB.
+desktop	preview.web.restarting	RENAME	Hermes is restarting...	СЭМ is restarting...
+desktop	preview.web.askRestart	RENAME	Ask Hermes to restart the server	Ask СЭМ to restart the server
+desktop	preview.web.lookingRestart	RENAME	Hermes is looking for a preview server to restart ({0})	СЭМ is looking for a preview server to restart ({0})
+desktop	preview.web.restartingMessage	RENAME	Hermes is working in the background. Watch the preview console for progress.	СЭМ is working in the background. Watch the preview console for progress.
+desktop	preview.web.blankPageBody	RENAME	Type an address above to browse, or ask Hermes to open a page.	Type an address above to browse, or ask СЭМ to open a page.
+desktop	preview.web.finishedRestarting	SKIP-fn	(message) => `Hermes finished restarting the preview server${message ? `: ${message}` : ""}`	
+desktop	preview.web.restartFailedMessage	RENAME	Hermes could not restart the server.	СЭМ could not restart the server.
+desktop	preview.web.stillWorking	RENAME	Hermes is still working, but no restart result has arrived yet. The server command may be running in the foreground.	СЭМ is still working, but no restart result has arrived yet. The server command may be running in the foreground.
+desktop	interfaceMode.hint	RENAME	Changes what is shown, not what Hermes can do.	Changes what is shown, not what СЭМ can do.
+desktop	interfaceMode.simple.description	RENAME	For talking to Hermes. Sidebar and chat; no terminal, file or diff panes.	For talking to СЭМ. Sidebar and chat; no terminal, file or diff panes.
+desktop	assistant.thread.loadingResponse	RENAME	Hermes is loading a response	СЭМ is loading a response
+desktop	assistant.thread.errorLayers.generic	RENAME	Hermes couldn't finish this reply	СЭМ couldn't finish this reply
+desktop	assistant.thread.errorLayers.runtime	RENAME	Hermes hit a problem	СЭМ hit a problem
+desktop	assistant.thread.errorLayerBodies.disk	RENAME	Your disk is full, so Hermes could not save this conversation. Free some space, then retry.	Your disk is full, so СЭМ could not save this conversation. Free some space, then retry.
+desktop	assistant.thread.errorLayerBodies.endpoint	RENAME	Hermes can't reach your custom model server. Check that it is running, then send your message again.	СЭМ can't reach your custom model server. Check that it is running, then send your message again.
+desktop	assistant.thread.errorLayerBodies.gateway	RENAME	Hermes hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.	СЭМ hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.
+desktop	assistant.thread.errorLayerBodies.generic	RENAME	Something went wrong while Hermes was replying. Retry, or copy the details if it keeps happening.	Something went wrong while СЭМ was replying. Retry, or copy the details if it keeps happening.
+desktop	assistant.thread.errorLayerBodies.runtime	RENAME	Hermes hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.	СЭМ hit an internal problem starting this reply. Send your message again; if it keeps happening, send diagnostics.
+desktop	assistant.thread.errorCodes.timeout.body	RENAME	Hermes couldn't reach {0}. Check your connection, then retry.	СЭМ couldn't reach {0}. Check your connection, then retry.
+desktop	assistant.thread.errorCodes.no_reply.body	RENAME	Hermes finished this turn, but no reply reached this window. Retry to send it again.	СЭМ finished this turn, but no reply reached this window. Retry to send it again.
+desktop	assistant.thread.errorCodes.loop_error.title	RENAME	Hermes couldn't finish this step	СЭМ couldn't finish this step
+desktop	assistant.thread.errorCodes.SESSION_OWNER_BUSY.title	RENAME	Hermes is busy in this chat	СЭМ is busy in this chat
+desktop	assistant.thread.errorCodes.session_read_only.body	RENAME	It is stored history Hermes can show but not continue, so your message was not run. Start a new chat to send it.	It is stored history СЭМ can show but not continue, so your message was not run. Start a new chat to send it.
+desktop	assistant.thread.errorCodes.local_runtime_unavailable.bodyNoRetry	KEEP-product	The local model server is turned off. Start it from the Hermes desktop app or `hermes model` in a te	The local model server is turned off. Start it from the Hermes desktop app or `hermes model` in a te
+desktop	assistant.thread.errorCodes.agent_init_failed.body	RENAME	Hermes couldn't connect to {0} for this chat. Retry; if it keeps failing, check the provider in Settings.	СЭМ couldn't connect to {0} for this chat. Retry; if it keeps failing, check the provider in Settings.
+desktop	assistant.thread.errorCodes.SESSION_NOT_OWNED.body	RENAME	This chat is open in another Hermes window or terminal. Start a new chat here, or close it there first.	This chat is open in another СЭМ window or terminal. Start a new chat here, or close it there first.
+desktop	assistant.thread.errorCodes.disk_full.body	RENAME	Hermes couldn't save this conversation. Free up space, then retry.	СЭМ couldn't save this conversation. Free up space, then retry.
+desktop	assistant.thread.errorCodes.free_tier_model_not_free.body	RENAME	Hermes uses the free model for now. Sign in with a Nous account for more models, it's free.	СЭМ uses the free model for now. Sign in with a Nous account for more models, it's free.
+desktop	assistant.thread.errorToastTitle	RENAME	Hermes couldn't finish the reply	СЭМ couldn't finish the reply
+desktop	assistant.thread.errorOpenHermesFolder	RENAME	Open Hermes folder	Open СЭМ folder
+desktop	assistant.thread.errorOpenHermesFolderFailed	RENAME	Could not open the Hermes folder	Could not open the СЭМ folder
+desktop	assistant.approval.gatewayDisconnected	RENAME	Hermes is offline right now. The command is still waiting for your answer (until the approval timeout). Reconnect, then send it again.	СЭМ is offline right now. The command is still waiting for your answer (until the approval timeout). Reconnect, then send it again.
+desktop	assistant.approval.timedOutSystemLine	RENAME	Approval timed out — the command was not run. Ask Hermes to try again, or raise the limit in Settings → Safety → Approval timeout.	Approval timed out — the command was not run. Ask СЭМ to try again, or raise the limit in Settings → Safety → Approval timeout.
+desktop	assistant.approval.alwaysDescription	RENAME	This adds the \u201C{0}\u201D pattern to your permanent allowlist (~/.hermes/config.yaml). Hermes won\u2019t ask again for commands like thi	This adds the \u201C{0}\u201D pattern to your permanent allowlist (~/.hermes/config.yaml). СЭМ won\u2019t ask again for commands like this \
+desktop	assistant.clarify.gatewayDisconnected	RENAME	Hermes is offline right now. Reconnect, then send it again.	СЭМ is offline right now. Reconnect, then send it again.
+desktop	assistant.themePicker.basicDetail	RENAME	For talking to Hermes.	For talking to СЭМ.
+desktop	assistant.catalogInstall.requiresHermes	RENAME	Hermes {0}	СЭМ {0}
+desktop	assistant.mcpSetup.gatewayDisconnected	RENAME	Hermes is offline right now. Reconnect, then send it again.	СЭМ is offline right now. Reconnect, then send it again.
+desktop	prompts.gatewayDisconnected	RENAME	Hermes is offline right now. Reconnect, then send it again.	СЭМ is offline right now. Reconnect, then send it again.
+desktop	prompts.sudoInstallDesc	RENAME	Hermes needs your sudo password to install the Bot Screen packages (TigerVNC + Xfce) on the gateway host. It is sent only to that host.	СЭМ needs your sudo password to install the Bot Screen packages (TigerVNC + Xfce) on the gateway host. It is sent only to that host.
+desktop	prompts.secretDesc	RENAME	Hermes needs a credential to continue.	СЭМ needs a credential to continue.
+desktop	prompts.vaultSaveDesc	RENAME	Hermes reached a sign-in page at {0} and has no login for it. Enter it once here; it is encrypted on this machine and filled into the page w	СЭМ reached a sign-in page at {0} and has no login for it. Enter it once here; it is encrypted on this machine and filled into the page with
+desktop	prompts.vaultCodeDesc	RENAME	{0} is asking for a one-time code (text message, email or authenticator app). Enter it here and Hermes types it into the page; the model nev	{0} is asking for a one-time code (text message, email or authenticator app). Enter it here and СЭМ types it into the page; the model never 
+desktop	prompts.vaultCodeFootnote	RENAME	Tip: save the authenticator key with this login in Settings → Passwords & Logins and Hermes enters codes for you.	Tip: save the authenticator key with this login in Settings → Passwords & Logins and СЭМ enters codes for you.
+desktop	desktop.restartToUseSaveImage	KEEP-product	Restart Hermes Desktop to use Save Image.	Restart Hermes Desktop to use Save Image.
+desktop	desktop.restartToSaveImages	KEEP-product	Restart Hermes Desktop to save images	Restart Hermes Desktop to save images
+desktop	desktop.handoff.timedOut	RENAME	Hermes couldn't reach your messaging connection. Start it from Settings → Messaging, then try the handoff again.	СЭМ couldn't reach your messaging connection. Start it from Settings → Messaging, then try the handoff again.
+desktop	tips.items.skills.text	RENAME	Skills are folders of instructions Hermes loads when the work calls for them.	Skills are folders of instructions СЭМ loads when the work calls for them.
+desktop	tips.items.messaging.title	RENAME	Hermes away from your desk	СЭМ away from your desk
+desktop	tips.items.artifacts.title	RENAME	Everything Hermes made	Everything СЭМ made
+desktop	tips.items.profiles.text	RENAME	Each one is its own Hermes — own keys, own memory, own sessions.	Each one is its own СЭМ — own keys, own memory, own sessions.

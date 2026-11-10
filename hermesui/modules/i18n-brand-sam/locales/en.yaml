@@ -1,0 +1,107 @@
+# HermesUI · i18n-brand-sam — персонаж «Hermes» → «СЭМ». Продуктовые имена не меняются.
+cli.banner.context_minimum: СЭМ needs at least {tokens} tokens. Tool schemas + system prompt use a large fixed prefix.
+cli.billing.keep_going_confirm_body: 'Use your credits when included usage runs out. Off: СЭМ waits for the reset.'
+cli.billing.keep_going_keep_off_desc: 'keep it off: СЭМ waits for the reset'
+cli.billing.keep_going_off_line: 'Keep going on credits: off (СЭМ waits for the reset)'
+cli.billing.keep_going_turn_off_desc: СЭМ waits for the reset
+cli.billing.keep_going_turned_off: '✅ Keep going on credits: off. СЭМ waits for the reset.'
+cli.commands.busy.long_interrupt: Enter will redirect the current run while СЭМ is busy; /stop still cancels it.
+cli.commands.busy.long_queue: Enter will queue follow-up input while СЭМ is busy.
+cli.commands.diff.no_session_changes: No changes — СЭМ hasn't edited any files here yet.
+cli.connect.named_account: СЭМ named this {name} account {alias}. Rename it anytime.
+cli.error.agent_init_failed: 'СЭМ couldn''t start the model connection: {error}. Your message was not sent. Run `hermes doctor` to check the setup, or /model to pick a different provider.'
+cli.model.desc_switch_anyway: Use this model for the current СЭМ session.
+cli.voice.err_stt_provider: 'Voice mode requires an STT provider for transcription.
+
+  Run hermes tools and configure Speech-to-Text, then restart СЭМ.'
+explainer.persistence.default: 'СЭМ couldn''t save this conversation, so it stopped rather than lose your messages. Possible causes: the drive is out of room, or another Hermes process is holding the database. Close other СЭМ windows, run `hermes {profile_arg}doctor` to check storage, then send your message again.'
+explainer.persistence.deleted_wal: 'another Hermes process still holds an old copy of the session database''s write-ahead log, so СЭМ stopped writing to keep the file safe and this message was not saved (a copy is kept in {home}/sessions/). Nothing is lost. Quit every Hermes process on this profile (Desktop app, `hermes {profile_arg}gateway stop`, dashboard, cron), run `hermes {profile_arg}doctor` — it names any process still holding the log — then start СЭМ again and send your message once more. Do not run `doctor --fix` or delete any state.db files while they run. Guide: {recovery_docs}'
+explainer.persistence.disk: 'СЭМ couldn''t save this conversation to disk, so it stopped rather than lose your messages. The disk is probably full: free some space (or fix the permissions on {home}/state.db), then send your message again.'
+explainer.persistence.fts_index: 'the turn was stopped because the session search index (FTS5) is corrupt and could not be detached, so this message was not saved. The message store itself is not damaged: do not run recovery tools or restore a backup. Run `hermes {profile_arg}doctor --fix` (or restart СЭМ, which repairs the index on open), then send your message again.'
+explainer.persistence.replaced: the session database file was replaced while СЭМ was running, so this message was not saved (a copy is kept in {home}/sessions/). Stop СЭМ (`hermes {profile_arg}gateway stop`), run `hermes {profile_arg}doctor` — not `hermes {profile_arg}doctor --fix`, which would repair the wrong file in place — then start it again and send your message once more. Advanced recovery steps are in the log.
+explainer.persistence.session_row_missing: this session was deleted from storage while the chat was still open, and СЭМ could not recreate it, so this message was not saved. Send your message again; if it keeps failing, run `hermes {profile_arg}doctor`.
+gateway.busy.behavior_interrupt_long: Messages will interrupt the current run while СЭМ is busy.
+gateway.busy.behavior_queue_long: Messages will be queued for the next turn while СЭМ is busy.
+gateway.debug.local_refused: '`/debug local` keeps the report on the machine running СЭМ, so it isn''t available from a chat. Send `/debug` to upload the summary report.'
+gateway.errors.connection_unknown: ⚠️ СЭМ could not reach the AI model service (no further detail from the SDK). Use /retry to try again; if it persists, run `hermes doctor` on the host.
+gateway.exec_approval.header: СЭМ wants to run a command that needs your OK
+gateway.help.header: '📖 **СЭМ Commands**
+
+  '
+gateway.notify.no_home_channel: '📬 No home channel is set for {platform}. A home channel is where СЭМ delivers cron job results and cross-platform messages.
+
+
+  Type {sethome_cmd} to make this chat your home channel, or ignore to skip.'
+gateway.pause.already_paused: ⏸️ СЭМ is already paused{suffix}. Use `/pause off` to resume.
+gateway.pause.not_paused: СЭМ wasn't paused.
+gateway.progress.task_card_title: СЭМ is working
+gateway.resume.matrix_blocked_no_origin: '⚠️ Matrix /resume blocked: this named session has no recorded room origin, so СЭМ will not resume it inside the current room by default. Use `/resume --cross-room {name}` if you intentionally want to cross room boundaries.'
+gateway.shutdown.cron_interrupted: ⚠️ Scheduled job '{job}' was cut short because СЭМ is {action}; no result this run. It will run again on schedule, or run it now with `hermes cron run {job}` once СЭМ is back.
+gateway.shutdown.notice_restart: ⚠️ СЭМ is restarting — your current task will be interrupted. Send any message after the restart and I'll try to resume where you left off.
+gateway.shutdown.notice_shutdown: ⚠️ СЭМ is shutting down — your current task will be interrupted. When it is back online, send any message and I'll try to pick up where we left off.
+gateway.startup.handoff_thread_title: СЭМ — {title}
+gateway.startup.online: ♻️ Gateway online — СЭМ is back and ready.
+gateway.topic.default_title: СЭМ Chat
+gateway.topic.help: "/topic — enable multi-session DM mode (one bot, many parallel chats)\n\nUsage:\n  /topic             Enable topic mode, or show status if already on\n  /topic help        Show this message\n  /topic off         Disable topic mode and clear topic bindings\n  /topic <id>        Inside a topic: restore a previous session by ID\n\nHow it works:\n1. Run /topic once in this DM — СЭМ checks BotFather Threads\n   Settings are enabled and flips on multi-session mode.\n2. Tap All Messages at the top of the bot and send any message.\n   Telegram creates a new topic for that message; each topic is\n   an independent СЭМ session (fresh history, fresh context).\n3. The root DM becomes a system lobby — send /topic, /status,\n   /help, /usage there. Normal prompts go in a topic.\n4. /new inside a topic resets just that topic's session.\n5. /topic <id> inside a topic restores an old session into it."
+gateway.topic.mode_disabled: 'Multi-session topic mode is now OFF for this chat.
+
+
+  Existing topics in Telegram aren''t removed — they''ll just stop being gated as independent sessions. The root DM works as a normal СЭМ chat again. Run /topic to re-enable later.'
+gateway.topic.new_header: 'Started a new СЭМ session in this topic.
+
+
+  Tip: for parallel work, open All Messages and send a message there to create a separate topic instead of using /new here. /new replaces the session attached to the current topic.'
+gateway.topic.restored_last_message: '
+
+
+  Last СЭМ message:
+
+  {text}'
+gateway.topic.root_lobby: 'This main chat is reserved for system commands.
+
+
+  To start a new СЭМ chat, open the All Messages topic at the top of this bot interface and send any message there. Telegram will create a new topic for that message; each topic works as an independent СЭМ session.'
+gateway.topic.root_new: 'To start a new parallel СЭМ chat, open the All Messages topic at the top of this bot interface and send any message there. Telegram will create a new topic for it.
+
+
+  Each topic is an independent СЭМ session. Use /new inside an existing topic only if you want to replace that topic''s current session.'
+gateway.topic.status_how_to: To create a new СЭМ chat, open All Messages at the top of this bot interface and send any message there. Telegram will create a new topic for it.
+gateway.topic.system_topic_intro: System topic for СЭМ commands and status.
+gateway.topic.thread_ready: 'Telegram multi-session topics are enabled.
+
+
+  This topic will be used as an independent СЭМ session. Use /new to replace this topic''s current session. For parallel work, open All Messages and send a message there to create another topic.'
+gateway.update.hermes_cmd_not_found: ✗ Could not locate the `hermes` command. СЭМ is running, but the update command could not find the executable on PATH or via the current Python interpreter. Try running `hermes update` manually in your terminal.
+platform.discord.approval.question: Do you want СЭМ to run this command?
+platform.discord.command.reset.description: Reset your СЭМ session
+platform.discord.command.skill.description: Run a СЭМ skill
+platform.discord.command.status.description: Show СЭМ session status
+platform.discord.command.thread.arg_message: Optional first message to send to СЭМ in the thread
+platform.discord.command.thread.description: Create a new thread and start a СЭМ session in it
+platform.discord.prompt.clarify_title: СЭМ needs your input
+platform.discord.thread.auto_create_failed: ⚠️ СЭМ could not create a Discord thread for this message, so the request was not processed. Please retry.
+platform.discord.thread.default_name: СЭМ
+platform.discord.thread.handoff_seed: '🧵 СЭМ handoff: **{name}**'
+platform.discord.thread.seed_message: '🧵 Thread created by СЭМ: **{name}**'
+platform.google_chat.typing.thinking: СЭМ is thinking…
+platform.matrix.handoff.default_name: СЭМ session
+platform.slack.handoff.seed: ':thread: СЭМ handoff — *{name}*'
+platform.slack.task_card.title: СЭМ is working
+slash.busy.description: Control how messages behave while СЭМ is working
+slash.discard.description: Drop a turn lost when СЭМ restarted so this chat's queue runs again
+slash.goal.description: Set a standing goal СЭМ works on across turns until achieved
+slash.hermes.description: Talk to СЭМ or run a subcommand
+slash.wake.description: Toggle the 'Hey СЭМ' wake word listener
+tips.t043: Ctrl+Z suspends СЭМ to the background — run fg in your shell to resume.
+tips.t080: hermes gateway install sets up СЭМ as a system service (systemd/launchd).
+tips.t107: execute_code runs Python scripts that call СЭМ tools programmatically — results stay out of context.
+tips.t133: When exiting, СЭМ prints a resume command with session ID and stats.
+tips.t157: 'СЭМ runs on 21 messaging platforms: Telegram, Discord, Slack, WhatsApp, Signal, Matrix, IRC, Microsoft Teams, email, and more.'
+tips.t160: BlueBubbles brings iMessage to СЭМ via a local macOS server.
+tips.t177: СЭМ loads project context from .hermes.md, AGENTS.md, CLAUDE.md, or .cursorrules (first match).
+tips.t208: hermes acp runs СЭМ as an ACP server for VS Code, Zed, and JetBrains integration.
+tips.t219: SOUL.md completely replaces the agent's default identity — rewrite it to make СЭМ your own.
+tips.t223: Before a gateway session reset, СЭМ auto-flushes important facts to memory in the background.
+tips.t285: /goal <text> sets a standing Ralph-loop objective — СЭМ auto-continues turn after turn until a judge says done.
+tips.t291: /busy queue|steer|interrupt controls what pressing Enter does while СЭМ is working.
+tips.t354: hermes import restores a full СЭМ backup zip; session JSON/JSONL exports import from the dashboard Sessions page.
