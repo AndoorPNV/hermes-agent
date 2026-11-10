@@ -151,12 +151,25 @@ function Workspace() {
   const [buildAsked, setBuildAsked] = useState(false)
   const build = useQuery({
     queryKey: ['ui-workspace', 'build'],
-    queryFn: () => apiGet('/build/setup'),
+    // 404 = маршрут ещё не смонтирован гейтвеем (плагин обновили после старта). Это состояние,
+    // а не ошибка: страница должна сказать «нужен рестарт», а не показать сырой 404.
+    queryFn: async () => {
+      if (!REST) {
+        return { state: 'unavailable' }
+      }
+      try {
+        return (await REST('/build/setup', { method: 'GET' })) || { state: 'unavailable' }
+      } catch (error) {
+        const text = String(error?.message || error)
+        return { state: 'unavailable', detail: text }
+      }
+    },
     refetchInterval: buildAsked ? 2500 : false
   })
   const buildInfo = build.data || {}
   const buildState = buildInfo.state || 'idle'
-  const BUILD_LABEL = { idle: 'не собирался', running: 'собираю…', ok: 'готово', failed: 'ошибка' }
+  const BUILD_LABEL = { idle: 'не собирался', running: 'собираю…', ok: 'готово', failed: 'ошибка',
+    unavailable: 'нужен рестарт гейтвея' }
   async function runBuild() {
     setBusy('build')
     setError('')
@@ -167,7 +180,10 @@ function Workspace() {
       void build.refetch?.()
       setNotice('сборка запущена: PyInstaller в отдельном venv, первый раз это минуты')
     } catch (err) {
-      setError(String(err?.message || err))
+      const text = String(err?.message || err)
+      setError(/404|Not Found/i.test(text)
+        ? 'сборщик не подключён: маршрут /build/setup появился после старта гейтвея — нужен hermes gateway restart'
+        : text)
     } finally {
       setBusy('')
     }
@@ -447,6 +463,13 @@ function Workspace() {
                           children: 'перед раздачей: запустить exe с --dry-run — он покажет состав и ничего не запишет'
                         })
                       ]
+                    })
+                  : null,
+                buildState === 'unavailable'
+                  ? jsx('div', {
+                      className: 'text-[11px]',
+                      style: { color: 'var(--ui-warn, #F5A623)' },
+                      children: 'сборщик не подключён: маршрут /build/setup монтируется при старте гейтвея — выполните hermes gateway restart'
                     })
                   : null,
                 buildInfo.error
