@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -342,6 +343,25 @@ def cmd_log(ctx: Ctx) -> int:
     return 0
 
 
+# ── сборка установщика ───────────────────────────────────────────────────────
+
+def cmd_build_setup(ctx) -> int:
+    """Обёртка над tools/setup_builder.py: одна команда, один exe."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import setup_builder  # noqa: PLC0415 — лениво, чтобы plan/apply не требовали ничего лишнего
+
+    out = Path(ctx.args.out).expanduser().resolve() if ctx.args.out else Path(ctx.repo) / "dist"
+    try:
+        result = setup_builder.build(out, ctx.args.python, ctx.args.keep_stage,
+                                    ctx.args.dry_run, ctx.args.no_venv)
+    except (OSError, subprocess.SubprocessError, SystemExit) as exc:
+        print(f"✗ {exc}")
+        return 1
+    if ctx.args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=1))
+    return 0
+
+
 # ── парсер ───────────────────────────────────────────────────────────────────
 
 def build_parser() -> argparse.ArgumentParser:
@@ -379,6 +399,14 @@ def build_parser() -> argparse.ArgumentParser:
     log = sub.add_parser("log", help="журнал изменений и аудит")
     log.add_argument("--limit", type=int, default=10)
     log.set_defaults(func=cmd_log)
+
+    build_setup = sub.add_parser("build-setup", help="собрать установщик .exe (один файл)")
+    build_setup.add_argument("--out", help="каталог для exe (по умолчанию hermesui/dist)")
+    build_setup.add_argument("--python", help="python для venv сборки (по умолчанию py -3.13)")
+    build_setup.add_argument("--no-venv", action="store_true", help="текущий интерпретатор")
+    build_setup.add_argument("--keep-stage", action="store_true", help="не удалять staging")
+    build_setup.add_argument("--dry-run", action="store_true", help="только план сборки")
+    build_setup.set_defaults(func=cmd_build_setup)
     return parser
 
 
