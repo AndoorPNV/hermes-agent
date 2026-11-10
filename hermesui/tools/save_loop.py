@@ -19,6 +19,7 @@
 Команды:
 
     python tools/save_loop.py --save [--session ID] [--title "…"] [--dry-run]
+    python tools/save_loop.py --recent [--minutes 60] [--min-messages 10] [--kind project]
     python tools/save_loop.py --verify [--session ID]
     python tools/save_loop.py --last                     # что прочитает новая сессия
     python tools/save_loop.py --status                   # журнал прогонов и долгов
@@ -35,6 +36,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import time
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Optional
@@ -445,6 +447,114 @@ def status(home: Path) -> dict[str, Any]:
         conn.close()
 
 
+"""Автосейв: пакетное сохранение свежих project-сессий (то, что раньше требовало кнопки).
+
+Правила, которые здесь зашиты осознанно:
+  * `temp` не сохраняется никогда — у временной сессии по определению не должно остаться следа;
+  * сессия проекта — та, что создана из карты (`session_registry.kind = project`) или чей cwd
+    лежит внутри папки проекта из `projects.db`;
+  * неизменённое не переписывается: сначала собирается заметка и считается хэш, и только если он
+    отличается от последнего `ok` в `save_runs` — запись. Иначе каждый прогон крона дёргал бы vault.
+"""
+# ── пакетный режим ──────────────────────────────────────────────────────────
+
+# temp в списке намеренно отсутствует: временная сессия не сохраняется ни при каком флаге.
+KINDS = ("project", "any")
+
+
+def _registry_kind(home: Path, session_id: str) -> str:
+    conn = _ro(home / "hermesui.db")
+    if not conn:
+        return ""
+    try:
+        row = conn.execute("SELECT kind FROM session_registry WHERE session_id = ?",
+                           (session_id,)).fetchone()
+        return str(row["kind"]) if row else ""
+    finally:
+        conn.close()
+
+
+def _last_ok_hash(home: Path, session_id: str) -> str:
+    conn = _ro(home / "hermesui.db")
+    if not conn:
+        return ""
+    try:
+        row = conn.execute(
+            "SELECT content_hash FROM save_runs WHERE session_id = ? AND status = 'ok'"
+            " ORDER BY id DESC LIMIT 1", (session_id,)).fetchone()
+        return str(row["content_hash"] or "") if row else ""
+    finally:
+        conn.close()
+
+
+def recent_sessions(home: Path, *, minutes: int = 60, min_messages: int = 10,
+                    kind: str = "project", limit: int = 20) -> list[dict[str, Any]]:
+    """Свежие сессии с активностью за `minutes` минут и не меньше `min_messages` сообщений."""
+    if kind not in KINDS:
+        raise ValueError(f"kind: одно из {', '.join(KINDS)}")
+    conn = _ro(home / "state.db")
+    if not conn:
+        return []
+    cutoff = time.time() - max(1, minutes) * 60
+    try:
+        rows = conn.execute(
+            "SELECT id, title, cwd, message_count, COALESCE(last_activity_at, started_at, 0) AS ts"
+            " FROM sessions WHERE COALESCE(message_count, 0) >= ?"
+            "   AND COALESCE(last_activity_at, started_at, 0) >= ?"
+            " ORDER BY ts DESC LIMIT ?", (min_messages, cutoff, max(1, limit))).fetchall()
+    except Exception:  # noqa: BLE001 — схема state.db другая версия: молча ничего не сохраняем
+        return []
+    finally:
+        conn.close()
+
+    picked: list[dict[str, Any]] = []
+    for row in rows:
+        item = dict(row)
+        registry = _registry_kind(home, item["id"])
+        project = project_for(home, str(item.get("cwd") or ""))
+        resolved = registry or ("project" if project else "")
+        item["kind"] = resolved or "none"
+        item["project"] = (project or {}).get("name", "")
+        if item["kind"] == "temp":
+            continue
+        if kind == "project" and item["kind"] != "project":
+            continue
+        picked.append(item)
+    return picked
+
+
+def recent(home: Path, vault: Path, *, minutes: int = 60, min_messages: int = 10,
+           kind: str = "project", limit: int = 20, dry_run: bool = False) -> dict[str, Any]:
+    """Пакетное сохранение: что проверили, что записали, что пропустили как неизменённое."""
+    candidates = recent_sessions(home, minutes=minutes, min_messages=min_messages,
+                                 kind=kind, limit=limit)
+    saved: list[dict[str, Any]] = []
+    unchanged: list[str] = []
+    failed: list[dict[str, str]] = []
+
+    for item in candidates:
+        session_id = item["id"]
+        try:
+            note = compose(home, pick_session(home, session_id))
+            if note["hash"] == _last_ok_hash(home, session_id):
+                unchanged.append(session_id)
+                continue
+            if dry_run:
+                saved.append({"session_id": session_id, "path": "", "title": note["title"],
+                              "hash": note["hash"], "dry_run": True})
+                continue
+            info = save(home, vault, session_id=session_id)
+            saved.append({"session_id": session_id, "path": info["path"],
+                          "title": info["title"], "hash": info["hash"],
+                          "sections": info["sections"]})
+        except Exception as exc:  # noqa: BLE001 — одна упавшая сессия не отменяет остальные
+            failed.append({"session_id": session_id, "error": str(exc)[:200]})
+
+    return {"checked": len(candidates), "saved": saved, "unchanged": unchanged,
+            "failed": failed, "dry_run": dry_run,
+            "minutes": minutes, "min_messages": min_messages, "kind": kind}
+
+
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -457,6 +567,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--session", default="")
     parser.add_argument("--title", default="")
     parser.add_argument("--vault", default=str(VAULT_DEFAULT))
+    parser.add_argument("--recent", action="store_true",
+                        help="сохранить все свежие project-сессии (пакетный режим, для cron)")
+    parser.add_argument("--minutes", type=int, default=60, help="окно активности, минут")
+    parser.add_argument("--min-messages", type=int, default=10, help="минимально сообщений в сессии")
+    parser.add_argument("--kind", default="project", choices=("project", "any"),
+                        help="какие сессии брать (temp не сохраняется никогда)")
+    parser.add_argument("--limit", type=int, default=20, help="сколько сессий проверять за прогон")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -464,6 +581,20 @@ def main(argv: Optional[list[str]] = None) -> int:
     home = db_mod.default_home()
     vault = Path(args.vault)
     try:
+        if args.recent:
+            info = recent(home, vault, minutes=args.minutes, min_messages=args.min_messages,
+                          kind=args.kind, limit=args.limit, dry_run=args.dry_run)
+            if args.json:
+                print(json.dumps(info, ensure_ascii=False, indent=1, default=str))
+            else:
+                tag = " (dry-run)" if info["dry_run"] else ""
+                print(f"автосейв{tag}: проверено {info['checked']}, сохранено {len(info['saved'])},"
+                      f" без изменений {len(info['unchanged'])}, ошибок {len(info['failed'])}")
+                for item in info["saved"]:
+                    print(f"  + {item['session_id'][:20]} → {item.get('path') or item['title']}")
+                for item in info["failed"]:
+                    print(f"  ✗ {item['session_id'][:20]}: {item['error']}")
+            return 0
         if args.save:
             info = save(home, vault, session_id=args.session, title=args.title, dry_run=args.dry_run)
             if args.json:

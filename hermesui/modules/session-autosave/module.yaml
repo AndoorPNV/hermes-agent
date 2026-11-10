@@ -1,0 +1,28 @@
+id: session-autosave
+type: plugin
+version: 0.1.0
+description: "Автосейв: раз в час сохраняет в vault свежие project-сессии (окно 60 мин, ≥10 сообщений), без temp и без перезаписи неизменённого. Логика — tools/save_loop.py --recent, в scripts/ только лончер для cron"
+author: mrkee
+license: MIT
+platforms: [windows, linux, macos]
+
+requires:
+  - id: save-loop
+conflicts: []
+
+capabilities: []
+
+artifacts:
+  - kind: python
+    src: launcher.py
+    dst: scripts/hermesui_session_autosave.py
+
+config: {}
+
+hooks: []
+
+settings:
+  cron: "15 * * * *"
+  cron_command: "hermes cron create \"15 * * * *\" --no-agent --script hermesui_session_autosave.py --name hermesui-autosave --deliver local"
+  policy: "temp не сохраняется никогда; unchanged не переписывается (сравнение хэша с последним ok в save_runs)"
+  manual: "python tools/save_loop.py --recent [--minutes 60] [--min-messages 10] [--kind project] [--dry-run]"
