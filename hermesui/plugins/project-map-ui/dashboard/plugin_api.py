@@ -137,6 +137,10 @@ class UnlinkBody(BaseModel):
     child: str
 
 
+class DeleteBody(BaseModel):
+    session_id: str
+
+
 class PolicyBody(BaseModel):
     scope: str = Field(description="project | session")
     id: str
@@ -473,6 +477,26 @@ def unlink(body: UnlinkBody) -> dict[str, Any]:
     except Exception as exc:
         log.exception("unlink failed")
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post("/delete")
+def delete(body: DeleteBody) -> dict[str, Any]:
+    """Delete a session the way the dashboard does.
+
+    The gateway's JSON-RPC surface has no ``session.delete`` for the canonical owner
+    ("unknown method"), and core itself deletes over HTTP (``DELETE /api/sessions/<id>``,
+    ``apps/desktop/src/api/sessions.ts``). A desktop plugin cannot reach that route, so the
+    plugin backend — already in the gateway process — does the same thing on state.db.
+    """
+    try:
+        from hermes_state import SessionDB
+
+        db = SessionDB(policy.state_db())
+        deleted = db.delete_session(body.session_id, include_compression_chain=True)
+        return {"ok": bool(deleted), "session_id": body.session_id, "deleted": bool(deleted)}
+    except Exception as exc:
+        log.exception("session delete failed")
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/policy")

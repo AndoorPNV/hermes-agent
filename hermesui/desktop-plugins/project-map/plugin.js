@@ -126,6 +126,10 @@ const STATUS_CSS = `
    переменных: светлый набор обычный, :root.dark — светлые подписи на тёмных
    подложках. Переключение темы не требует перезапуска: меняется класс. */
 .pm-root {
+  /* Карта занимает ровно видимую область страницы: без этого колонка с чатом съезжала
+     ниже экрана, и после клика по сессии «чат» оказывался за пределами окна. */
+  max-height: 100%;
+  overflow: hidden;
   /* Поверхности оболочки. Имена — настоящие токены темы (--dt-*); в теме НЕ объявлены
      --card/--border, и var(--card, #fff) молча падал в белый: карта оставалась светлой
      в тёмной теме. Один слой переменных, чтобы правка была в одном месте. */
@@ -233,7 +237,7 @@ async function sweepEphemeral() {
   for (const id of stale) {
     try {
       await host.request('session.close', { session_id: id }).catch(() => null)
-      await host.request('session.delete', { session_id: id })
+      await apiPost('/delete', { session_id: id })
       await apiPost('/ephemeral/drop', { session_id: id })
       removed += 1
     } catch {
@@ -289,6 +293,8 @@ const D = {
   muted: 'var(--ui-text-secondary)',
   panel: 'var(--ui-bg-editor)',
   solid: 'var(--dt-primary-solid)',
+  // Alias kept from the first pass: the dock reads `D.text` as its ink.
+  text: 'var(--ui-text-primary)',
   solidInk: 'var(--dt-primary-solid-foreground)'
 }
 
@@ -623,8 +629,51 @@ function attachPathsFromDrop(event) {
     }
 
     if (path) {
-      out.push({ path, mime: file.type || mimeFor(path), name: file.name || fileName(path) })
+      out.push({ key: path, path, mime: file.type || mimeFor(path), name: file.name || fileName(path) })
     }
+  }
+
+  return out
+}
+
+let blobSeq = 0
+
+function readBlobAsDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(reader.error || new Error('файл не читается'))
+    reader.readAsDataURL(blob)
+  })
+}
+
+// Entries for the composer chip list. A native File (file picker, clipboard
+// paste) has NO path until Electron resolves one — and a pasted screenshot has
+// none at all, so the blob rides along and is staged as base64 on submit.
+function filesFromNative(nativeList) {
+  const desktop = typeof window !== 'undefined' ? window.hermesDesktop : null
+  const out = []
+
+  for (const file of Array.from(nativeList || [])) {
+    if (!file) {
+      continue
+    }
+
+    let path = ''
+
+    try {
+      path = desktop?.getPathForFile ? desktop.getPathForFile(file) || '' : ''
+    } catch {
+      path = ''
+    }
+
+    const name = String(file.name || '') || (path ? fileName(path) : `файл-${Date.now()}`)
+    const mime = String(file.type || '') || (path ? mimeFor(path) : 'application/octet-stream')
+    blobSeq += 1
+    const key = path || `blob:${name}:${file.size || 0}:${blobSeq}`
+
+    out.push({ blob: path ? null : file, key, mime, name, path })
   }
 
   return out
@@ -954,6 +1003,7 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
   const [height, setHeight] = useState(44)
 
   const scrollRef = useRef(null)
+  const fileInputRef = useRef(null)
   const itemsRef = useRef([])
   const sidRef = useRef('')
   // The canonical owner's session.interrupt is generation-fenced: the turn's
@@ -1493,18 +1543,49 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
     const live = sidRef.current
 
     for (const file of list) {
-      if (isImagePath(file.path)) {
-        const result = await host.request('image.attach', { path: file.path, session_id: live })
+      // A chip with a blob (paste / file picker without a resolved path) is
+      // uploaded inline: the gateway stages the bytes itself and answers with
+      // the path/ref the turn needs.
+      const isImage = file.blob
+        ? String(file.mime || '').startsWith('image/')
+        : isImagePath(file.path)
+
+      if (isImage) {
+        let result
+
+        if (file.path) {
+          result = await host.request('image.attach', { path: file.path, session_id: live })
+        } else {
+          const dataUrl = String(await readBlobAsDataUrl(file.blob))
+          const contentBase64 = dataUrl.slice(dataUrl.indexOf(',') + 1)
+
+          result = await host.request('image.attach_bytes', {
+            content_base64: contentBase64,
+            filename: file.name || 'image.png',
+            session_id: live
+          })
+        }
 
         if (!result?.attached) {
           throw new Error(result?.message || `не удалось приложить ${file.name}`)
         }
 
-        attachments.push({ mime: file.mime && file.mime.startsWith('image/') ? file.mime : mimeFor(file.path), path: result.path || file.path })
+        attachments.push({
+          mime: file.mime && file.mime.startsWith('image/') ? file.mime : mimeFor(file.path || file.name),
+          path: result.path || file.path
+        })
         continue
       }
 
-      const result = await host.request('file.attach', { name: file.name, path: file.path, session_id: live })
+      const payload = { name: file.name, session_id: live }
+
+      if (file.path) {
+        payload.path = file.path
+      } else {
+        payload.data_url = String(await readBlobAsDataUrl(file.blob))
+      }
+
+      const result = await host.request('file.attach', payload)
 
       if (!result?.attached || !result.ref_text) {
         throw new Error(result?.message || `не удалось приложить ${file.name}`)
@@ -1612,25 +1693,53 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
     }
   }
 
-  const pickFiles = async () => {
-    const ctx = PLUGIN_CTX
-
-    if (!ctx?.pickOpenPath) {
-      host.notify({ kind: 'info', message: 'Диалог выбора файла недоступен — перетащи файл сюда' })
+  const addFiles = entries => {
+    if (!entries.length) {
       return
     }
 
-    try {
-      const path = await ctx.pickOpenPath({ title: 'Приложить файл' })
+    setFiles(current => {
+      const fresh = entries.filter(entry => !current.some(existing => existing.key === entry.key))
 
-      if (path) {
-        setFiles(current => current.some(entry => entry.path === path)
-          ? current
-          : [...current, { mime: mimeFor(path), name: fileName(path), path }])
-      }
-    } catch (err) {
-      setError(String(err?.message || err))
+      return [...current, ...fresh]
+    })
+  }
+
+  // The "+" opens Chromium's own file dialog. `ctx.pickOpenPath` only yields a
+  // path (no bytes) and is absent on some shells; a hidden <input type=file>
+  // works everywhere and hands us the File itself, which pastes also produce.
+  const pickFiles = () => {
+    const input = fileInputRef.current
+
+    if (input) {
+      input.value = ''
+      input.click()
+    } else {
+      host.notify({ kind: 'info', message: 'Выбор файла недоступен — перетащи файл сюда' })
     }
+  }
+
+  const onPaste = event => {
+    const items = Array.from(event.clipboardData?.items || [])
+    const natives = []
+
+    for (const item of items) {
+      if (item.kind === 'file') {
+        const file = item.getAsFile()
+
+        if (file) {
+          natives.push(file)
+        }
+      }
+    }
+
+    if (!natives.length) {
+      // Plain text paste keeps the browser default.
+      return
+    }
+
+    event.preventDefault()
+    addFiles(filesFromNative(natives))
   }
 
   const toggleCard = key => setExpanded(current => current.includes(key) ? current.filter(item => item !== key) : [...current, key])
@@ -1650,7 +1759,7 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
       const dropped = attachPathsFromDrop(event)
 
       if (dropped.length) {
-        setFiles(current => [...current, ...dropped.filter(file => !current.some(entry => entry.path === file.path))])
+        addFiles(dropped)
       }
     }
   }
@@ -1866,16 +1975,19 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
                 className: 'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px]',
                 style: { background: D.bg, border: `1px solid ${D.lineSoft}`, color: D.muted },
                 children: [
-                  jsx(Codicon, { name: isImagePath(file.path) ? 'file-media' : 'file', size: '0.6rem' }),
+                  jsx(Codicon, {
+                    name: String(file.mime || '').startsWith('image/') || isImagePath(file.path) ? 'file-media' : 'file',
+                    size: '0.6rem'
+                  }),
                   jsx('span', { className: 'max-w-[190px] truncate', children: file.name }),
                   jsx('button', {
                     type: 'button',
                     'aria-label': `убрать ${file.name}`,
-                    onClick: () => setFiles(current => current.filter(entry => entry.path !== file.path)),
+                    onClick: () => setFiles(current => current.filter(entry => entry.key !== file.key)),
                     children: jsx(Codicon, { name: 'close', size: '0.55rem' })
                   })
                 ]
-              }, file.path)
+              }, file.key)
             )
           })
         : null,
@@ -1887,7 +1999,21 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
         className: 'flex items-end gap-2 px-3 py-2',
         style: { borderTop: `1px solid ${D.lineSoft}` },
         ...dropHandlers,
+        onPaste,
         children: [
+          jsx('input', {
+            ref: fileInputRef,
+            type: 'file',
+            multiple: true,
+            tabIndex: -1,
+            'aria-hidden': 'true',
+            style: { display: 'none' },
+            onChange: event => {
+              const picked = filesFromNative(event.target.files)
+              event.target.value = ''
+              addFiles(picked)
+            }
+          }),
           jsx(Tip, {
             label: 'приложить файл',
             children: jsx('button', {
@@ -1910,9 +2036,9 @@ function ChatDock({ node, onClose, onOpen, onWindow, fill }) {
               }
             },
             rows: 1,
-            placeholder: 'Написать в эту сессию… (Enter — отправить, Shift+Enter — новая строка, файлы можно перетащить)',
+            placeholder: 'Написать в эту сессию… (Enter — отправить, Shift+Enter — строка, картинку можно вставить через Ctrl+V)',
             className: 'max-h-32 min-h-[30px] flex-1 resize-none rounded-2xl px-3 py-1.5 text-[12.5px] outline-none',
-            style: { background: D.bg, color: D.text, border: `1px solid ${D.lineSoft}`, lineHeight: 1.45 },
+            style: { background: D.bg, color: D.ink, border: `1px solid ${D.lineSoft}`, lineHeight: 1.45 },
             onInput: event => {
               const element = event.currentTarget
               element.style.height = 'auto'
@@ -2765,6 +2891,87 @@ function ScaffoldDialog({ project, onClose, onDone }) {
 
 // ── main ────────────────────────────────────────────────────────────────────
 
+// ── «из будущего»: голографическая карточка + радиальное меню ───────────────
+// Всё на токенах карты (--pm-*) и под .pm-no-motion / prefers-reduced-motion, как
+// остальные анимации: выключенное движение гасит блики, пыль и вылет колеса.
+const EXTRA_CSS = `
+@keyframes pm-sheen { from { background-position: 190% 0; } to { background-position: -90% 0; } }
+@keyframes pm-drift { 0% { transform: translate3d(0,0,0); opacity: 0; } 18% { opacity: .55; }
+  82% { opacity: .35; } 100% { transform: translate3d(24px,-40px,0); opacity: 0; } }
+@keyframes pm-wheel-in { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* Поток частиц по ребру: pathLength="100" нормализует длину, поэтому точки летят
+   с одинаковой скоростью на коротких и длинных связях. Шаг 20 = 5 частиц на ребро. */
+@keyframes pm-flow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -100; } }
+.pm-flow { animation: pm-flow 4.5s linear infinite; pointer-events: none; }
+.pm-flow.pm-flow-slow { animation-duration: 7s; }
+@keyframes pm-halo { 0%,100% { opacity: .30; transform: scale(1); } 50% { opacity: .08; transform: scale(1.35); } }
+
+.pm-card { position: relative; isolation: isolate; will-change: transform;
+  transition: transform .16s ease, box-shadow .22s ease, border-color .22s ease; }
+
+/* свет под курсором: позиция приходит из --pm-x/--pm-y */
+.pm-card::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  z-index: -1; opacity: 0; transition: opacity .25s ease;
+  background: radial-gradient(140px 90px at var(--pm-x, 50%) var(--pm-y, 50%), var(--pm-accent), transparent 72%); }
+.pm-card:hover::before { opacity: .16; }
+
+/* бегущий блик: один проход на наведение */
+.pm-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  opacity: 0; background: linear-gradient(112deg, transparent 42%, rgba(255,255,255,.22) 50%, transparent 58%);
+  background-size: 240% 100%; background-position: 190% 0; }
+.pm-card:hover::after { opacity: 1; animation: pm-sheen 1.5s ease-out; }
+
+/* уголки-скобки: проявляются на наведении, «прицел» HUD */
+.pm-bracket { position: absolute; width: 8px; height: 8px; pointer-events: none; opacity: 0;
+  border-color: var(--pm-accent); transition: opacity .2s ease; }
+.pm-card:hover .pm-bracket { opacity: .9; }
+.pm-bracket.tl { left: -1px; top: -1px; border-left: 1px solid; border-top: 1px solid; border-radius: 4px 0 0 0; }
+.pm-bracket.tr { right: -1px; top: -1px; border-right: 1px solid; border-top: 1px solid; border-radius: 0 4px 0 0; }
+.pm-bracket.bl { left: -1px; bottom: -1px; border-left: 1px solid; border-bottom: 1px solid; border-radius: 0 0 0 4px; }
+.pm-bracket.br { right: -1px; bottom: -1px; border-right: 1px solid; border-bottom: 1px solid; border-radius: 0 0 4px 0; }
+
+/* пыль: три точки медленно уходят вверх-вправо, как звёзды за иллюминатором */
+.pm-dust { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.pm-dust i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--pm-accent); opacity: 0; }
+.pm-card:hover .pm-dust i { animation: pm-drift 26s linear infinite; }
+.pm-dust i:nth-child(1) { left: 14%; top: 76%; animation-delay: 0s;   animation-duration: 26s; }
+.pm-dust i:nth-child(2) { left: 34%; top: 88%; animation-delay: 4.2s;  animation-duration: 32s; width: 1px; height: 1px; }
+.pm-dust i:nth-child(3) { left: 58%; top: 82%; animation-delay: 9.5s;  animation-duration: 22s; }
+.pm-dust i:nth-child(4) { left: 82%; top: 70%; animation-delay: 14s;   animation-duration: 30s; width: 1px; height: 1px; }
+.pm-dust i:nth-child(5) { left: 22%; top: 58%; animation-delay: 18.5s; animation-duration: 36s; }
+.pm-dust i:nth-child(6) { left: 47%; top: 66%; animation-delay: 6.8s;  animation-duration: 28s; width: 3px; height: 3px; }
+.pm-dust i:nth-child(7) { left: 70%; top: 92%; animation-delay: 22s;   animation-duration: 34s; }
+.pm-dust i:nth-child(8) { left: 90%; top: 84%; animation-delay: 11.2s; animation-duration: 38s; width: 1px; height: 1px; }
+
+/* живая точка «открыто»: дышит, когда есть незавершённые */
+.pm-live { position: relative; display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.pm-live::after { content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1px solid currentColor; animation: pm-halo 2.4s ease-in-out infinite; }
+
+/* радиальное меню */
+.pm-wheel { position: fixed; z-index: 60; width: 0; height: 0; }
+.pm-wheel-veil { position: fixed; inset: 0; z-index: 59; }
+.pm-wheel-btn { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  background: var(--pm-surface); border: 1px solid var(--pm-stroke-soft); color: var(--pm-ink-muted);
+  box-shadow: 0 8px 22px rgba(0,0,0,.28); animation: pm-wheel-in .16s ease both;
+  transition: background .15s ease, color .15s ease, transform .15s ease; }
+.pm-wheel-btn:hover { background: var(--pm-accent); color: var(--pm-page); transform: scale(1.16); z-index: 5; }
+.pm-wheel-btn.danger:hover { background: #b42318; color: #fff; }
+.pm-wheel-btn .lbl { position: absolute; left: 42px; top: 50%; transform: translateY(-50%);
+  white-space: nowrap; max-width: 168px; overflow: hidden; text-overflow: ellipsis;
+  font-size: 10.5px; letter-spacing: .06em; color: var(--pm-ink);
+  background: var(--pm-surface); border: 1px solid var(--pm-stroke-soft); border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  padding: 2px 7px; opacity: 0; transition: opacity .15s ease; pointer-events: none; }
+.pm-wheel-btn:hover .lbl { opacity: 1; }
+.pm-wheel-core { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; padding: 0; font-size: 10px;
+  background: var(--pm-surface); border: 1px dashed var(--pm-stroke-soft); color: var(--pm-ink-muted); }
+.pm-wheel-ring { position: fixed; z-index: 58; width: 176px; height: 176px; margin: -88px 0 0 -88px;
+  border-radius: 50%; border: 1px dashed var(--pm-stroke-soft); pointer-events: none; }
+`
+
 function projectSessions(rows, project) {
   return rows.filter(row => inProject(project, row.cwd))
 }
@@ -2794,13 +3001,33 @@ function ProjectStats({ rows, project, policy, audit }) {
       item('сессий', sessions.length),
       item('скиллов', skillCount === null ? '∞' : skillCount),
       gapCount ? item('нет в наборе', gapCount, '#b42318') : null,
-      item('открыто', Math.max(0, sessions.length - saved), sessions.length - saved > 0 ? '#b42318' : T.muted)
+      sessions.length - saved > 0
+        ? jsxs('div', {
+            className: 'flex flex-col gap-0.5',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-1.5',
+                children: [
+                  jsx('span', {
+                    className: 'pm-live',
+                    style: { color: '#b42318', background: '#b42318' }
+                  }),
+                  jsx('div', {
+                    style: { fontSize: 15, fontWeight: 600, color: '#b42318', lineHeight: 1.1 },
+                    children: sessions.length - saved
+                  })
+                ]
+              }),
+              jsx('div', { style: { fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.faint }, children: 'открыто' })
+            ]
+          })
+        : item('открыто', 0, T.muted)
     ]
   })
 }
 
 function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, query, onQuery,
-                       width = 268, onResize, onHide }) {
+                       width = 268, onResize, onHide, onRename, onDelete }) {
   const needle = query.trim().toLowerCase()
   const shown = needle
     ? projects.filter(project => `${project.name} ${project.description || ''}`.toLowerCase().includes(needle))
@@ -2871,19 +3098,76 @@ function ProjectRail({ projects, rows, policy, audit, activeId, onPick, onNew, q
         children: shown.length
           ? shown.map(project =>
               jsxs(
-                'button',
+                'div',
                 {
-                  type: 'button',
+                  role: 'button',
+                  tabIndex: 0,
                   onClick: () => onPick(project.id),
-                  className: 'flex flex-col rounded-xl px-3 py-2.5 text-left transition-all',
+                  onKeyDown: event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      onPick(project.id)
+                    }
+                  },
+                  className: 'pm-card group relative flex cursor-pointer flex-col rounded-xl px-3 py-2.5 text-left',
+                  onMouseMove: event => {
+                    const box = event.currentTarget.getBoundingClientRect()
+                    const px = ((event.clientX - box.left) / box.width) * 100
+                    const py = ((event.clientY - box.top) / box.height) * 100
+                    event.currentTarget.style.setProperty('--pm-x', `${px}%`)
+                    event.currentTarget.style.setProperty('--pm-y', `${py}%`)
+                    // микро-наклон к курсору: 3° максимум, чтобы текст оставался читаемым
+                    event.currentTarget.style.transform =
+                      `perspective(700px) rotateX(${(0.5 - py / 100) * 4}deg) rotateY(${(px / 100 - 0.5) * 4}deg)`
+                  },
+                  onMouseLeave: event => {
+                    event.currentTarget.style.transform = ''
+                  },
                   style: {
                     background: T.panel,
                     border: `1px solid ${project.id === activeId ? T.accent : T.lineSoft}`,
                     boxShadow: project.id === activeId ? '0 8px 20px rgba(18,22,28,0.10)' : '0 1px 2px rgba(18,22,28,0.04)'
                   },
                   children: [
+                    project.id === NO_PROJECT
+                      ? null
+                      : jsxs('div', {
+                          className: 'absolute right-1 top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100',
+                          children: [
+                            jsx('button', {
+                              type: 'button',
+                              'aria-label': `переименовать ${project.name}`,
+                              title: 'переименовать',
+                              onClick: event => {
+                                event.stopPropagation()
+                                onRename?.(project)
+                              },
+                              className: 'rounded-md p-1',
+                              style: { background: T.bg, border: `1px solid ${T.lineSoft}`, color: T.muted },
+                              children: jsx(Codicon, { name: 'edit', size: '0.6rem' })
+                            }),
+                            jsx('button', {
+                              type: 'button',
+                              'aria-label': `удалить ${project.name}`,
+                              title: 'удалить',
+                              onClick: event => {
+                                event.stopPropagation()
+                                onDelete?.(project)
+                              },
+                              className: 'rounded-md p-1',
+                              style: { background: T.bg, border: `1px solid ${T.lineSoft}`, color: '#b42318' },
+                              children: jsx(Codicon, { name: 'trash', size: '0.6rem' })
+                            })
+                          ]
+                        }),
+                    jsx('span', { className: 'pm-bracket tl' }),
+                    jsx('span', { className: 'pm-bracket tr' }),
+                    jsx('span', { className: 'pm-bracket bl' }),
+                    jsx('span', { className: 'pm-bracket br' }),
+                    jsxs('span', { className: 'pm-dust', children: [jsx('i', {}, 'd1'), jsx('i', {}, 'd2'), jsx('i', {}, 'd3'), jsx('i', {}, 'd4'),
+                               jsx('i', {}, 'd5'), jsx('i', {}, 'd6'), jsx('i', {}, 'd7'), jsx('i', {}, 'd8')] }),
                     jsx('div', {
-                      style: { fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+                      style: { fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 34 },
                       children: project.name
                     }),
                     jsx('div', {
@@ -3464,6 +3748,15 @@ function ProjectMap({ variant }) {
 
   const [railQuery, setRailQuery] = useState('')
   const [wizard, setWizard] = useState(false)
+  const [renameCard, setRenameCard] = useState(null)
+  const [renameDraft, setRenameDraft] = useState('')
+  const [deleteCard, setDeleteCard] = useState(null)
+  const [cardBusy, setCardBusy] = useState(false)
+  const [sessionRename, setSessionRename] = useState(null)
+  const [sessionRenameDraft, setSessionRenameDraft] = useState('')
+  const [sessionDelete, setSessionDelete] = useState(null)
+  const [moveFor, setMoveFor] = useState(null)
+  const [wheel, setWheel] = useState(null)
   const [hover, setHover] = useState(null)
   const [menu, setMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
@@ -3664,7 +3957,10 @@ function ProjectMap({ variant }) {
       const created = await host.request('session.create', {
         source: 'gui',
         cwd: cwd || undefined,
-        cwd_explicit: Boolean(cwd)
+        cwd_explicit: Boolean(cwd),
+        // `title` IS on the canonical whitelist, and without it the row lands nameless:
+        // the graph then shows a stack of «Сессия без названия» that reads as "ничего не создалось".
+        title: parentId ? `Сессия от «${node.title || 'родителя'}»` : `Сессия · ${project?.name || 'проект'}`
       })
       const sessionId = created?.stored_session_id || created?.session_id || created?.session?.id || ''
 
@@ -3724,7 +4020,8 @@ function ProjectMap({ variant }) {
     try {
       // Deleting a session the gateway still holds live is refused (4023) — detach first.
       await host.request('session.close', { session_id: sessionId }).catch(() => null)
-      await host.request('session.delete', { session_id: sessionId })
+      // same reason as the delete dialog: the owner RPC has no session.delete
+      await apiPost('/delete', { session_id: sessionId })
     } catch (error) {
       host.notify({ kind: 'error', message: `Не удалось удалить: ${String(error?.message || error)}` })
       return
@@ -3761,6 +4058,37 @@ function ProjectMap({ variant }) {
 
   const hovered = hover ? graph.nodes.get(hover.id) : null
   const target = menu ? graph.nodes.get(menu.id) : null
+  const wheelNode = wheel ? graph.nodes.get(wheel.id) : null
+  const wheelItems = wheelNode
+    ? [
+        { icon: 'browser', label: 'в новой вкладке', run: () => host.openSession(wheelNode.id, { intent: 'tab' }) },
+        { icon: 'link-external', label: 'новое окно', run: () => host.openSession(wheelNode.id, { intent: 'window' }) },
+        {
+          icon: 'edit',
+          label: 'переименовать',
+          run: () => {
+            setSessionRename({ id: wheelNode.id, title: wheelNode.title })
+            setSessionRenameDraft(wheelNode.title || '')
+          }
+        },
+        { icon: 'add', label: 'новая сессия', run: () => void createSession(wheelNode, false) },
+        {
+          icon: 'settings-gear',
+          label: 'скиллы и инструменты',
+          run: () => setDialog({ scope: 'session', id: wheelNode.id, title: wheelNode.title })
+        },
+        { icon: 'repo-forked', label: 'ветка', run: () => void branchSession(wheelNode) },
+        {
+          icon: 'arrow-right',
+          label: 'в проект',
+          run: () => {
+            setMenu({ id: wheelNode.id, x: wheel.x, y: wheel.y })
+            setMoveFor(wheelNode.id)
+          }
+        },
+        { icon: 'trash', label: 'удалить', danger: true, run: () => setSessionDelete({ id: wheelNode.id, title: wheelNode.title }) }
+      ]
+    : []
   const selectedNode = selected ? graph.nodes.get(selected) : null
 
   const focusMode = async () => {
@@ -3791,11 +4119,176 @@ function ProjectMap({ variant }) {
     }
   }
 
+  const copyText = async text => {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      const ok = await PLUGIN_CTX?.os?.writeClipboard?.(text)
+      return ok !== false
+    }
+  }
+
+  const reload = async () => {
+    await backend.refetch()
+    await tree.refetch()
+  }
+
+  const applySessionRename = async () => {
+    const next = sessionRenameDraft.trim()
+
+    if (!sessionRename || !next) {
+      setSessionRename(null)
+      return
+    }
+
+    setCardBusy(true)
+
+    try {
+      await host.request('session.title', { session_id: sessionRename.id, title: next })
+      await reload()
+      setSessionRename(null)
+    } catch (error) {
+      host.notify({ kind: 'error', message: `переименовать не вышло: ${String(error?.message || error)}` })
+    } finally {
+      setCardBusy(false)
+    }
+  }
+
+  const branchSession = async node => {
+    setMenu(null)
+
+    try {
+      const created = await host.request('session.branch_stored', {
+        parent_session_id: node.id,
+        cwd: node.cwd || undefined
+      })
+      await reload()
+      host.notify({ kind: 'success', message: 'ветка создана' })
+      if (created?.session_id) {
+        window.setTimeout(() => host.openSession(created.session_id, { intent: 'in-place' }), 300)
+      }
+    } catch (error) {
+      host.notify({ kind: 'error', message: `ветка не создалась: ${String(error?.message || error)}` })
+    }
+  }
+
+  const exportSession = async node => {
+    setMenu(null)
+
+    try {
+      const out = await host.request('session.export', { session_id: node.id })
+      const ok = await copyText(String(out?.content || ''))
+      host.notify({
+        kind: ok ? 'success' : 'error',
+        message: ok ? `экспорт «${out?.filename || node.id}» в буфере` : 'не удалось положить экспорт в буфер'
+      })
+    } catch (error) {
+      host.notify({ kind: 'error', message: `экспорт не вышел: ${String(error?.message || error)}` })
+    }
+  }
+
+  const moveSession = async (node, target) => {
+    setMoveFor(null)
+    setMenu(null)
+
+    if (!target?.path) {
+      return
+    }
+
+    try {
+      await host.request('session.workspace.move', { session_key: node.id, cwd: target.path })
+      await reload()
+      host.notify({ kind: 'success', message: `переехала в «${target.name}»` })
+    } catch (error) {
+      host.notify({ kind: 'error', message: `переместить не вышло: ${String(error?.message || error)}` })
+    }
+  }
+
+  const archiveSession = async node => {
+    setMenu(null)
+
+    try {
+      await host.request('session.archive', { session_id: node.id, archived: true })
+      await reload()
+      host.notify({ kind: 'success', message: 'сессия в архиве' })
+    } catch (error) {
+      host.notify({ kind: 'error', message: `архивировать не вышло: ${String(error?.message || error)}` })
+    }
+  }
+
+  const applySessionDelete = async () => {
+    if (!sessionDelete) {
+      return
+    }
+
+    setCardBusy(true)
+
+    try {
+      // The owner RPC has no session.delete ("unknown method"); deletion goes through this
+      // plugin's own backend, which does what core's HTTP DELETE does on state.db.
+      await apiPost('/delete', { session_id: sessionDelete.id })
+      await reload()
+      setSessionDelete(null)
+      if (selected === sessionDelete.id) {
+        setSelected(null)
+      }
+    } catch (error) {
+      host.notify({ kind: 'error', message: `удалить не вышло: ${String(error?.message || error)}` })
+    } finally {
+      setCardBusy(false)
+    }
+  }
+
+  const applyRename = async () => {
+    const next = renameDraft.trim()
+
+    if (!renameCard || !next || next === renameCard.name) {
+      setRenameCard(null)
+      return
+    }
+
+    setCardBusy(true)
+
+    try {
+      await host.request('projects.update', { id: renameCard.id, name: next })
+      await backend.refetch()
+      setRenameCard(null)
+    } catch (error) {
+      host.notify({ kind: 'error', message: `не удалось переименовать: ${String(error?.message || error)}` })
+    } finally {
+      setCardBusy(false)
+    }
+  }
+
+  const applyDelete = async () => {
+    if (!deleteCard) {
+      return
+    }
+
+    setCardBusy(true)
+
+    try {
+      // projects.delete removes the container only — the sessions stay in state.db and fall
+      // back to «Без проекта», which is why the dialog says so before the click.
+      await host.request('projects.delete', { id: deleteCard.id })
+      await backend.refetch()
+      if (activeId === deleteCard.id) {
+        setPicked(null)
+      }
+      setDeleteCard(null)
+    } catch (error) {
+      host.notify({ kind: 'error', message: `не удалось удалить: ${String(error?.message || error)}` })
+    } finally {
+      setCardBusy(false)
+    }
+  }
+
   return jsxs('div', {
     className: noMotion ? 'pm-root pm-no-motion flex h-full min-h-0' : 'pm-root flex h-full min-h-0',
     style: { background: T.bg, color: T.text },
     children: [
-      jsx('style', { children: STATUS_CSS }),
+      jsx('style', { children: STATUS_CSS + EXTRA_CSS }),
       railHidden
         ? null
         : jsx(ProjectRail, {
@@ -3812,11 +4305,16 @@ function ProjectMap({ variant }) {
           setSelected(null)
         },
         onNew: () => setWizard(true),
+        onRename: entry => {
+          setRenameCard(entry)
+          setRenameDraft(entry.name)
+        },
+        onDelete: entry => setDeleteCard(entry),
         query: railQuery,
         onQuery: setRailQuery
       }),
       jsxs('div', {
-        className: 'flex min-h-0 min-w-0 flex-1 flex-col',
+        className: 'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
         children: [
           jsxs('div', {
             className: 'flex flex-wrap items-center gap-2 px-4 pt-3',
@@ -4074,15 +4572,34 @@ function ProjectMap({ variant }) {
 
                       const active = (hover && (hover.id === edge.to || hover.id === edge.from)) || selected === edge.to
 
-                      return jsx(
-                        'path',
+                      const d = edgePath(from, to)
+
+                      return jsxs(
+                        'g',
                         {
-                          d: edgePath(from, to),
-                          fill: 'none',
-                          stroke: active ? T.accent : T.line,
-                          strokeWidth: active ? 1.6 : 1,
-                          strokeLinecap: 'round',
-                          strokeDasharray: active ? '0' : '3 4'
+                          children: [
+                            // тонкая неподвижная трасса — чтобы связь читалась даже без движения
+                            jsx('path', {
+                              d,
+                              fill: 'none',
+                              stroke: active ? T.line : T.lineSoft,
+                              strokeWidth: 1,
+                              strokeOpacity: active ? 0.9 : 0.45,
+                              strokeLinecap: 'round'
+                            }),
+                            // летящие частицы (форма ребра та же, длина нормализована до 100)
+                            jsx('path', {
+                              d,
+                              pathLength: 100,
+                              fill: 'none',
+                              stroke: active ? T.accent : T.line,
+                              strokeWidth: active ? 2.4 : 1.8,
+                              strokeLinecap: 'round',
+                              strokeOpacity: active ? 0.95 : 0.55,
+                              strokeDasharray: '2 18',
+                              className: active ? 'pm-flow' : 'pm-flow pm-flow-slow'
+                            })
+                          ]
                         },
                         `edge-${index}`
                       )
@@ -4118,7 +4635,20 @@ function ProjectMap({ variant }) {
                           }
                           setSelected(id)
                         },
-                        onMenu: (id, x, y) => setMenu({ id, x, y }),
+                        onMenu: (id, x, y) => {
+                          const hit = graph.nodes.get(id)
+                          if (hit?.kind === 'session') {
+                            // keep the whole ring (78px + label) on screen
+                            const pad = 130
+                            setWheel({
+                              id,
+                              x: Math.min(Math.max(x, pad), window.innerWidth - pad),
+                              y: Math.min(Math.max(y, pad), window.innerHeight - pad)
+                            })
+                          } else {
+                            setMenu({ id, x, y })
+                          }
+                        },
                         onDragStart: id => {
                           setDragId(id)
                           setDropId(null)
@@ -4149,7 +4679,7 @@ function ProjectMap({ variant }) {
             className: 'fixed z-[55] flex w-60 flex-col overflow-hidden rounded-xl py-1 text-[12px]',
             style: {
               left: `${Math.min(menu.x, window.innerWidth - 252)}px`,
-              top: `${Math.min(menu.y, window.innerHeight - 300)}px`,
+              top: `${Math.min(menu.y, Math.max(12, window.innerHeight - 380))}px`,
               background: T.panel,
               border: `1px solid ${T.line}`,
               boxShadow: '0 18px 40px rgba(18,22,28,0.16)'
@@ -4203,6 +4733,63 @@ function ProjectMap({ variant }) {
                 },
                 children: 'Скиллы и инструменты…'
               }),
+              // ── what the core sidebar menu offers, reachable from the map ──
+              target.kind === 'session'
+                ? jsx('div', { className: 'my-1 h-px', style: { background: T.lineSoft } })
+                : null,
+              ...(target.kind === 'session'
+                ? [
+                    ['browser', 'Открыть в новой вкладке', () => { setMenu(null); host.openSession(target.id, { intent: 'tab' }) }],
+                    ['link-external', 'Новое окно', () => { setMenu(null); host.openSession(target.id, { intent: 'window' }) }],
+                    ['edit', 'Переименовать…', () => {
+                      setMenu(null)
+                      setSessionRename({ id: target.id, title: target.title })
+                      setSessionRenameDraft(target.title || '')
+                    }],
+                    ['copy', 'Копировать ID', () => { setMenu(null); void copyText(target.id) }],
+                    ['repo-forked', 'Ветка', () => void branchSession(target)],
+                    ['cloud-download', 'Экспорт в буфер', () => void exportSession(target)],
+                    ['arrow-right', 'Переместить в проект…', () => setMoveFor(moveFor === target.id ? null : target.id)],
+                    ['archive', 'В архив', () => void archiveSession(target)],
+                    ['trash', 'Удалить…', () => { setMenu(null); setSessionDelete({ id: target.id, title: target.title }) }]
+                  ].map(([icon, label, run]) =>
+                    jsxs(
+                      'button',
+                      {
+                        type: 'button',
+                        className: 'flex items-center gap-2 px-3 py-1.5 text-left',
+                        style: { color: label.startsWith('Удалить') ? '#b42318' : T.text },
+                        onClick: run,
+                        children: [
+                          jsx(Codicon, { name: icon, size: '0.62rem', style: { color: T.faint } }),
+                          jsx('span', { children: label })
+                        ]
+                      },
+                      `sess-${label}`
+                    )
+                  )
+                : []),
+              target.kind === 'session' && moveFor === target.id
+                ? jsx('div', {
+                    className: 'flex flex-col border-l',
+                    style: { borderColor: T.lineSoft, marginLeft: 8, maxHeight: 180, overflowY: 'auto' },
+                    children: projects
+                      .filter(entry => entry.id !== NO_PROJECT && entry.path)
+                      .map(entry =>
+                        jsx('button', {
+                          type: 'button',
+                          className: 'px-3 py-1 text-left',
+                          style: { color: T.muted, fontSize: 11.5 },
+                          title: entry.path,
+                          onClick: () => void moveSession(target, entry),
+                          children: entry.name
+                        }, `move-${entry.id}`)
+                      )
+                  })
+                : null,
+              target.kind === 'session'
+                ? jsx('div', { className: 'my-1 h-px', style: { background: T.lineSoft } })
+                : null,
               target.kind === 'session'
                 ? jsx('button', {
                     type: 'button',
@@ -4230,6 +4817,63 @@ function ProjectMap({ variant }) {
             ]
           })
         : null,
+      wheel && wheelNode
+        ? jsxs('div', {
+            children: [
+              jsx('div', { className: 'pm-wheel-veil', onPointerDown: () => setWheel(null) }),
+              jsx('div', { className: 'pm-wheel-ring', style: { left: wheel.x, top: wheel.y } }),
+              jsxs('div', {
+                className: 'pm-wheel',
+                style: { left: wheel.x, top: wheel.y },
+                children: [
+                  ...wheelItems.map((item, index) => {
+                    const angle = -Math.PI / 2 + (index / wheelItems.length) * Math.PI * 2
+
+                    return jsxs(
+                      'button',
+                      {
+                        type: 'button',
+                        className: item.danger ? 'pm-wheel-btn danger' : 'pm-wheel-btn',
+                        style: {
+                          left: `${Math.cos(angle) * 78}px`,
+                          top: `${Math.sin(angle) * 78}px`,
+                          animationDelay: `${index * 18}ms`,
+                          zIndex: 2
+                        },
+                        onClick: () => {
+                          setWheel(null)
+                          item.run()
+                        },
+                        children: [
+                          jsx(Codicon, { name: item.icon, size: '0.72rem' }),
+                          jsx('span', {
+                            className: 'lbl',
+                            style: Math.cos(angle) >= 0
+                              ? { left: 44, right: 'auto', textAlign: 'left' }
+                              : { right: 44, left: 'auto', textAlign: 'right' },
+                            children: item.label
+                          })
+                        ]
+                      },
+                      `wheel-${item.label}`
+                    )
+                  }),
+                  jsx('button', {
+                    type: 'button',
+                    className: 'pm-wheel-core',
+                    title: 'все действия',
+                    'aria-label': 'все действия',
+                    onClick: () => {
+                      setMenu({ id: wheelNode.id, x: wheel.x, y: wheel.y })
+                      setWheel(null)
+                    },
+                    children: '···'
+                  })
+                ]
+              })
+            ]
+          })
+        : null,
       dialog && backend.data
         ? jsx(PolicyDialog, { target: dialog, backend: backend.data, onClose: () => setDialog(null), onSaved: () => void backend.refetch() })
         : null,
@@ -4241,6 +4885,198 @@ function ProjectMap({ variant }) {
               void backend.refetch()
               void tree.refetch()
             }
+          })
+        : null,
+      sessionRename
+        ? jsx('div', {
+            className: 'fixed inset-0 z-[75] flex items-center justify-center p-4',
+            style: { background: 'rgba(18,22,28,0.30)', backdropFilter: 'blur(2px)' },
+            onPointerDown: event => {
+              if (event.target === event.currentTarget) {
+                setSessionRename(null)
+              }
+            },
+            children: jsxs('div', {
+              className: 'flex w-[min(440px,94vw)] flex-col gap-3 rounded-2xl p-5',
+              style: { background: T.panel, border: `1px solid ${T.line}`, boxShadow: '0 24px 60px rgba(18,22,28,0.20)' },
+              children: [
+                jsx('div', { style: { fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.faint }, children: 'переименовать сессию' }),
+                jsx('input', {
+                  autoFocus: true,
+                  value: sessionRenameDraft,
+                  onChange: event => setSessionRenameDraft(event.target.value),
+                  onKeyDown: event => {
+                    if (event.key === 'Enter') {
+                      void applySessionRename()
+                    }
+                    if (event.key === 'Escape') {
+                      setSessionRename(null)
+                    }
+                  },
+                  className: 'w-full rounded-xl px-3 py-2 text-[13px] outline-none',
+                  style: { background: T.bg, color: T.text, border: `1px solid ${T.lineSoft}` }
+                }),
+                jsxs('div', {
+                  className: 'flex justify-end gap-2',
+                  children: [
+                    jsx('button', {
+                      type: 'button',
+                      onClick: () => setSessionRename(null),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em]',
+                      style: { border: `1px solid ${T.line}`, color: T.muted },
+                      children: 'отмена'
+                    }),
+                    jsx('button', {
+                      type: 'button',
+                      disabled: cardBusy || !sessionRenameDraft.trim(),
+                      onClick: () => void applySessionRename(),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+                      style: { background: T.accent, color: '#fff' },
+                      children: cardBusy ? '…' : 'сохранить'
+                    })
+                  ]
+                })
+              ]
+            })
+          })
+        : null,
+      sessionDelete
+        ? jsx('div', {
+            className: 'fixed inset-0 z-[75] flex items-center justify-center p-4',
+            style: { background: 'rgba(18,22,28,0.30)', backdropFilter: 'blur(2px)' },
+            onPointerDown: event => {
+              if (event.target === event.currentTarget) {
+                setSessionDelete(null)
+              }
+            },
+            children: jsxs('div', {
+              className: 'flex w-[min(470px,94vw)] flex-col gap-3 rounded-2xl p-5',
+              style: { background: T.panel, border: `1px solid ${T.line}`, boxShadow: '0 24px 60px rgba(18,22,28,0.20)' },
+              children: [
+                jsx('div', { style: { fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.faint }, children: 'удалить сессию' }),
+                jsx('div', { style: { fontSize: 14, fontWeight: 600, color: T.text }, children: sessionDelete.title || sessionDelete.id }),
+                jsx('div', {
+                  style: { fontSize: 11.5, color: T.muted, lineHeight: 1.5 },
+                  children: 'Сессия удаляется вместе с перепиской — как «Удалить» в боковой панели Hermes. Отменить нельзя; если нужен обратимый вариант — «В архив».'
+                }),
+                jsxs('div', {
+                  className: 'flex justify-end gap-2',
+                  children: [
+                    jsx('button', {
+                      type: 'button',
+                      onClick: () => setSessionDelete(null),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em]',
+                      style: { border: `1px solid ${T.line}`, color: T.muted },
+                      children: 'отмена'
+                    }),
+                    jsx('button', {
+                      type: 'button',
+                      disabled: cardBusy,
+                      onClick: () => void applySessionDelete(),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+                      style: { background: '#b42318', color: '#fff' },
+                      children: cardBusy ? '…' : 'удалить'
+                    })
+                  ]
+                })
+              ]
+            })
+          })
+        : null,
+      renameCard
+        ? jsx('div', {
+            className: 'fixed inset-0 z-[75] flex items-center justify-center p-4',
+            style: { background: 'rgba(18,22,28,0.30)', backdropFilter: 'blur(2px)' },
+            onPointerDown: event => {
+              if (event.target === event.currentTarget) {
+                setRenameCard(null)
+              }
+            },
+            children: jsxs('div', {
+              className: 'flex w-[min(420px,94vw)] flex-col gap-3 rounded-2xl p-5',
+              style: { background: T.panel, border: `1px solid ${T.line}`, boxShadow: '0 24px 60px rgba(18,22,28,0.20)' },
+              children: [
+                jsx('div', { style: { fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.faint }, children: 'переименовать проект' }),
+                jsx('input', {
+                  autoFocus: true,
+                  value: renameDraft,
+                  onChange: event => setRenameDraft(event.target.value),
+                  onKeyDown: event => {
+                    if (event.key === 'Enter') {
+                      void applyRename()
+                    }
+                    if (event.key === 'Escape') {
+                      setRenameCard(null)
+                    }
+                  },
+                  className: 'w-full rounded-xl px-3 py-2 text-[13px] outline-none',
+                  style: { background: T.bg, color: T.text, border: `1px solid ${T.lineSoft}` }
+                }),
+                jsxs('div', {
+                  className: 'flex justify-end gap-2',
+                  children: [
+                    jsx('button', {
+                      type: 'button',
+                      onClick: () => setRenameCard(null),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em]',
+                      style: { border: `1px solid ${T.line}`, color: T.muted },
+                      children: 'отмена'
+                    }),
+                    jsx('button', {
+                      type: 'button',
+                      disabled: cardBusy || !renameDraft.trim(),
+                      onClick: () => void applyRename(),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+                      style: { background: T.accent, color: '#fff' },
+                      children: cardBusy ? '…' : 'сохранить'
+                    })
+                  ]
+                })
+              ]
+            })
+          })
+        : null,
+      deleteCard
+        ? jsx('div', {
+            className: 'fixed inset-0 z-[75] flex items-center justify-center p-4',
+            style: { background: 'rgba(18,22,28,0.30)', backdropFilter: 'blur(2px)' },
+            onPointerDown: event => {
+              if (event.target === event.currentTarget) {
+                setDeleteCard(null)
+              }
+            },
+            children: jsxs('div', {
+              className: 'flex w-[min(460px,94vw)] flex-col gap-3 rounded-2xl p-5',
+              style: { background: T.panel, border: `1px solid ${T.line}`, boxShadow: '0 24px 60px rgba(18,22,28,0.20)' },
+              children: [
+                jsx('div', { style: { fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.faint }, children: 'удалить проект' }),
+                jsx('div', { style: { fontSize: 14, fontWeight: 600, color: T.text }, children: deleteCard.name }),
+                jsx('div', {
+                  style: { fontSize: 11.5, color: T.muted, lineHeight: 1.5 },
+                  children: 'Удаляется только карточка проекта. Сессии, их переписка и файлы на диске остаются — они переедут в «Без проекта».'
+                }),
+                jsxs('div', {
+                  className: 'flex justify-end gap-2',
+                  children: [
+                    jsx('button', {
+                      type: 'button',
+                      onClick: () => setDeleteCard(null),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em]',
+                      style: { border: `1px solid ${T.line}`, color: T.muted },
+                      children: 'отмена'
+                    }),
+                    jsx('button', {
+                      type: 'button',
+                      disabled: cardBusy,
+                      onClick: () => void applyDelete(),
+                      className: 'rounded-full px-4 py-1.5 text-[10.5px] uppercase tracking-[0.12em] disabled:opacity-40',
+                      style: { background: '#b42318', color: '#fff' },
+                      children: cardBusy ? '…' : 'удалить'
+                    })
+                  ]
+                })
+              ]
+            })
           })
         : null,
       wizard && backend.data
@@ -4317,3 +5153,4 @@ export default {
     ])
   }
 }
+
