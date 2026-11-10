@@ -1,7 +1,7 @@
 id: theme-hermesui
 type: theme
 version: 0.1.0
-description: "Скин HermesUI: тёмный тил с мятным акцентом плюс светлая пара для белого фона. Палитра поверх default, layout не трогает"
+description: "Скин HermesUI: тёплые кофейно-серые (taupe/mocha) тона с латте-акцентом плюс кремово-бежевая светлая пара. Палитра поверх default, layout не трогает"
 author: mrkee
 license: MIT
 platforms: [windows, linux, macos]
@@ -24,5 +24,5 @@ config:
 hooks: []
 
 settings:
-  palette: "dark: teal/mint (#0C1A17 base, #4FD1A5 accent); light: ink on paper"
+  palette: "dark: taupe/mocha (#121010 base, #C8A98A accent); light: cream (#F7F2EA base, #6E5844 accent); контраст 54/54, худший 4.53"
   overrides: "colors + light_colors + spinner + tool_prefix; branding не трогаем (наследуется от default)"
