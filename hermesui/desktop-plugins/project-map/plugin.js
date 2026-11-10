@@ -2742,106 +2742,6 @@ const SCAFFOLD_STORAGES = [
   ['none', 'не выбрано', 'раздела данных в каркасе не будет']
 ]
 
-const BUILD_STATES = { idle: 'не собирался', running: 'собираю…', ok: 'готово', failed: 'ошибка' }
-
-function BuildDialog({ onClose }) {
-  const [error, setError] = useState('')
-  const [asked, setAsked] = useState(false)
-  // Сборка идёт минуты (первый раз — venv + PyInstaller), поэтому опрашиваем состояние,
-  // а не ждём ответа: POST только запускает.
-  const status = useQuery({ queryKey: ['project-map', 'build'], queryFn: () => apiGet('/build/setup'), refetchInterval: asked ? 2500 : false })
-  const data = status.data || {}
-  const state = data.state || 'idle'
-  const start = async () => {
-    setError('')
-    try {
-      await apiPost('/build/setup', { confirm: true })
-      setAsked(true)
-      void status.refetch?.()
-    } catch (caught) {
-      setError(String(caught?.message || caught))
-    }
-  }
-  const logTail = (data.log || []).slice(-8)
-
-  return jsxs('div', {
-    className: 'fixed inset-0 z-[60] flex items-center justify-center p-6',
-    style: { background: 'rgba(8,12,16,0.42)' },
-    onClick: onClose,
-    children: [
-      jsxs('div', {
-        className: 'flex w-full max-w-[520px] flex-col gap-3 rounded-2xl p-5',
-        style: { background: T.panel, border: `1px solid ${T.line}`, color: T.text },
-        onClick: event => event.stopPropagation(),
-        children: [
-          jsx('div', { style: { fontSize: 13.5, fontWeight: 600 }, children: 'Установщик для другого пользователя' }),
-          jsx('div', {
-            style: { fontSize: 11.5, lineHeight: 1.5, color: T.muted },
-            children: 'Соберёт один файл hermesui-setup-<версия>.exe: наши скиллы, плагины, модули и база. На чужой машине он разложит слой в установленный Hermes, подключит плагины, применит модули и проверит себя. Само приложение Hermes в exe не входит — это отдельная сборка Electron.'
-          }),
-          jsxs('div', {
-            className: 'flex items-center gap-2 rounded-xl px-3 py-2',
-            style: { background: T.bg, border: `1px solid ${T.lineSoft}`, fontSize: 11.5 },
-            children: [
-              jsx('span', { style: { color: T.muted }, children: 'состояние:' }),
-              jsx('span', { style: { color: state === 'failed' ? S.idle.ink : T.text, fontWeight: 600 }, children: BUILD_STATES[state] || state }),
-              data.started ? jsx('span', { style: { color: T.faint }, children: `· ${data.started}` }) : null,
-              data.size ? jsx('span', { style: { color: T.muted }, children: `· ${(data.size / 1024 / 1024).toFixed(1)} МБ` }) : null
-            ]
-          }),
-          data.exe
-            ? jsxs('div', {
-                className: 'flex flex-col gap-1 rounded-xl px-3 py-2',
-                style: { background: T.bg, border: `1px solid ${S.working.line}`, fontSize: 11 },
-                children: [
-                  jsx('div', { style: { color: S.working.ink, fontWeight: 600 }, children: 'готово — файл' }),
-                  jsx('div', { style: { fontFamily: 'ui-monospace, monospace', wordBreak: 'break-all', color: T.text }, children: data.exe }),
-                  data.sha256
-                    ? jsx('div', { style: { color: T.faint, wordBreak: 'break-all' }, children: `sha256 ${data.sha256}` })
-                    : null,
-                  jsx('div', { style: { color: T.muted }, children: 'проверка перед раздачей: запустить exe с --dry-run' })
-                ]
-              })
-            : null,
-          data.error
-            ? jsx('div', { style: { fontSize: 11, color: S.idle.ink }, children: `ошибка: ${data.error}` })
-            : null,
-          error
-            ? jsx('div', { style: { fontSize: 11, color: S.idle.ink }, children: error })
-            : null,
-          logTail.length
-            ? jsx('pre', {
-                className: 'max-h-32 overflow-auto rounded-xl px-3 py-2',
-                style: { background: T.bg, border: `1px solid ${T.lineSoft}`, fontSize: 10, lineHeight: 1.45, color: T.muted, whiteSpace: 'pre-wrap' },
-                children: logTail.join('\n')
-              })
-            : null,
-          jsxs('div', {
-            className: 'mt-1 flex items-center gap-2',
-            children: [
-              jsx('button', {
-                type: 'button',
-                onClick: start,
-                disabled: state === 'running',
-                className: 'rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] disabled:opacity-50',
-                style: { background: T.accent, color: '#fff' },
-                children: state === 'running' ? 'собираю…' : 'собрать exe'
-              }),
-              jsx('button', {
-                type: 'button',
-                onClick: onClose,
-                className: 'rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.12em]',
-                style: { border: `1px solid ${T.line}`, color: T.muted },
-                children: 'закрыть'
-              })
-            ]
-          })
-        ]
-      })
-    ]
-  })
-}
-
 function ScaffoldDialog({ project, onClose, onDone }) {
   const [profile, setProfile] = useState('standard')
   const [storage, setStorage] = useState('sqlite')
@@ -3861,7 +3761,6 @@ function ProjectMap({ variant }) {
   const [menu, setMenu] = useState(null)
   const [dialog, setDialog] = useState(null)
   const [scaffold, setScaffold] = useState(null)
-  const [build, setBuild] = useState(false)
   // Ширина и видимость панели проектов: раньше 268px были зашиты, а список рос вниз — «уменьшить
   // нельзя». Теперь тянется ручкой (240–460) и прячется; выбор переживает перезапуск.
   const [railWidth, setRailWidth] = useState(() => {
@@ -4985,9 +4884,6 @@ function ProjectMap({ variant }) {
         : null,
       dialog && backend.data
         ? jsx(PolicyDialog, { target: dialog, backend: backend.data, onClose: () => setDialog(null), onSaved: () => void backend.refetch() })
-        : null,
-      build
-        ? jsx(BuildDialog, { onClose: () => setBuild(false) })
         : null,
       scaffold && backend.data
         ? jsx(ScaffoldDialog, {

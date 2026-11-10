@@ -156,11 +156,6 @@ class ScaffoldBody(BaseModel):
     reason: str = Field(default="", description="для отказа: почему структуру не создаём")
 
 
-class BuildBody(BaseModel):
-    confirm: bool = Field(default=False, description="подтверждение: сборка пишет exe в dist/")
-    out_dir: str = Field(default="", description="каталог для exe (по умолчанию hermesui/dist)")
-
-
 def _scaffold():
     """`hermesui/tools/project_scaffold.py` — тот же код, что у CLI и у скилла."""
     import sys
@@ -553,78 +548,6 @@ def scaffold_check(project_id: str) -> dict[str, Any]:
     path = _project_path(project_id)
     module = _scaffold()
     return module.check(Path(path))
-
-
-# ── сборка установщика (.exe) ────────────────────────────────────────────────
-# Сборка длинная (PyInstaller ставит venv в первый раз), поэтому REST отвечает сразу, а состояние
-# читается отдельным GET. Прогресс — хвост вывода сборщика, а не выдуманный процент.
-
-_BUILD: dict[str, Any] = {"state": "idle", "started": None, "finished": None,
-                          "exe": None, "size": None, "sha256": None,
-                          "log": [], "error": None}
-_BUILD_THREAD: Optional[Any] = None
-
-
-def _builder_script() -> Path:
-    repo = Path(__file__).resolve().parents[3]
-    return repo / "tools" / "setup_builder.py"
-
-
-def _build_worker(out_dir: str) -> None:
-    import subprocess
-    import sys
-    import time as _time
-
-    script = _builder_script()
-    _BUILD.update({"state": "running", "started": _time.strftime("%Y-%m-%d %H:%M:%S"),
-                   "finished": None, "exe": None, "error": None, "log": []})
-    cmd = [sys.executable, str(script), "--json"]
-    if out_dir:
-        cmd += ["--out", out_dir]
-    try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
-        output = (proc.stdout or "") + (proc.stderr or "")
-        _BUILD["log"] = output.splitlines()[-60:]
-        payload = None
-        brace = output.rfind("\n{")
-        if brace >= 0:
-            try:
-                payload = json.loads(output[brace:])
-            except ValueError:
-                payload = None
-        if proc.returncode == 0 and payload and payload.get("exe"):
-            _BUILD.update({"state": "ok", "exe": payload["exe"], "size": payload.get("size"),
-                           "sha256": payload.get("sha256")})
-        else:
-            _BUILD.update({"state": "failed",
-                           "error": (payload or {}).get("error") or f"код {proc.returncode}"})
-    except Exception as exc:  # noqa: BLE001 — сборка не должна ронять процесс плагина
-        _BUILD.update({"state": "failed", "error": str(exc)[:300]})
-    finally:
-        _BUILD["finished"] = _time.strftime("%Y-%m-%d %H:%M:%S")
-
-
-@router.get("/build/setup")
-def build_status() -> dict[str, Any]:
-    return dict(_BUILD, running=_BUILD.get("state") == "running")
-
-
-@router.post("/build/setup")
-def build_start(body: "BuildBody") -> dict[str, Any]:
-    global _BUILD_THREAD
-    import threading
-
-    if not body.confirm:
-        raise HTTPException(status_code=400,
-                            detail="нужен confirm: true — сборка пишет exe в dist/")
-    if _BUILD.get("state") == "running":
-        return {"ok": True, "already": True, **_BUILD}
-    script = _builder_script()
-    if not script.is_file():
-        raise HTTPException(status_code=404, detail=f"нет сборщика: {script}")
-    _BUILD_THREAD = threading.Thread(target=_build_worker, args=(body.out_dir,), daemon=True)
-    _BUILD_THREAD.start()
-    return {"ok": True, "state": "running"}
 
 
 @router.post("/resolve")

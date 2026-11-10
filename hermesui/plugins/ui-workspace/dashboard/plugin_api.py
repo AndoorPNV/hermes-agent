@@ -12,6 +12,8 @@
   POST /doctor/run         выполнить doctor и записать результат
   POST /apply              применить план (нужен confirm: true)
   POST /rollback           откатить последние N изменений (нужен confirm: true)
+  GET  /build/setup        состояние сборки установщика (idle|running|ok|failed)
+  POST /build/setup        запустить сборку hermesui-setup.exe (нужен confirm: true)
 """
 
 from __future__ import annotations
@@ -267,3 +269,83 @@ def rollback(body: RollbackBody) -> dict[str, Any]:
         return {"rolled_back": undone}
     except Exception as exc:  # noqa: BLE001
         raise _bad(exc) from exc
+
+
+# ── сборка установщика (.exe) ────────────────────────────────────────────────
+# Сборка длится минуты (первый раз ставится PyInstaller в venv сборки), поэтому POST только
+# запускает поток, а состояние читается GET-ом. Прогресс — хвост вывода сборщика, не выдуманный
+# процент: врать про «осталось 30%» дороже, чем показать последние строки.
+
+_BUILD: dict[str, Any] = {"state": "idle", "started": None, "finished": None,
+                          "exe": None, "size": None, "sha256": None,
+                          "log": [], "error": None}
+_BUILD_THREAD: Optional[Any] = None
+
+
+class BuildBody(BaseModel):
+    confirm: bool = False
+    out_dir: str = ""
+
+
+def _builder_script() -> Path:
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        candidate = parent / "tools" / "setup_builder.py"
+        if candidate.is_file():
+            return candidate
+    return here.parents[3] / "tools" / "setup_builder.py"
+
+
+def _build_worker(out_dir: str) -> None:
+    import subprocess
+    import time as _time
+
+    _BUILD.update({"state": "running", "started": _time.strftime("%Y-%m-%d %H:%M:%S"),
+                   "finished": None, "exe": None, "error": None, "log": []})
+    cmd = [sys.executable, str(_builder_script()), "--json"]
+    if out_dir:
+        cmd += ["--out", out_dir]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+        output = (proc.stdout or "") + (proc.stderr or "")
+        _BUILD["log"] = output.splitlines()[-60:]
+        payload = None
+        brace = output.rfind("\n{")
+        if brace >= 0:
+            try:
+                payload = json.loads(output[brace:])
+            except ValueError:
+                payload = None
+        if proc.returncode == 0 and payload and payload.get("exe"):
+            _BUILD.update({"state": "ok", "exe": payload["exe"], "size": payload.get("size"),
+                           "sha256": payload.get("sha256")})
+        else:
+            _BUILD.update({"state": "failed",
+                           "error": (payload or {}).get("error") or f"код {proc.returncode}"})
+    except Exception as exc:  # noqa: BLE001 — сборка не должна ронять процесс плагина
+        _BUILD.update({"state": "failed", "error": str(exc)[:300]})
+    finally:
+        _BUILD["finished"] = _time.strftime("%Y-%m-%d %H:%M:%S")
+
+
+@router.get("/build/setup")
+def build_status() -> dict[str, Any]:
+    return dict(_BUILD, running=_BUILD.get("state") == "running")
+
+
+@router.post("/build/setup")
+def build_start(body: BuildBody) -> dict[str, Any]:
+    global _BUILD_THREAD
+    import threading
+
+    if not body.confirm:
+        raise HTTPException(status_code=400,
+                            detail="сборка пишет exe в dist/ — нужен confirm: true")
+    if _BUILD.get("state") == "running":
+        return {"ok": True, "already": True, **_BUILD}
+    script = _builder_script()
+    if not script.is_file():
+        raise HTTPException(status_code=404, detail=f"нет сборщика: {script}")
+    _BUILD_THREAD = threading.Thread(target=_build_worker, args=(body.out_dir,), daemon=True)
+    _BUILD_THREAD.start()
+    return {"ok": True, "state": "running"}

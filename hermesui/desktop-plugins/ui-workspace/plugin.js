@@ -147,6 +147,31 @@ function Workspace() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [armed, setArmed] = useState('')
+  // Сборка установщика: идёт минутами, поэтому состояние опрашивается, а POST только запускает.
+  const [buildAsked, setBuildAsked] = useState(false)
+  const build = useQuery({
+    queryKey: ['ui-workspace', 'build'],
+    queryFn: () => apiGet('/build/setup'),
+    refetchInterval: buildAsked ? 2500 : false
+  })
+  const buildInfo = build.data || {}
+  const buildState = buildInfo.state || 'idle'
+  const BUILD_LABEL = { idle: 'не собирался', running: 'собираю…', ok: 'готово', failed: 'ошибка' }
+  async function runBuild() {
+    setBusy('build')
+    setError('')
+    setNotice('')
+    try {
+      await apiPost('/build/setup', { confirm: true })
+      setBuildAsked(true)
+      void build.refetch?.()
+      setNotice('сборка запущена: PyInstaller в отдельном venv, первый раз это минуты')
+    } catch (err) {
+      setError(String(err?.message || err))
+    } finally {
+      setBusy('')
+    }
+  }
 
   const data = backend.data
   const plan = data?.plan || { summary: {}, changes: [], warnings: [] }
@@ -250,6 +275,12 @@ function Workspace() {
             tone: DOCTOR_COLOR[doctor.summary] || DOCTOR_COLOR.unknown
           }),
           jsx('span', { className: 'flex-1' }),
+          jsx(ActionButton, {
+            label: buildState === 'running' ? 'собираю…' : 'собрать exe',
+            icon: 'package',
+            onClick: runBuild,
+            busy: busy === 'build' || buildState === 'running'
+          }),
           jsx(ActionButton, {
             label: 'проверить',
             icon: 'check-all',
@@ -378,6 +409,62 @@ function Workspace() {
                   )
                 })
               : jsx(Empty, { children: 'изменений нет — состояние совпадает с каталогом' })
+          }),
+          jsx(Card, {
+            title: 'Установщик',
+            subtitle: 'один exe для другого пользователя',
+            right: jsx(Chip, {
+              children: BUILD_LABEL[buildState] || buildState,
+              tone: buildState === 'ok' ? 'var(--ui-ok, #3ED598)'
+                : buildState === 'failed' ? 'var(--ui-error, #F2637B)'
+                  : buildState === 'running' ? 'var(--ui-warn, #F5A623)' : undefined
+            }),
+            children: jsxs('div', {
+              className: 'flex flex-col gap-2 py-1',
+              children: [
+                jsx('div', {
+                  className: 'text-[11px]',
+                  style: { color: 'var(--ui-text-secondary)' },
+                  children: 'Кнопка «собрать exe» собирает hermesui-setup-<коммит>.exe: внутри наши скиллы, плагины, модули, база и скин плюс манифест sha256. На чужой машине он разложит слой в уже установленный Hermes, подключит плагины, применит модули и проверит себя через doctor. Само приложение Hermes в exe не входит — это отдельная Electron-сборка.'
+                }),
+                buildInfo.exe
+                  ? jsxs('div', {
+                      className: 'flex flex-col gap-1 rounded-lg px-3 py-2',
+                      style: { background: 'var(--color-muted)' },
+                      children: [
+                        jsx('div', {
+                          className: 'font-mono text-[11px] break-all',
+                          children: buildInfo.exe
+                        }),
+                        jsx('div', {
+                          className: 'font-mono text-[10.5px]',
+                          style: { color: 'var(--ui-text-tertiary)' },
+                          children: `${((buildInfo.size || 0) / 1048576).toFixed(2)} МБ · sha256 ${buildInfo.sha256 || '—'}`
+                        }),
+                        jsx('div', {
+                          className: 'text-[10.5px]',
+                          style: { color: 'var(--ui-text-tertiary)' },
+                          children: 'перед раздачей: запустить exe с --dry-run — он покажет состав и ничего не запишет'
+                        })
+                      ]
+                    })
+                  : null,
+                buildInfo.error
+                  ? jsx('div', {
+                      className: 'text-[11px]',
+                      style: { color: 'var(--ui-error, #F2637B)' },
+                      children: `ошибка: ${buildInfo.error}`
+                    })
+                  : null,
+                (buildInfo.log || []).length
+                  ? jsx('pre', {
+                      className: 'max-h-28 overflow-auto rounded-lg px-3 py-2 font-mono text-[10px]',
+                      style: { background: 'var(--color-muted)', color: 'var(--ui-text-secondary)', whiteSpace: 'pre-wrap' },
+                      children: (buildInfo.log || []).slice(-6).join('\n')
+                    })
+                  : null
+              ]
+            })
           }),
           jsx(Card, {
             title: 'Журнал',
