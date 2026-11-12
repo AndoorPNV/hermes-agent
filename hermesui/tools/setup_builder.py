@@ -54,6 +54,23 @@ def version(root: Path) -> str:
     return time.strftime("%Y%m%d")
 
 
+# Что никогда не уходит в установщик: .env, ключи, токены. Их место — $HERMES_HOME,
+# а репозиторий публичный. Пропуск не молчаливый: сборщик печатает, что выбросил.
+SECRET_SUFFIXES = (".key", ".pem", ".pfx", ".p12")
+SECRET_HINTS = ("token", "credential", "secret", "password")
+
+
+def is_secret(path: Path) -> bool:
+    name = path.name.lower()
+    if name == ".env" or name.startswith(".env."):
+        return True
+    if name.endswith(SECRET_SUFFIXES):
+        return True
+    if name.endswith(".json") and any(hint in name for hint in SECRET_HINTS):
+        return True
+    return False
+
+
 def iter_payload(root: Path):
     for name in PAYLOAD_DIRS:
         base = root / name
@@ -64,6 +81,8 @@ def iter_payload(root: Path):
                 continue
             parts = path.relative_to(root).parts
             if any(part in SKIP_DIRS for part in parts) or path.name in SKIP_FILES:
+                continue
+            if is_secret(path):
                 continue
             yield path
     for name in PAYLOAD_FILES:

@@ -87,6 +87,23 @@ def git_version(root: Path) -> str:
 
 # ── копирование ──────────────────────────────────────────────────────────────
 
+# Что никогда не уходит в установщик: .env, ключи, токены. Их место — $HERMES_HOME,
+# а репозиторий публичный. Пропуск не молчаливый: сборщик печатает, что выбросил.
+SECRET_SUFFIXES = (".key", ".pem", ".pfx", ".p12")
+SECRET_HINTS = ("token", "credential", "secret", "password")
+
+
+def is_secret(path: Path) -> bool:
+    name = path.name.lower()
+    if name == ".env" or name.startswith(".env."):
+        return True
+    if name.endswith(SECRET_SUFFIXES):
+        return True
+    if name.endswith(".json") and any(hint in name for hint in SECRET_HINTS):
+        return True
+    return False
+
+
 def iter_payload(root: Path):
     for name in PAYLOAD_DIRS:
         base = root / name
@@ -96,6 +113,8 @@ def iter_payload(root: Path):
             if path.is_dir():
                 continue
             if any(part in SKIP for part in path.relative_to(root).parts):
+                continue
+            if is_secret(path):
                 continue
             if path.suffix in (".pyc", ".log"):
                 continue
